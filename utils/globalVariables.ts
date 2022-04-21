@@ -1,1 +1,8 @@
-export let request;
+import { RobloxRequest } from "./classes";
+
+export let request: RobloxRequest = {
+    authorID: "",
+    channelID: "",
+    type: "",
+    payload: null
+}

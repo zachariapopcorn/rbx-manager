@@ -1,5 +1,7 @@
 import Discord from 'discord.js';
 
+type RobloxRequestType = "Ban" | "Unban" | "Announce" | "CheckUser" | "Eval" | "Shutdown" | "GetJobID" | "GetJobIDs" | "Lock" | "Unlock" | "Mute" | "Unmute" | "";
+
 export interface BotConfig {
     token: string,
     cookie: string
@@ -37,6 +39,13 @@ export interface BotConfig {
         error: Discord.ColorResolvable
     }
     whitelistedServers: string[]
+}
+
+export interface RobloxRequest {
+    authorID: string,
+    channelID: string,
+    type: RobloxRequestType,
+    payload: any
 }
 
 export class BotClient extends Discord.Client {
