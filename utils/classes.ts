@@ -41,7 +41,7 @@ export interface BotConfig {
 
 export class BotClient extends Discord.Client {
     public config: BotConfig
-    public embedMaker(title: string, description: string, type: "info" | "success" | "error", makeObject?: boolean, author? : Discord.User): any {
+    public embedMaker(title: string, description: string, type: "info" | "success" | "error", author? : Discord.User, makeObject?: boolean, ): any {
         if(!author) author = this.user;
         if(!makeObject) makeObject = true;
         let embed = new Discord.MessageEmbed();
@@ -72,7 +72,7 @@ export class CommandHelpers {
         return args;
     }
     public static checkPermissions(command: any, user: Discord.GuildMember): boolean {
-        let roleIDsRequired = command.commandPermissions as string[];
+        let roleIDsRequired = command.commandData.permissions as string[];
         if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
         return false;
     }

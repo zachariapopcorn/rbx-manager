@@ -44,7 +44,7 @@ async function readCommands(path?: string) {
     let files = await fs.readdir(path);
     for(let i = 0; i < files.length; i++) {
         let file = files[i];
-        if(file.indexOf(".") == -1) {
+        if(file.indexOf(".") === -1) {
             readCommands(`${path}/${file}`);
         } else {
             file = file.replace(".ts", ".js");
@@ -53,7 +53,7 @@ async function readCommands(path?: string) {
                 file: commandFile,
                 name: file.split('.')[0],
                 slashData: commandFile.slashData,
-                commandPermissions: commandFile.permissions || []
+                commandData: commandFile.commandData || []
             }
             commands.push(command);
         }
@@ -159,13 +159,13 @@ client.on('interactionCreate', async(interaction) => {
             await interaction.deferReply();
             let args = CommandHelpers.loadArguments(interaction);
             if(!CommandHelpers.checkPermissions(commands[i], interaction.member as Discord.GuildMember)) {
-                let embed = client.embedMaker("No Permission", "You don't have permission to run this command", "error", true, interaction.user);
+                let embed = client.embedMaker("No Permission", "You don't have permission to run this command", "error", interaction.user);
                 await interaction.editReply(embed);
             }
             try {
                 await commands[i].file.run(interaction, client, args);
             } catch(e) {
-                let embed = client.embedMaker("Error", "There was an error while trying to run this command. The error has been logged in the console", "error", true, interaction.user);
+                let embed = client.embedMaker("Error", "There was an error while trying to run this command. The error has been logged in the console", "error", interaction.user);
                 await interaction.editReply(embed);
             }
         }
