@@ -8,11 +8,11 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
 }
 
 export const slashData = new Builders.SlashCommandBuilder()
-    .setName("promote")
-    .setDescription("Promotes the inputed user")
-    .addStringOption(o => o.setName("username").setDescription("The username of the person that you wish to promote").setRequired(true))
+    .setName("groupban")
+    .setDescription("Bans the supplied user from the group")
+    .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to ban from the group"))
 
 export const commandData: CommandData = {
-    category: "Ranking",
-    permissions: config.permissions.group.ranking
+    category: "User",
+    permissions: config.permissions.group.user
 }

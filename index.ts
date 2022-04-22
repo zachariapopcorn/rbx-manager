@@ -11,7 +11,7 @@ import express from 'express';
 
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { BotClient, CommandHelpers } from './utils/classes';
+import { BotClient, CommandFile, CommandHelpers } from './utils/classes';
 
 const client = new Discord.Client({intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]}) as BotClient;
 client.config = config;
@@ -48,7 +48,7 @@ async function readCommands(path?: string) {
             readCommands(`${path}/${file}`);
         } else {
             file = file.replace(".ts", ".js");
-            let commandFile = require(`${path}/${file}`);
+            let commandFile = require(`${path}/${file}`) as CommandFile;
             let command = {
                 file: commandFile,
                 name: file.split('.')[0],

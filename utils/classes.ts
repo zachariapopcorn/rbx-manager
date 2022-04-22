@@ -1,6 +1,9 @@
 import Discord from 'discord.js';
+import Builders from '@discordjs/builders';
+import { config } from '../config';
 
 type RobloxRequestType = "Ban" | "Unban" | "Announce" | "CheckUser" | "Eval" | "Shutdown" | "GetJobID" | "GetJobIDs" | "Lock" | "Unlock" | "Mute" | "Unmute" | "";
+type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout"
 
 export interface BotConfig {
     token: string,
@@ -15,8 +18,7 @@ export interface BotConfig {
             shout: string[],
             ranking: string[],
             joinrequests: string[],
-            exile: string[],
-            audits: string[]
+            user: string[],
         },
         game: {
             all: string[],
@@ -39,6 +41,17 @@ export interface BotConfig {
         error: Discord.ColorResolvable
     }
     whitelistedServers: string[]
+}
+
+export interface CommandFile {
+    run: Function;(interaction: Discord.CommandInteraction, client: BotClient, args: any[]),
+    slashData: Builders.SlashCommandBuilder,
+    commandData: CommandData
+}
+
+export interface CommandData {
+    category: CommandCategory,
+    permissions?: string[]
 }
 
 export interface RobloxRequest {
@@ -80,8 +93,11 @@ export class CommandHelpers {
         }
         return args;
     }
-    public static checkPermissions(command: any, user: Discord.GuildMember): boolean {
-        let roleIDsRequired = command.commandData.permissions as string[];
+    public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {
+        let roleIDsRequired = command.commandData.permissions;
+        if(!roleIDsRequired || roleIDsRequired.length === 0) return true;
+        roleIDsRequired.concat(config.permissions.group.all);
+        roleIDsRequired.concat(config.permissions.game.all);
         if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
         return false;
     }

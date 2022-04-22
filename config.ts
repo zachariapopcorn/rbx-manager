@@ -15,8 +15,7 @@ export const config: BotConfig = {
             shout: [""],
             ranking: [""],
             joinrequests: [""],
-            exile: [""],
-            audits: [""]
+            user: [""],
         },
         game: {
             all: [""],
