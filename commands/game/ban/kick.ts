@@ -8,11 +8,11 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
 }
 
 export const slashData = new Builders.SlashCommandBuilder()
-    .setName("unlock")
-    .setDescription("Unlocks the inputted server")
-    .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to unlock").setRequired(true))
+    .setName("kick")
+    .setDescription("Kicks a user from the game")
+    .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to kick").setRequired(true))
 
 export const commandData: CommandData = {
-    category: "Lock",
-    permissions: config.permissions.game.lock
+    category: "Ban",
+    permissions: config.permissions.game.ban
 }

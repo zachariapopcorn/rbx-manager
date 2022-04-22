@@ -22,11 +22,16 @@ export interface BotConfig {
         },
         game: {
             all: string[],
+            general: string[]
             broadcast: string[],
             kick: string[],
             ban: string[],
+            shutdown: string[],
             datastore: string[],
-            execution: string[]
+            execution: string[],
+            jobIDs: string[],
+            lock: string[],
+            mute: string[]
         }
     },
     logging: {

@@ -19,11 +19,16 @@ export const config: BotConfig = {
         },
         game: {
             all: [""],
+            general: [""],
             broadcast: [""],
             kick: [""],
             ban: [""],
+            shutdown: [""],
             datastore: [""],
-            execution: [""]
+            execution: [""],
+            jobIDs: [""],
+            lock: [""],
+            mute: [""]
         }
     },
     logging: {
