@@ -35,8 +35,8 @@ app.post('/process', async (request, response) => {
     response.status(200);
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`Your app is currently listening on port: ${process.env.PORT}`);
+let listener = app.listen(process.env.PORT, () => {
+    console.log(`Your app is currently listening on port: ${(listener.address() as any).port}`);
 });
 
 async function readCommands(path?: string) {
