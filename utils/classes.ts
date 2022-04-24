@@ -8,9 +8,6 @@ type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | 
 export interface BotConfig {
     token: string,
     cookie: string
-    projectId: string,
-    clientEmail: string,
-    privateKey: string,
     groupId: number,
     permissions: {
         group: {

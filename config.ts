@@ -5,9 +5,6 @@ require('dotenv').config();
 export const config: BotConfig = {
     token: process.env.token,
     cookie: process.env.cookie,
-    projectId: process.env.projectId,
-    clientEmail: process.env.clientEmail,
-    privateKey: process.env.privateKey,
     groupId: 0,
     permissions: {
         group: {
