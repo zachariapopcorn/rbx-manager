@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import Builders from '@discordjs/builders';
+import * as Builders from '@discordjs/builders';
 import { BotClient, CommandData } from '../../../utils/classes';
 import { config } from '../../../config';
 
