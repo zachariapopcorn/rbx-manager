@@ -1,6 +1,9 @@
 import Discord from 'discord.js';
 import Builders from '@discordjs/builders';
+import roblox from 'noblox.js';
 import { config } from '../config';
+
+import axios = require('axios');
 
 type RobloxRequestType = "Ban" | "Unban" | "Announce" | "CheckUser" | "Eval" | "Shutdown" | "GetJobID" | "GetJobIDs" | "Lock" | "Unlock" | "Mute" | "Unmute" | "";
 type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout"
@@ -41,7 +44,8 @@ export interface BotConfig {
         info: Discord.ColorResolvable,
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
-    }
+    },
+    verificationChecks: boolean
     whitelistedServers: string[]
 }
 
@@ -56,6 +60,11 @@ export interface CommandData {
     permissions?: string[]
 }
 
+export interface VerificationResult {
+    passedVerificationChecks: boolean,
+    memberRole?: number
+}
+
 export interface RobloxRequest {
     authorID: string,
     channelID: string,
@@ -63,9 +72,49 @@ export interface RobloxRequest {
     payload: any
 }
 
+export interface RoverAPIResponse {
+    status: "ok" | "error",
+    robloxUsername: string,
+    robloxId: number,
+    errorCode: number,
+    error: string
+}
+
 export class BotClient extends Discord.Client {
     public config: BotConfig
-    public embedMaker(title: string, description: string, type: "info" | "success" | "error", author? : Discord.User, makeObject?: boolean, ): any {
+
+    constructor() {
+        super({
+            intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]
+        })
+    }
+
+    public async request(requestOptions: {url: string, method?: axios.Method, headers?: any, body?: any, robloxRequest?: boolean}) : Promise<any> {
+        const axiosClient = axios.default;
+        let responseData: axios.AxiosResponse;
+        if(requestOptions.robloxRequest) {
+            requestOptions.headers = {
+                "X-CSRF-TOKEN": await roblox.getGeneralToken(),
+                "Cookie": this.config.cookie,
+                ...requestOptions.headers
+            }
+        }
+        try {
+            responseData = await axiosClient({
+                url: requestOptions.url,
+                method: requestOptions.method || "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...requestOptions.headers || {}
+                },
+                data: requestOptions.body || {}
+            })
+        } catch(e) {
+            throw e;
+        }
+        return responseData.data;
+    }
+    public embedMaker(title: string, description: string, type: "info" | "success" | "error", author? : Discord.User, makeObject?: boolean): any {
         if(!author) author = this.user;
         if(!makeObject) makeObject = true;
         let embed = new Discord.MessageEmbed();
@@ -82,24 +131,58 @@ export class BotClient extends Discord.Client {
         }
         return embed;
     }
+    public async getRobloxUser(discordID: string): Promise<number> {
+        let roverResponse;
+        try {
+            roverResponse = await this.request({url: `https://verify.eryn.io/api/user/${discordID}`}) as RoverAPIResponse;
+        } catch {
+            return 0;
+        }
+        if(roverResponse.status === "ok") {
+            return roverResponse.robloxId;
+        }
+    }
+    public async preformGeneralVerificationCheck(discordID: string): Promise<VerificationResult> {
+        let robloxID = await this.getRobloxUser(discordID);
+        let passedChecks = true;
+        if(robloxID === 0) {
+            passedChecks = false;
+        }
+        let memberRole = await roblox.getRankInGroup(this.config.groupId, robloxID);
+        if(memberRole === 0) {
+            passedChecks = false;
+        }
+        return {
+            passedVerificationChecks: passedChecks,
+            memberRole: memberRole
+        }
+    }
+    public async logAction(logString: string): Promise<void> {
+        let embed = this.embedMaker("Command Executed", logString, "info");
+        let channel = await this.channels.fetch(this.config.logging.commandLogChannel) as Discord.TextChannel;
+        if(channel) {
+            try {
+                await channel.send(embed);
+            } catch(e) {
+                console.error(`There was an error while trying to log a command execution to the command logging channel: ${e}`);
+            }
+        }
+    }
 }
 
 export class CommandHelpers {
-    public static loadArguments(interaction: Discord.CommandInteraction): any[] {
+    public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
-        let args = [];
+        let args = {};
         for(let i = 0; i < options.length; i++) {
-            args.push({
-                [options[i].name]: options[i].value
-            });
+            args[options[i].name] = options[i].value;
         }
         return args;
     }
     public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {
         let roleIDsRequired = command.commandData.permissions;
-        if(!roleIDsRequired || roleIDsRequired.length === 0) return true;
-        roleIDsRequired.concat(config.permissions.group.all);
-        roleIDsRequired.concat(config.permissions.game.all);
+        if(!roleIDsRequired) return true;
+        roleIDsRequired = roleIDsRequired.concat(config.permissions.group.all).concat(config.permissions.game.all);
         if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
         return false;
     }

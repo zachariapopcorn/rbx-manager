@@ -1,9 +1,9 @@
 import Discord from 'discord.js';
-import roblox from 'noblox.js'
+import roblox = require('noblox.js');
 
 import fs from 'fs/promises';
 
-import { config } from './config'
+import { config } from './config';
 
 import * as globals from './utils/globalVariables'
 
@@ -13,12 +13,9 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { BotClient, CommandFile, CommandHelpers } from './utils/classes';
 
-const client = new Discord.Client({intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]}) as BotClient;
+const client = new BotClient();
 client.config = config;
 const app = express();
-
-const token = config.token;
-const cookie = config.cookie;
 
 export const commands = [];
 export const interactions = [];
@@ -45,7 +42,7 @@ async function readCommands(path?: string) {
     for(let i = 0; i < files.length; i++) {
         let file = files[i];
         if(file.indexOf(".") === -1) {
-            readCommands(`${path}/${file}`);
+            await readCommands(`${path}/${file}`);
         } else {
             file = file.replace(".ts", ".js");
             let commandFile = require(`${path}/${file}`) as CommandFile;
@@ -84,7 +81,7 @@ async function registerSlashCommands() {
             console.log(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
         }
     }
-    let rest = new REST({version: "9"}).setToken(token);
+    let rest = new REST({version: "9"}).setToken(config.token);
     try {
         for(let i = 0; i < config.whitelistedServers.length; i++) {
             let serverID = config.whitelistedServers[i];
@@ -95,18 +92,21 @@ async function registerSlashCommands() {
     }
 }
 
-async function loginToRoblox() {
+export async function loginToRoblox(robloxCookie: string) {
     try {
-        await roblox.setCookie(cookie);
+        await roblox.setCookie(robloxCookie);
     } catch {
-        console.log("Unable to login to Roblox");
+        console.error("Unable to login to Roblox");
         return;
     }
+    console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
     let auditLogListener = roblox.onAuditLog(config.groupId);
     auditLogListener.on('data', async(data) => {
         if(config.logging.enabled === false) return;
+        if(data.actionType === "Post Status") return;
+        if(data.actor.user.username === (await roblox.getCurrentUser()).UserName) return;
         let embedDescription = "";
-        embedDescription += `**Actor**: ${data.actor}\n`;
+        embedDescription += `**Actor**: ${data.actor.user.username}\n`;
         embedDescription += `**Action**: ${data.actionType}\n`;
         embedDescription += `**Date**: ${data.created}\n`;
         let embed = client.embedMaker("New Audit Log", embedDescription, "info");
@@ -145,7 +145,11 @@ async function loginToRoblox() {
 
 client.on('ready', async() => {
     console.log(`Logged into the Discord account - ${client.user.tag}`);
-    await loginToRoblox();
+    if(client.application.botPublic) {
+        console.warn("BOT IS PUBLIC | SHUTTING DOWN");
+        process.exit();
+    }
+    await loginToRoblox(config.cookie);
     await readCommands();
     await readInteractions();
     await registerSlashCommands();
@@ -161,6 +165,7 @@ client.on('interactionCreate', async(interaction) => {
             if(!CommandHelpers.checkPermissions(commands[i], interaction.member as Discord.GuildMember)) {
                 let embed = client.embedMaker("No Permission", "You don't have permission to run this command", "error", interaction.user);
                 await interaction.editReply(embed);
+                return;
             }
             try {
                 await commands[i].file.run(interaction, client, args);
@@ -172,4 +177,4 @@ client.on('interactionCreate', async(interaction) => {
     }
 });
 
-client.login(token);
+client.login(config.token);
