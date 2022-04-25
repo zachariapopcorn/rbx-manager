@@ -131,6 +131,12 @@ export class BotClient extends Discord.Client {
         }
         return embed;
     }
+    public addButton(messageData: Discord.MessageOptions, id: string, label: string, style: Discord.MessageButtonStyleResolvable) {
+        let components = messageData.components || [];
+        let newComponent = new Discord.MessageActionRow().addComponents(new Discord.MessageButton().setCustomId(id).setLabel(label).setStyle(style));
+        components.push(newComponent);
+        messageData.components = components;
+    }
     public async getRobloxUser(discordID: string): Promise<number> {
         let roverResponse;
         try {
