@@ -45,7 +45,8 @@ export interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
-    verificationChecks: boolean
+    verificationChecks: boolean,
+    lockedRanks: string[],
     whitelistedServers: string[]
 }
 

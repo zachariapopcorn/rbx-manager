@@ -10,13 +10,13 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         let verificationStatus = await client.preformGeneralVerificationCheck(interaction.user.id);
         if(!verificationStatus.passedVerificationChecks) {
             let embed = client.embedMaker("Verification Checks Failed", "You've failed the general verification checks, meaning that you either aren't verified with Rover, or that your verified account is not in the gorup, meaning that you can't execute this command", "error", interaction.user);
-            return interaction.editReply(embed);
+            return await interaction.editReply(embed);
         }
         let groupRole = await roblox.getRole(client.config.groupId, verificationStatus.memberRole);
         let rolePermissions = (await roblox.getRolePermissions(client.config.groupId, groupRole.id)).permissions;
         if(!rolePermissions.groupMembershipPermissions.inviteMembers) {
             let embed = client.embedMaker("Verification Check Failed", "Although you've passed the general verification checks, your group role doesn't have the permission to maange join requests, meaing that you can't execute this command", "error", interaction.user);
-            return interaction.editReply(embed);
+            return await interaction.editReply(embed);
         }
     }
     let joinRequests = await roblox.getJoinRequests(client.config.groupId, "Asc", 10);
