@@ -172,6 +172,7 @@ client.on('interactionCreate', async(interaction) => {
             } catch(e) {
                 let embed = client.embedMaker("Error", "There was an error while trying to run this command. The error has been logged in the console", "error", interaction.user);
                 await interaction.editReply(embed);
+                console.error(e);
             }
         }
     }
