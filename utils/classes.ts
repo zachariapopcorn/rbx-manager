@@ -6,7 +6,12 @@ import { config } from '../config';
 import axios = require('axios');
 
 type RobloxRequestType = "Ban" | "Unban" | "Announce" | "CheckUser" | "Eval" | "Shutdown" | "GetJobID" | "GetJobIDs" | "Lock" | "Unlock" | "Mute" | "Unmute" | "";
-type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout"
+type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout";
+
+type RobloxPostPermissions = "groupPostsPermissions.viewWall" | "groupPostsPermissions.postToWall" | "groupPostsPermissions.deleteFromWall" | "groupPostsPermissions.viewStatus" | "groupPostsPermissions.postToStatus";
+type RobloxMembershipPermissions = "groupMembershipPermissions.changeRank" | "groupMembershipPermissions.inviteMembers" | "groupMembershipPermissions.removeMembers";
+type RobloxManagementPermissions = "groupManagementPermissions.manageRelationships" | "groupManagementPermissions.manageClan" | "groupManagementPermissions.viewAuditLogs";
+type RobloxEconomyPermissions = "groupEconomyPermissions.spendGroupFunds" | "groupEconomyPermissions.advertiseGroup" | "groupEconomyPermissions.createItems" | "groupEconomyPermissions.manageItems" | "groupEconomyPermissions.addGroupPlaces" | "groupEconomyPermissions.manageGroupGames" | "groupEconomyPermissions.viewGroupPayouts";
 
 export interface BotConfig {
     token: string,
@@ -37,7 +42,7 @@ export interface BotConfig {
     logging: {
         enabled: boolean,
         auditLogChannel: string,
-        shouttLogChannel: string,
+        shoutLogChannel: string,
         commandLogChannel: string
     }
     embedColors: {
@@ -149,20 +154,31 @@ export class BotClient extends Discord.Client {
             return roverResponse.robloxId;
         }
     }
-    public async preformGeneralVerificationCheck(discordID: string): Promise<VerificationResult> {
+    private formatPermissionString(permissionString: string): any {
+        let arr = permissionString.split(".");
+        return {
+            category: arr[0],
+            permission: arr[1]
+        }
+    }
+    public async preformVerificationChecks(discordID: string, permissionNode: RobloxPostPermissions | RobloxMembershipPermissions | RobloxManagementPermissions | RobloxEconomyPermissions, otherUser?: number): Promise<boolean> {
+        let permissionObject = this.formatPermissionString(permissionNode);
         let robloxID = await this.getRobloxUser(discordID);
-        let passedChecks = true;
         if(robloxID === 0) {
-            passedChecks = false;
+            return false;
         }
         let memberRole = await roblox.getRankInGroup(this.config.groupId, robloxID);
         if(memberRole === 0) {
-            passedChecks = false;
+            return false;
         }
-        return {
-            passedVerificationChecks: passedChecks,
-            memberRole: memberRole
+        let groupRole = await roblox.getRole(this.config.groupId, memberRole);
+        let rolePermissions = (await roblox.getRolePermissions(this.config.groupId, groupRole.id)).permissions;
+        if(!rolePermissions[permissionObject.category][permissionObject.permission]) return false;
+        if(otherUser) {
+            let groupRoleOfVictim = await roblox.getRankInGroup(this.config.groupId, otherUser);
+            if(groupRoleOfVictim >= groupRole.rank) return false;
         }
+        return true;
     }
     public async logAction(logString: string): Promise<void> {
         let embed = this.embedMaker("Command Executed", logString, "info");

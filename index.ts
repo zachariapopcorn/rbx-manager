@@ -57,19 +57,6 @@ async function readCommands(path?: string) {
     }
 }
 
-async function readInteractions() {
-    let files = await fs.readdir(`./interactions/`);
-    for(var i = 0; i < files.length; i++) {
-        let file = files[i];
-        file = file.replace(".ts", ".js");
-        let coreFile = require(`./interactions/${file}`);
-        interactions.push({
-            file: coreFile,
-            name: file.split('.')[0],
-        });
-    }
-}
-
 async function registerSlashCommands() {
     let slashCommands = [];
     for(let i = 0; i < commands.length; i++) {
@@ -130,7 +117,7 @@ export async function loginToRoblox(robloxCookie: string) {
         embedDescription += `**Body**: ${data.body}\n`;
         embedDescription += `**Created**: ${data.created}\n`;
         let embed = client.embedMaker("New Shout", embedDescription, "info");
-        let channel = await client.channels.fetch(config.logging.shouttLogChannel) as Discord.TextChannel;
+        let channel = await client.channels.fetch(config.logging.shoutLogChannel) as Discord.TextChannel;
         if(!channel) return;
         try {
             await channel.send(embed);
@@ -151,7 +138,6 @@ client.on('ready', async() => {
     }
     await loginToRoblox(config.cookie);
     await readCommands();
-    await readInteractions();
     await registerSlashCommands();
 });
 

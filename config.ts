@@ -31,7 +31,7 @@ export const config: BotConfig = {
     logging: {
         enabled: true,
         auditLogChannel: "967932588327067768",
-        shouttLogChannel: "967932588327067768",
+        shoutLogChannel: "967932588327067768",
         commandLogChannel: "967932588327067768"
     },
     embedColors: {

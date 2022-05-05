@@ -7,15 +7,9 @@ import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
     if(client.config.verificationChecks) {
-        let verificationStatus = await client.preformGeneralVerificationCheck(interaction.user.id);
-        if(!verificationStatus.passedVerificationChecks) {
-            let embed = client.embedMaker("Verification Checks Failed", "You've failed the general verification checks, meaning that you either aren't verified with Rover, or that your verified account is not in the gorup, meaning that you can't execute this command", "error", interaction.user);
-            return await interaction.editReply(embed);
-        }
-        let groupRole = await roblox.getRole(client.config.groupId, verificationStatus.memberRole);
-        let rolePermissions = (await roblox.getRolePermissions(client.config.groupId, groupRole.id)).permissions;
-        if(!rolePermissions.groupPostsPermissions.postToStatus) {
-            let embed = client.embedMaker("Verification Check Failed", "Although you've passed the general verification checks, your group role doesn't have the permission to shout to the group, meaing that you can't execute this command", "error", interaction.user);
+        let verificationStatus = await client.preformVerificationChecks(interaction.user.id, "groupPostsPermissions.postToStatus");
+        if(!verificationStatus) {
+            let embed = client.embedMaker("Verification Checks Failed", "You've failed the verification checks", "error", interaction.user);
             return await interaction.editReply(embed);
         }
     }
