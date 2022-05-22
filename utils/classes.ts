@@ -51,7 +51,7 @@ export interface BotConfig {
         error: Discord.ColorResolvable
     },
     verificationChecks: boolean,
-    lockedRanks: string[],
+    lockedRanks: any[],
     whitelistedServers: string[]
 }
 

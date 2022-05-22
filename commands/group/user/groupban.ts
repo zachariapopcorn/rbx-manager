@@ -3,7 +3,7 @@ import * as Builders from '@discordjs/builders';
 import { BotClient, CommandData } from '../../../utils/classes';
 import { config } from '../../../config';
 
-import roblox = require('noblox.js')
+import roblox = require('noblox.js');
 import * as fs from 'fs/promises';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
