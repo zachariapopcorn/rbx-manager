@@ -12,6 +12,7 @@ import express from 'express';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { BotClient, CommandFile, CommandHelpers } from './utils/classes';
+import { checkBans } from './utils/checkbans';
 
 const client = new BotClient();
 client.config = config;
@@ -128,15 +129,17 @@ export async function loginToRoblox(robloxCookie: string) {
     shoutListener.on('error', async(e) => {
         console.error(`There was an error while trying to fetch the shout data: ${e.message}`);
     });
+
 }
 
 client.on('ready', async() => {
     console.log(`Logged into the Discord account - ${client.user.tag}`);
     if(client.application.botPublic) {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
-        process.exit();
+        return process.exit();
     }
     await loginToRoblox(config.cookie);
+    await checkBans();
     await readCommands();
     await registerSlashCommands();
 });
