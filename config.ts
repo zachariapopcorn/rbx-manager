@@ -40,6 +40,6 @@ export const config: BotConfig = {
         error: "RED",
     },
     verificationChecks: true,
-    lockedRanks: ["Member", 252],
+    lockedRanks: ["Administrators/Moderators", 252],
     whitelistedServers: ["658241441234944021"]
 }

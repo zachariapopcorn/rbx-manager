@@ -49,10 +49,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
     }
     let roleObject = await roblox.getRole(client.config.groupId, inputtedRank);
-    let isLocked = false;
-    if(client.config.lockedRanks.findIndex(lockedRank => lockedRank === roleObject.name) !== -1) isLocked = true;
-    if(client.config.lockedRanks.findIndex(lockedRank => lockedRank === roleObject.rank) !== -1) isLocked = true;
-    if(isLocked) {
+    if(client.isLockedRole(roleObject)) {
         let embed = client.embedMaker("Locked Rank", "The rank that you tried to rank this user to is currently locked, please try a different rank", "error", interaction.user);
         return await interaction.editReply(embed);
     }

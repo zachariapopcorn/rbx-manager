@@ -191,6 +191,12 @@ export class BotClient extends Discord.Client {
             }
         }
     }
+    public isLockedRole(role: roblox.Role): boolean {
+        let isLocked = false;
+        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
+        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
+        return isLocked;
+    }
 }
 
 export class CommandHelpers {

@@ -8,9 +8,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     let ranks = await roblox.getRoles(client.config.groupId);
     let description = "";
     for(let i = 1; i < ranks.length; i++) {
-        let rankNameIndex = client.config.lockedRanks.findIndex(v => v === ranks[i].name);
-        let rankIDIndex = client.config.lockedRanks.findIndex(v => v === ranks[i].rank);
-        if(rankNameIndex === -1 && rankIDIndex === -1) {
+        if(!client.isLockedRole(ranks[i])) {
             description += `**Name**: ${ranks[i].name} | **ID**: ${ranks[i].rank}\n`;
         } else {
             description += `**Name**: ${ranks[i].name} | **ID**: ${ranks[i].rank} [LOCKED]\n`;
