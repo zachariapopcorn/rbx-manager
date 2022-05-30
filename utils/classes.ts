@@ -86,6 +86,12 @@ export interface RoverAPIResponse {
     error: string
 }
 
+export interface CommandLog {
+    username: string,
+    status: "Success" | "Error",
+    message?: string
+}
+
 export class BotClient extends Discord.Client {
     public config: BotConfig
 
@@ -189,6 +195,62 @@ export class BotClient extends Discord.Client {
             } catch(e) {
                 console.error(`There was an error while trying to log a command execution to the command logging channel: ${e}`);
             }
+        }
+    }
+    public createLogEmbeds(author: Discord.User, logs: CommandLog[]): Discord.WebhookEditMessageOptions[] {
+        let embeds = [];
+        let masterDescription = "";
+        let pageCount = 1;
+        for(let i = 0; i < logs.length; i++) {
+            let logObject = logs[i];
+            if(i === 0) {
+                masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "") || "Operation Successful"}\n`;
+            } else if(i % 10 !== 0) {
+                masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "") || "Operation Successful"}\n`;
+            } else {
+                let embed = this.embedMaker(`Logs (Page ${pageCount})`, masterDescription, "info", author);
+                embeds.push(embed);
+                masterDescription = "";
+                pageCount++;
+            }
+        }
+        let embed = this.embedMaker(`Logs (Page ${pageCount})`, masterDescription, "info", author);
+        embeds.push(embed);
+        masterDescription = "";
+        return embeds;
+    }
+    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[]) {
+        let logEmbeds = this.createLogEmbeds(interaction.user, logs);
+        if(logEmbeds.length === 1) {
+            return interaction.editReply(logEmbeds[0]);
+        } else {
+            let index = 0;
+            let embed = logEmbeds[index];
+            this.addButton(embed, "backButton", "Previous Log Page", "PRIMARY");
+            this.addButton(embed, "nextButton", "Next Log Page", "PRIMARY");
+            let msg = await interaction.editReply(embed) as Discord.Message;
+            let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+            let collector = msg.createMessageComponentCollector({filter: filter});
+            collector.on('collect', async(button: Discord.ButtonInteraction) => {
+                if(button.customId === "backButton") {
+                    index -= 1;
+                    if(index < 0) {
+                        index = logEmbeds.length - 1;
+                    }
+                } else {
+                    index++;
+                    if(index === logEmbeds.length) {
+                        index = 0;
+                    }
+                }
+                await button.reply({content: "ㅤ"});
+                await button.deleteReply();
+                embed = logEmbeds[index];
+                embed.components = [];
+                this.addButton(embed, "backButton", "Previous Log Page", "PRIMARY");
+                this.addButton(embed, "nextButton", "Next Log Page", "PRIMARY");
+                await msg.edit(embed);
+            });
         }
     }
     public isLockedRole(role: roblox.Role): boolean {
