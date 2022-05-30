@@ -5,7 +5,7 @@ import { config } from '../../../config';
 
 import roblox = require('noblox.js');
 
-export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
+export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     if(client.config.verificationChecks) {
         let verificationStatus = await client.preformVerificationChecks(interaction.user.id, "groupMembershipPermissions.inviteMembers");
         if(!verificationStatus) {
@@ -22,7 +22,11 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         embedDescription += `**${counter}**: ${joinRequests.data[i].requester.username}`;
         counter++;
     }
-    if(joinRequests.data.length === 0) embedDescription = "There are currently no join requests";
+    if(joinRequests.data.length === 0) {
+        embedDescription = "There are currently no join requests";
+        let embed = client.embedMaker("Join Requests", embedDescription, "info", interaction.user, true);
+        return await interaction.editReply(embed);
+    }
     let embed = client.embedMaker("Join Requests", embedDescription, "info", interaction.user, true);
     client.addButton(embed, "backButton", "Previous Page", "PRIMARY");
     client.addButton(embed, "nextButton", "Next Page", "PRIMARY");
@@ -44,6 +48,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             embedDescription += `**${counter}**: ${joinRequests.data[i].requester.username}`;
             counter++;
         }
+        await button.reply({content: "ㅤ"});
+        await button.deleteReply();
         let embed = client.embedMaker("Join Requests", embedDescription, "info", interaction.user, true);
         client.addButton(embed, "backButton", "Previous Page", "PRIMARY");
         client.addButton(embed, "nextButton", "Next Page", "PRIMARY");
