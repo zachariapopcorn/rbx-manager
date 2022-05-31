@@ -88,7 +88,7 @@ export interface RoverAPIResponse {
 
 export interface CommandLog {
     username: string,
-    status: "Success" | "Error",
+    status: "Success" | "Error" | "Cancelled",
     message?: string
 }
 
@@ -204,9 +204,17 @@ export class BotClient extends Discord.Client {
         for(let i = 0; i < logs.length; i++) {
             let logObject = logs[i];
             if(i === 0) {
-                masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "") || "Operation Successful"}\n`;
+                if(logObject.status === "Error") {
+                    masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "")}\n`;
+                } else {
+                    masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: Operation ${logObject.status}\n`;
+                }
             } else if(i % 10 !== 0) {
-                masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "") || "Operation Successful"}\n`;
+                if(logObject.status === "Error") {
+                    masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: ${logObject.message.toString().replace("Error: ", "")}\n`;
+                } else {
+                    masterDescription += `**Username**: ${logObject.username} | **Status**: ${logObject.status} | **Message**: Operation ${logObject.status}\n`;
+                }
             } else {
                 let embed = this.embedMaker(`Logs (Page ${pageCount})`, masterDescription, "info", author);
                 embeds.push(embed);
@@ -219,16 +227,26 @@ export class BotClient extends Discord.Client {
         masterDescription = "";
         return embeds;
     }
-    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[]) {
+    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[], didCommandReply?: boolean) {
+        if(didCommandReply === undefined) didCommandReply = false;
         let logEmbeds = this.createLogEmbeds(interaction.user, logs);
         if(logEmbeds.length === 1) {
-            return interaction.editReply(logEmbeds[0]);
+            if(didCommandReply) {
+                return await interaction.channel.send(logEmbeds[0]);
+            } else {
+                return await interaction.editReply(logEmbeds[0]);
+            }
         } else {
             let index = 0;
             let embed = logEmbeds[index];
             this.addButton(embed, "backButton", "Previous Log Page", "PRIMARY");
             this.addButton(embed, "nextButton", "Next Log Page", "PRIMARY");
-            let msg = await interaction.editReply(embed) as Discord.Message;
+            let msg: Discord.Message;
+            if(didCommandReply) {
+                msg = await interaction.channel.send(embed) as Discord.Message;
+            } else {
+                msg = await interaction.editReply(embed) as Discord.Message;
+            }
             let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
             let collector = msg.createMessageComponentCollector({filter: filter});
             collector.on('collect', async(button: Discord.ButtonInteraction) => {

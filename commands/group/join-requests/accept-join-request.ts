@@ -14,7 +14,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
     }
     let logs: CommandLog[] = [];
-    let usernames = args["username"].replace(" ", "").split(",");
+    let usernames = args["username"].replaceAll(" ", "").split(",");
     for(let i = 0; i < usernames.length; i++) {
         let username = usernames[i];
         let robloxID;

@@ -4,7 +4,7 @@ import { BotClient, CommandData } from '../../../utils/classes';
 
 import roblox = require('noblox.js');
 
-export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
+export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let ranks = await roblox.getRoles(client.config.groupId);
     let description = "";
     for(let i = 1; i < ranks.length; i++) {
