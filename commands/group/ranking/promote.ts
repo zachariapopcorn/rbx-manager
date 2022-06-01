@@ -141,8 +141,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
 
 export const slashData = new Builders.SlashCommandBuilder()
     .setName("promote")
-    .setDescription("Promotes the inputed user")
-    .addStringOption(o => o.setName("username").setDescription("The username of the person that you wish to promote").setRequired(true))
+    .setDescription("Promotes the inputed user(s)")
+    .addStringOption(o => o.setName("username").setDescription("The username(s) of the person/people that you wish to promote").setRequired(true))
 
 export const commandData: CommandData = {
     category: "Ranking",
