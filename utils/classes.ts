@@ -15,18 +15,18 @@ type RobloxEconomyPermissions = "groupEconomyPermissions.spendGroupFunds" | "gro
 
 export interface BotConfig {
     token: string,
-    cookie: string
+    cookie: string,
+    API_KEY: string,
     groupId: number,
     permissions: {
+        all: string[],
         group: {
-            all: string[],
             shout: string[],
             ranking: string[],
             joinrequests: string[],
             user: string[],
         },
         game: {
-            all: string[],
             general: string[]
             broadcast: string[],
             kick: string[],
@@ -50,6 +50,8 @@ export interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
+    universeId: number,
+    datastoreName: string,
     verificationChecks: boolean,
     lockedRanks: any[],
     whitelistedServers: string[]
@@ -92,8 +94,14 @@ export interface CommandLog {
     message?: string
 }
 
+export interface ModerationData {
+    isMuted: boolean,
+    isBanned: boolean
+}
+
 export class BotClient extends Discord.Client {
     public config: BotConfig
+    public pendingRequest: RobloxRequest
 
     constructor() {
         super({
@@ -291,8 +299,54 @@ export class CommandHelpers {
     public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {
         let roleIDsRequired = command.commandData.permissions;
         if(!roleIDsRequired) return true;
-        roleIDsRequired = roleIDsRequired.concat(config.permissions.group.all).concat(config.permissions.game.all);
+        roleIDsRequired = roleIDsRequired.concat(config.permissions.all);
         if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
         return false;
+    }
+}
+
+export class RobloxDatastore {
+    private API_KEY: string
+    constructor(key: string) {
+        this.API_KEY = key;
+    }
+    public async request(requestOptions: {url: string, method?: axios.Method, headers?: any, body?: any}) : Promise<any> {
+        const axiosClient = axios.default;
+        let responseData: axios.AxiosResponse;
+        requestOptions.headers = {
+            "x-api-key": this.API_KEY,
+            ...requestOptions.headers
+        }
+        try {
+            responseData = await axiosClient({
+                url: requestOptions.url,
+                method: requestOptions.method || "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...requestOptions.headers || {}
+                },
+                data: requestOptions.body || {}
+            })
+        } catch(e) {
+            throw e;
+        }
+        return responseData.data;
+    }
+    public async getModerationData(userID: number): Promise<ModerationData> {
+        let response = await this.request({
+            url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${config.datastoreName}&entryKey=${userID}-moderationData`,
+            method: "GET"
+        });
+        return response;
+    }
+    public async setModerationData(userID: number, moderationData: ModerationData) {
+        let response = await this.request({
+            url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${config.datastoreName}&entryKey=${userID}-moderationData`,
+            method: "POST",
+            headers: {
+                "content-md5": require('crypto').createHash('md5').update(JSON.stringify(moderationData)).digest('base64')
+            },
+            body: moderationData
+        });
     }
 }

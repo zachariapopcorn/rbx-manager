@@ -5,8 +5,6 @@ import fs from 'fs/promises';
 
 import { config } from './config';
 
-import * as globals from './utils/globalVariables'
-
 import express from 'express';
 
 import { REST } from '@discordjs/rest';
@@ -16,6 +14,12 @@ import { checkBans } from './utils/checkbans';
 
 const client = new BotClient();
 client.config = config;
+client.pendingRequest = {
+    authorID: "",
+    channelID: "",
+    type: "",
+    payload: null
+}
 const app = express();
 
 export const commands = [];
@@ -26,7 +30,7 @@ app.get('/', async (request, response) => {
 });
 
 app.get('/get', async (request, response) => {
-    response.status(200).send(globals.request);
+    response.status(200).send(client.pendingRequest);
 });
 
 app.post('/process', async (request, response) => {

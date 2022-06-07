@@ -5,17 +5,17 @@ require('dotenv').config();
 export const config: BotConfig = {
     token: process.env.token,
     cookie: process.env.cookie,
+    API_KEY: process.env.API_KEY,
     groupId: 5242495,
     permissions: {
+        all: ["759959415708450837"],
         group: {
-            all: ["759959415708450837"],
             shout: [""],
             ranking: [""],
             joinrequests: [""],
             user: [""],
         },
         game: {
-            all: ["759959415708450837"],
             general: [""],
             broadcast: [""],
             kick: [""],
@@ -39,6 +39,8 @@ export const config: BotConfig = {
         success: "GREEN",
         error: "RED",
     },
+    universeId: 3507532981,
+    datastoreName: "moderations",
     verificationChecks: true,
     lockedRanks: ["Administrators/Moderators"],
     whitelistedServers: ["658241441234944021"]
