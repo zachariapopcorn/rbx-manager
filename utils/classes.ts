@@ -5,7 +5,7 @@ import { config } from '../config';
 
 import axios = require('axios');
 
-type RobloxRequestType = "Ban" | "Unban" | "Announce" | "CheckUser" | "Eval" | "Shutdown" | "GetJobID" | "GetJobIDs" | "Lock" | "Unlock" | "Mute" | "Unmute" | "";
+type RobloxRequestType = "Announce" | "CheckUser" | "Eval" | "GetJobID" | "GetJobIDs" | "Kick" | "Lock" | "Shutdown" | "Unlock" | "";
 type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout";
 
 type RobloxPostPermissions = "groupPostsPermissions.viewWall" | "groupPostsPermissions.postToWall" | "groupPostsPermissions.deleteFromWall" | "groupPostsPermissions.viewStatus" | "groupPostsPermissions.postToStatus";
