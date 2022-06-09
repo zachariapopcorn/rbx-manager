@@ -37,11 +37,7 @@ app.get('/get-request', async (request, response) => {
 });
 
 app.post('/finalize-request', async (request, response) => {
-    response.status(200); // Processes final requests
-});
-
-app.post('/process-part-request', async (request, response) => {
-    response.status(200); // Processes temporary requests
+    response.status(200);
 });
 
 let listener = app.listen(process.env.PORT, () => {
