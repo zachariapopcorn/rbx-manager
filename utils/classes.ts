@@ -332,15 +332,28 @@ export class RobloxDatastore {
         }
         return responseData.data;
     }
-    public async getModerationData(userID: number): Promise<ModerationData> {
+    public async getAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
+        if(!scope) scope = "";
         let response = await this.request({
-            url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${config.datastoreName}&entryKey=${userID}-moderationData`,
+            url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
             method: "GET"
         });
         return response;
     }
-    public async setModerationData(userID: number, moderationData: ModerationData) {
+    public async removeAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
+        if(!scope) scope = "";
         let response = await this.request({
+            url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
+            method: "DELETE"
+        });
+        return response;
+    }
+    public async getModerationData(userID: number): Promise<ModerationData> {
+        let response = await this.getAsync(config.datastoreName, `${userID}-moderationData`);
+        return response;
+    }
+    public async setModerationData(userID: number, moderationData: ModerationData) {
+        await this.request({
             url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${config.datastoreName}&entryKey=${userID}-moderationData`,
             method: "POST",
             headers: {
