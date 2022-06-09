@@ -101,7 +101,7 @@ export interface ModerationData {
 
 export class BotClient extends Discord.Client {
     public config: BotConfig
-    public pendingRequest: RobloxRequest
+    public pendingRequests: RobloxRequest[]
 
     constructor() {
         super({

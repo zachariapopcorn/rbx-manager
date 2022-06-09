@@ -15,12 +15,7 @@ import { checkBans } from './utils/checkbans';
 
 const client = new BotClient();
 client.config = config;
-client.pendingRequest = {
-    authorID: "",
-    channelID: "",
-    type: "",
-    payload: null
-}
+client.pendingRequests = []
 
 const app = express();
 app.use(bodyParser.json());
@@ -33,7 +28,7 @@ app.get('/', async (request, response) => {
 });
 
 app.get('/get-request', async (request, response) => {
-    response.status(200).send(client.pendingRequest);
+    response.status(200).send(client.pendingRequests);
 });
 
 app.post('/finalize-request', async (request, response) => {
