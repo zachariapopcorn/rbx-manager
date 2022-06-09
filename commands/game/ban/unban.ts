@@ -9,8 +9,28 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     let database = new RobloxDatastore(client.config.API_KEY);
     let logs: CommandLog[] = [];
     let usernames = args["username"].replaceAll(" ", "").split(",");
+    let reasons = args["reason"];
+    if(!reasons) { // If nothing for the reason argument was inputted
+        reasons = [];
+        while(true) {
+            reasons.push("No reason provided");
+            if(reasons.length === usernames.length) break;
+        }
+    } else {
+        reasons = reasons.split(",");
+        if(reasons.length === 1) {
+            while(true) {
+                reasons.push(reasons[0]);
+                if(reasons.length === usernames.length) break;
+            }
+        } else if(reasons.length !== usernames.length) {
+            let embed = client.embedMaker("Argument Error", `You inputted an unequal amount of usernames and reasons, please make sure that these amounts are equal, or, if you wish to apply one reason to multiple people, only put that reason for the reason argument`, "error", interaction.user);
+            return await interaction.editReply(embed);
+        }
+    }
     for(let i = 0; i < usernames.length; i++) {
         let username = usernames[i];
+        let reason = reasons[i];
         let robloxID;
         try {
             robloxID = await roblox.getIdFromUsername(username);
@@ -25,7 +45,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         username = await roblox.getUsernameFromId(robloxID);
         try {
             let oldData = await database.getModerationData(robloxID);
-            await database.setModerationData(robloxID, {isBanned: true, isMuted: oldData.isMuted});
+            await database.setModerationData(robloxID, {isBanned: false, isMuted: oldData.isMuted});
         } catch(e) {
             logs.push({
                 username: username,
@@ -39,7 +59,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             status: "Success"
         });
         if(config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the game`);
+            await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the game with the reason of **${reason}**`);
             continue;
         }
     }
@@ -48,8 +68,9 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
 
 export const slashData = new Builders.SlashCommandBuilder()
     .setName("unban")
-    .setDescription("Unbans the inputted user from the game")
-    .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to unban").setRequired(true))
+    .setDescription("Unbans the inputted user(s) from the game")
+    .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to unban").setRequired(true))
+    .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unbans(s)").setRequired(false))
 
 export const commandData: CommandData = {
     category: "Ban",
