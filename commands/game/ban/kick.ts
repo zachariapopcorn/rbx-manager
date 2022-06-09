@@ -47,5 +47,5 @@ export const slashData = new Builders.SlashCommandBuilder()
 
 export const commandData: CommandData = {
     category: "Ban",
-    permissions: config.permissions.game.ban
+    permissions: config.permissions.game.kick
 }
