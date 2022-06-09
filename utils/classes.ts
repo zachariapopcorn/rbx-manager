@@ -333,7 +333,7 @@ export class RobloxDatastore {
         return responseData.data;
     }
     public async getAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
-        if(!scope) scope = "";
+        if(!scope) scope = "global";
         let response = await this.request({
             url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
             method: "GET"
@@ -341,7 +341,7 @@ export class RobloxDatastore {
         return response;
     }
     public async removeAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
-        if(!scope) scope = "";
+        if(!scope) scope = "global";
         let response = await this.request({
             url: `https://apis.roblox.com/datastores/v1/universes/${config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
             method: "DELETE"
