@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import bodyParser = require('body-parser');
 
 import fs from 'fs/promises';
 
@@ -20,7 +21,9 @@ client.pendingRequest = {
     type: "",
     payload: null
 }
+
 const app = express();
+app.use(bodyParser.json());
 
 export const commands = [];
 export const interactions = [];
@@ -29,12 +32,16 @@ app.get('/', async (request, response) => {
     response.sendStatus(200);
 });
 
-app.get('/get', async (request, response) => {
+app.get('/get-request', async (request, response) => {
     response.status(200).send(client.pendingRequest);
 });
 
-app.post('/process', async (request, response) => {
-    response.status(200);
+app.post('/finalize-request', async (request, response) => {
+    response.status(200); // Processes final requests
+});
+
+app.post('/process-part-request', async (request, response) => {
+    response.status(200); // Processes temporary requests
 });
 
 let listener = app.listen(process.env.PORT, () => {
