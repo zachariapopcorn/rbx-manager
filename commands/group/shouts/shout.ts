@@ -5,7 +5,7 @@ import { config } from '../../../config';
 
 import roblox = require('noblox.js');
 
-export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
+export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     if(client.config.verificationChecks) {
         let verificationStatus = await client.preformVerificationChecks(interaction.user.id, "groupPostsPermissions.postToStatus");
         if(!verificationStatus) {

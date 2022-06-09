@@ -3,7 +3,7 @@ import * as Builders from '@discordjs/builders';
 import { BotClient, CommandData } from '../../../utils/classes';
 import { commands } from '../../..';
 
-export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
+export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let helpData = {}
     for(let i = 0; i < commands.length; i++) {
         let commandName = commands[i].name;

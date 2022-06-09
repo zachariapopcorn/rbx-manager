@@ -5,7 +5,7 @@ import { config } from '../../../config';
 
 import roblox = require('noblox.js');
 
-export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
+export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let logs: CommandLog[] = [];
     let usernames = args["username"].replaceAll(" ", "").split(",");
     for(let i = 0; i < usernames.length; i++) {
