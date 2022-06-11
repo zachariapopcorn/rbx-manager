@@ -136,7 +136,7 @@ export class BotClient extends Discord.Client {
     }
     public embedMaker(title: string, description: string, type: "info" | "success" | "error", author? : Discord.User, makeObject?: boolean): any {
         if(!author) author = this.user;
-        if(!makeObject) makeObject = true;
+        if(!makeObject && makeObject !== false) makeObject = true;
         let embed = new Discord.MessageEmbed();
         embed.setColor(this.config.embedColors[type]);
         embed.setAuthor({name: author.tag, iconURL: author.displayAvatarURL()});
