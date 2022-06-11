@@ -74,8 +74,7 @@ export interface VerificationResult {
 }
 
 export interface RobloxRequest {
-    authorID: string,
-    channelID: string,
+    authorTag: string,
     type: RobloxRequestType,
     payload: any
 }

@@ -47,8 +47,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             status: "Success"
         });
         client.pendingRequests.push({
-            authorID: interaction.user.id,
-            channelID: interaction.channel.id,
+            authorTag: interaction.user.tag,
             type: "Kick",
             payload: {username: username, reason: reason}
         });
