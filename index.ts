@@ -15,7 +15,6 @@ import { checkBans } from './utils/checkbans';
 
 const client = new BotClient();
 client.config = config;
-client.pendingRequests = []
 
 const app = express();
 app.use(bodyParser.json());
@@ -25,14 +24,6 @@ export const interactions = [];
 
 app.get('/', async (request, response) => {
     response.sendStatus(200);
-});
-
-app.get('/get-request', async (request, response) => {
-    response.status(200).send(client.pendingRequests);
-});
-
-app.post('/finalize-request', async (request, response) => {
-    response.status(200);
 });
 
 let listener = app.listen(process.env.PORT, () => {

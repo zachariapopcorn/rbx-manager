@@ -5,7 +5,7 @@ import { config } from '../config';
 
 import axios = require('axios');
 
-type RobloxRequestType = "Announce" | "CheckUser" | "Eval" | "GetJobID" | "GetJobIDs" | "Kick" | "Lock" | "Shutdown" | "Unlock" | "";
+type RobloxRequestType = "Announce" | "Eval" | "GetJobID" | "Kick" | "LockSwitch" | "Shutdown";
 type CommandCategory = "Ban" | "Database" | "General Game" | "JobID" | "Lock" | "Mute" | "General Group" | "Join Request" | "Ranking" | "User" | "Shout";
 
 type RobloxPostPermissions = "groupPostsPermissions.viewWall" | "groupPostsPermissions.postToWall" | "groupPostsPermissions.deleteFromWall" | "groupPostsPermissions.viewStatus" | "groupPostsPermissions.postToStatus";
@@ -73,12 +73,6 @@ export interface VerificationResult {
     memberRole?: number
 }
 
-export interface RobloxRequest {
-    authorTag: string,
-    type: RobloxRequestType,
-    payload: any
-}
-
 export interface RoverAPIResponse {
     status: "ok" | "error",
     robloxUsername: string,
@@ -100,7 +94,6 @@ export interface ModerationData {
 
 export class BotClient extends Discord.Client {
     public config: BotConfig
-    public pendingRequests: RobloxRequest[]
 
     constructor() {
         super({
@@ -305,7 +298,7 @@ export class CommandHelpers {
 }
 
 export class RobloxDatastore {
-    private API_KEY: string
+    private API_KEY: string;
     constructor(key: string) {
         this.API_KEY = key;
     }
@@ -359,6 +352,44 @@ export class RobloxDatastore {
                 "content-md5": require('crypto').createHash('md5').update(JSON.stringify(moderationData)).digest('base64')
             },
             body: moderationData
+        });
+    }
+}
+
+export class MessagingService {
+    private API_KEY: string;
+    constructor(key: string) {
+        this.API_KEY = key;
+    }
+    public async request(requestOptions: {url: string, method?: axios.Method, headers?: any, body?: any}) : Promise<any> {
+        const axiosClient = axios.default;
+        let responseData: axios.AxiosResponse;
+        requestOptions.headers = {
+            "x-api-key": this.API_KEY,
+            ...requestOptions.headers
+        }
+        try {
+            responseData = await axiosClient({
+                url: requestOptions.url,
+                method: requestOptions.method || "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...requestOptions.headers || {}
+                },
+                data: requestOptions.body || {}
+            })
+        } catch(e) {
+            throw e;
+        }
+        return responseData.data;
+    }
+    public async sendMessage(type: RobloxRequestType, payload: any) {
+        await this.request({
+            url: `https://apis.roblox.com/messaging-service/v1/universes/{${config.universeId}/topics/DiscordModerationSystemCall`,
+            method: "POST",
+            body: {
+                message: JSON.stringify({type: type, payload: payload})
+            }
         });
     }
 }

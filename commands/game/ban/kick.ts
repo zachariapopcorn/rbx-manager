@@ -46,11 +46,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        client.pendingRequests.push({
-            authorTag: interaction.user.tag,
-            type: "Kick",
-            payload: {username: username, reason: reason}
-        });
+        // add messaging call later
         if(config.logging.enabled) {
             await client.logAction(`<@${interaction.user.id}> has kicked **${username}** from the game with the reason of **${reason}**`);
             continue;
