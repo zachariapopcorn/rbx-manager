@@ -28,10 +28,11 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         return await interaction.editReply(embed);
     }
     let embed = client.embedMaker("Join Requests", embedDescription, "info", interaction.user, true);
+    if(!previousPageCursor && !nextPageCursor) {
+        return await interaction.editReply(embed);
+    }
     client.addButton(embed, "backButton", "Previous Page", "PRIMARY");
     client.addButton(embed, "nextButton", "Next Page", "PRIMARY");
-    if(!previousPageCursor) embed.components[0].components[0].setDisabled(true);
-    if(!nextPageCursor) embed.components[1].components[0].setDisabled(true);
     let msg = await interaction.editReply(embed) as Discord.Message;
     let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
     let collector = msg.createMessageComponentCollector({filter: filter});
