@@ -1,12 +1,13 @@
 import Discord from 'discord.js';
 import * as Builders from '@discordjs/builders';
-import { BotClient, CommandData, CommandLog, RobloxDatastore } from '../../../utils/classes';
+import { BotClient, CommandData, CommandLog, MessagingService, RobloxDatastore } from '../../../utils/classes';
 import { config } from '../../../config';
 
 import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let database = new RobloxDatastore(client.config.API_KEY);
+    let messaging = new MessagingService(client.config.API_KEY);
     let logs: CommandLog[] = [];
     let usernames = args["username"].replaceAll(" ", "").split(",");
     let reasons = args["reason"];
@@ -45,7 +46,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         username = await roblox.getUsernameFromId(robloxID);
         try {
             let oldData = await database.getModerationData(robloxID);
-            await database.setModerationData(robloxID, {isBanned: true, isMuted: oldData.isMuted});
+            await database.setModerationData(robloxID, {banData: {isBanned: true, reason: reason}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason}});
         } catch(e) {
             logs.push({
                 username: username,
@@ -54,11 +55,23 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             });
             continue;
         }
-        logs.push({
-            username: username,
-            status: "Success"
-        });
-        // add messaging call later
+        let didKickError = false;
+        try {
+            await messaging.sendMessage("Kick", {username: username});
+        } catch(e) {
+            didKickError = true;
+            logs.push({
+                username: username,
+                status: "Error",
+                message: `Although this user is now banned, I couldn't kick them from the game because of the following error: ${e}`
+            });
+        }
+        if(!didKickError) {
+            logs.push({
+                username: username,
+                status: "Success"
+            });
+        }
         if(config.logging.enabled) {
             await client.logAction(`<@${interaction.user.id}> has banned **${username}** from the game with the reason of **${reason}**`);
             continue;

@@ -1,12 +1,13 @@
 import Discord from 'discord.js';
 import * as Builders from '@discordjs/builders';
-import { BotClient, CommandData, CommandLog } from '../../../utils/classes';
+import { BotClient, CommandData, CommandLog, MessagingService } from '../../../utils/classes';
 import { config } from '../../../config';
 
 import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let logs: CommandLog[] = [];
+    let messaging = new MessagingService(client.config.API_KEY);
     let usernames = args["username"].replaceAll(" ", "").split(",");
     let reasons = args["reason"];
     if(!reasons) { // If nothing for the reason argument was inputted
@@ -42,11 +43,15 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             continue;
         }
         username = await roblox.getUsernameFromId(robloxID);
+        try {
+            await messaging.sendMessage("Kick", {username: username});
+        } catch(e) {
+            
+        }
         logs.push({
             username: username,
             status: "Success"
         });
-        // add messaging call later
         if(config.logging.enabled) {
             await client.logAction(`<@${interaction.user.id}> has kicked **${username}** from the game with the reason of **${reason}**`);
             continue;

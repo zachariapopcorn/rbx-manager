@@ -45,7 +45,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         username = await roblox.getUsernameFromId(robloxID);
         try {
             let oldData = await database.getModerationData(robloxID);
-            await database.setModerationData(robloxID, {isBanned: false, isMuted: oldData.isMuted});
+            await database.setModerationData(robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason}});
         } catch(e) {
             logs.push({
                 username: username,

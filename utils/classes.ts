@@ -88,8 +88,14 @@ export interface CommandLog {
 }
 
 export interface ModerationData {
-    isMuted: boolean,
-    isBanned: boolean
+    banData: {
+        isBanned: boolean,
+        reason: string
+    },
+    muteData: {
+        isMuted: boolean,
+        reason: string
+    }
 }
 
 export class BotClient extends Discord.Client {
