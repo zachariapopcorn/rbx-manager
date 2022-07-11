@@ -11,8 +11,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     let ranks = args["rank"].replaceAll(" ", "").split(",");
     if(ranks.length === 1) {
         while(true) {
-            ranks.push(ranks[0]);
             if(ranks.length === usernames.length) break;
+            ranks.push(ranks[0]);
         }
     } else if(ranks.length !== usernames.length) {
         let embed = client.embedMaker("Argument Error", `You inputted an unequal amount of usernames and ranks, please make sure that these amounts are equal, or, if you wish to apply one rank to multiple people, only put that rank for the rank argument`, "error", interaction.user);

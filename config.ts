@@ -42,6 +42,6 @@ export const config: BotConfig = {
     universeId: 3507532981,
     datastoreName: "moderations",
     verificationChecks: true,
-    lockedRanks: ["Administrators/Moderators"],
+    lockedRanks: ["Administrators/Moderators", "Developer"],
     whitelistedServers: ["658241441234944021"]
 }
