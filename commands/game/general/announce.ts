@@ -1,14 +1,22 @@
 import Discord from 'discord.js';
 import * as Builders from '@discordjs/builders';
-import { BotClient, CommandData } from '../../../utils/classes';
+import { BotClient, CommandData, MessagingService } from '../../../utils/classes';
 import { config } from '../../../config';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
-    // add messaging call later
+    let messaging = new MessagingService(client.config.API_KEY);
+    let title = args["title"];
+    let message = args["message"];
+    try {
+        await messaging.sendMessage("Announce", {title: title, message: message});
+    } catch(e) {
+        let embed = client.embedMaker("Error", `There was an error while trying to send the announcement to the game: ${e}`, "error", interaction.user);
+        return await interaction.editReply(embed);
+    }
     let embed = client.embedMaker("Success", "You've successfully sent this announcement to the game", "success", interaction.user);
     await interaction.editReply(embed);
     if(client.config.logging.enabled) {
-        await client.logAction(`<@${interaction.user.id}> has announced **${args["message"]}** with the title of **${args["title"]}** to the game's players`);
+        await client.logAction(`<@${interaction.user.id}> has announced **${message}** with the title of **${title}** to the game's players`);
     }
 }
 
