@@ -1,16 +1,33 @@
 import Discord from 'discord.js';
 import * as Builders from '@discordjs/builders';
-import { BotClient, CommandData } from '../../../utils/classes';
+import { BotClient, CommandData, MessagingService } from '../../../utils/classes';
 import { config } from '../../../config';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
-    
+    let messaging = new MessagingService(client.config.API_KEY);
+    let jobID = args["jobid"];
+    let reason = args["reason"];
+    try {
+        await messaging.sendMessage("Lock", {
+            jobID: jobID,
+            reason: reason
+        });
+    } catch(e) {
+        let embed = client.embedMaker("Error", `There was an error while trying to send the lock request to the server: ${e}`, "error", interaction.user);
+        return await interaction.editReply(embed);
+    }
+    let embed = client.embedMaker("Success", "You've successfully locked the inputted server", "success", interaction.user);
+    await interaction.editReply(embed);
+    if(client.config.logging.enabled) {
+        await client.logAction(`<@${interaction.user.id}> has locked the server with the job id of **${jobID}** for the reason of **${reason}**`);
+    }
 }
 
 export const slashData = new Builders.SlashCommandBuilder()
     .setName("lock")
     .setDescription("Locks the inputted server")
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to lock").setRequired(true))
+    .addStringOption(o => o.setName("reason").setDescription("The reason of why you want to lock the supplied server").setRequired(true))
 
 export const commandData: CommandData = {
     category: "Lock",
