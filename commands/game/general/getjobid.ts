@@ -6,7 +6,7 @@ import { config } from '../../../config';
 import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
-    let messaging = new MessagingService(client.config.API_KEY);
+    let messaging = new MessagingService(client.config.ROBLOX_API_KEY);
     let username = args["username"];
     let rbxID;
     try {

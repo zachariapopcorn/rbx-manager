@@ -16,7 +16,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         return await interaction.editReply(embed);
     }
     username = await roblox.getUsernameFromId(robloxID);
-    let database = new RobloxDatastore(client.config.API_KEY);
+    let database = new RobloxDatastore(client.config.ROBLOX_API_KEY);
     let moderationData: ModerationData | string = "";
     try {
         moderationData = await database.getModerationData(robloxID);

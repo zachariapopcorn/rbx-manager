@@ -62,7 +62,7 @@ async function registerSlashCommands() {
             console.log(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
         }
     }
-    let rest = new REST({version: "9"}).setToken(config.token);
+    let rest = new REST({version: "9"}).setToken(config.DISCORD_TOKEN);
     try {
         for(let i = 0; i < config.whitelistedServers.length; i++) {
             let serverID = config.whitelistedServers[i];
@@ -131,7 +131,7 @@ client.on('ready', async() => {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
         return process.exit();
     }
-    await loginToRoblox(config.cookie);
+    await loginToRoblox(config.ROBLOX_COOKIE);
     await checkBans();
     await readCommands();
     await registerSlashCommands();
@@ -160,4 +160,4 @@ client.on('interactionCreate', async(interaction) => {
     }
 });
 
-client.login(config.token);
+client.login(config.DISCORD_TOKEN);

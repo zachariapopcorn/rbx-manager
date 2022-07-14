@@ -14,9 +14,11 @@ type RobloxManagementPermissions = "groupManagementPermissions.manageRelationshi
 type RobloxEconomyPermissions = "groupEconomyPermissions.spendGroupFunds" | "groupEconomyPermissions.advertiseGroup" | "groupEconomyPermissions.createItems" | "groupEconomyPermissions.manageItems" | "groupEconomyPermissions.addGroupPlaces" | "groupEconomyPermissions.manageGroupGames" | "groupEconomyPermissions.viewGroupPayouts";
 
 export interface BotConfig {
-    token: string,
-    cookie: string,
-    API_KEY: string,
+    DISCORD_TOKEN: string,
+    ROBLOX_USERNAME: string,
+    ROBLOX_PASSWORD: string,
+    ROBLOX_COOKIE: string,
+    ROBLOX_API_KEY: string,
     groupId: number,
     permissions: {
         all: string[],
@@ -113,7 +115,7 @@ export class BotClient extends Discord.Client {
         if(requestOptions.robloxRequest) {
             requestOptions.headers = {
                 "X-CSRF-TOKEN": await roblox.getGeneralToken(),
-                "Cookie": this.config.cookie,
+                "Cookie": this.config.ROBLOX_COOKIE,
                 ...requestOptions.headers
             }
         }

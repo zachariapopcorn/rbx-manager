@@ -4,7 +4,7 @@ import { BotClient, CommandData, MessagingService } from '../../../utils/classes
 import { config } from '../../../config';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any[]) {
-    let messaging = new MessagingService(client.config.API_KEY);
+    let messaging = new MessagingService(client.config.ROBLOX_API_KEY);
     let typeOfOperation = args["type"];
     let jobID = args["jobid"];
     let reason = args["reason"];

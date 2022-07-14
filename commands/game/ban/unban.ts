@@ -6,7 +6,7 @@ import { config } from '../../../config';
 import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
-    let database = new RobloxDatastore(client.config.API_KEY);
+    let database = new RobloxDatastore(client.config.ROBLOX_API_KEY);
     let logs: CommandLog[] = [];
     let usernames = args["username"].replaceAll(" ", "").split(",");
     let reasons = args["reason"];

@@ -3,9 +3,11 @@ import { BotConfig } from "./utils/classes";
 require('dotenv').config();
 
 export const config: BotConfig = {
-    token: process.env.token,
-    cookie: process.env.cookie,
-    API_KEY: process.env.API_KEY,
+    DISCORD_TOKEN: process.env.DISCORD_TOKEN,
+    ROBLOX_USERNAME: process.env.ROBLOX_USERNAME,
+    ROBLOX_PASSWORD: process.env.ROBLOX_PASSWORD,
+    ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
+    ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     groupId: 5242495,
     permissions: {
         all: ["759959415708450837"],

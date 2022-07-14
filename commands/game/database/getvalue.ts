@@ -4,7 +4,7 @@ import { BotClient, CommandData, RobloxDatastore } from '../../../utils/classes'
 import { config } from '../../../config';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
-    let database = new RobloxDatastore(client.config.API_KEY);
+    let database = new RobloxDatastore(client.config.ROBLOX_API_KEY);
     let returnedData;
     try {
         returnedData = await database.getAsync(args["name"], args["key"], args["scope"]);

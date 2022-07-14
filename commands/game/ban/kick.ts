@@ -7,7 +7,7 @@ import roblox = require('noblox.js');
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let logs: CommandLog[] = [];
-    let messaging = new MessagingService(client.config.API_KEY);
+    let messaging = new MessagingService(client.config.ROBLOX_API_KEY);
     let usernames = args["username"].replaceAll(" ", "").split(",");
     let reasons = args["reason"];
     if(!reasons) { // If nothing for the reason argument was inputted
