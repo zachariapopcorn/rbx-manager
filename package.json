@@ -4,10 +4,12 @@
     "description": "",
     "main": "index.ts",
     "scripts": {
-        "winStart": "rd build /s /q & cls & npx tsc --project ./ & node build/index.js",
-        "winUpdate": "cls & npx tsc --project ./ & node build/update.js",
-        "linuxStart": "rm build -r ; clear ; npx tsc --project ./ ; node build/index.js",
-        "linuxUpdate": "clear ; npx tsc --project ./ ; node build/update.js"
+        "winBuild": "rd build /s /q & cls & npx tsc --project ./",
+        "linuxBuild": "rm build -r ; clear ; npx tsc --project ./",
+        "winStart": "npm run winBuild & node build/index.js",
+        "linuxStart": "npm run linuxBuild ; node build/index.js",
+        "winUpdate": "cls & npm run winBuild & node build/update.js",
+        "linuxUpdate": "clear ; npm run linuxBuild ; node build/update.js"
     },
     "keywords": [],
     "author": "zachariapopcorn#8105",
