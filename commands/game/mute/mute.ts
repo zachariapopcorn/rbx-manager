@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import * as Builders from '@discordjs/builders';
-import { BotClient, CommandData, CommandLog, MessagingService, RobloxDatastore } from '../../../utils/classes';
+import { BotClient, CommandData, CommandLog, MessagingService, ModerationData, RobloxDatastore } from '../../../utils/classes';
 import { config } from '../../../config';
 
 import roblox = require('noblox.js');
@@ -45,7 +45,30 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
         username = await roblox.getUsernameFromId(robloxID);
         try {
-            let oldData = await database.getModerationData(robloxID);
+            let oldData: ModerationData;
+            try {
+                oldData = await database.getModerationData(robloxID);
+            } catch(e) {
+                if(!(e.response.data.error === "NOT_FOUND")) {
+                    logs.push({
+                        username: username,
+                        status: "Error",
+                        message: e
+                    });
+                    continue;
+                } else {
+                    oldData = {
+                        banData: { // Gets overridden in the setModerationData call
+                            isBanned: false,
+                            reason: ""
+                        },
+                        muteData: {
+                            isMuted: false,
+                            reason: ""
+                        }
+                    }
+                }
+            }
             await database.setModerationData(robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason}, muteData: {isMuted: true, reason: reason}});
         } catch(e) {
             logs.push({
