@@ -10,6 +10,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     embedDescription += `**Group Name**: ${groupInfo.name}\n`;
     embedDescription += `**Group Description**: ${groupInfo.description}\n`;
     embedDescription += `**Group Owner**: ${groupInfo.owner.username}\n`;
+    embedDescription += `**Group Membercount**: ${groupInfo.memberCount}\n`;
     embedDescription += `**Join Requests Enabled**: ${!groupInfo.publicEntryAllowed}`;
     let embed = client.embedMaker("Group Information", embedDescription, "info", interaction.user);
     return await interaction.editReply(embed);
