@@ -23,8 +23,14 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     } catch(e) {
         if(e.response.data.error === "NOT_FOUND") { // Meaning that if the data doesn't exist, meaning that they have a clean slate
             moderationData = {
-                isBanned: false,
-                isMuted: false
+                banData: {
+                    isBanned: false,
+                    reason: ""
+                },
+                muteData: {
+                    isMuted: false,
+                    reason: ""
+                }
             }
         }
     }
@@ -44,8 +50,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     .replace("<ban status>", isGroupBanned ? "Yes" : "No"))
 
     embed.addField("Game Data", "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\n```"
-    .replace("<ban status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.isBanned ? "Yes" : "No"))
-    .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.isMuted ? "Yes" : "No"))
+    .replace("<ban status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.banData.isBanned ? `Yes\nReason: ${moderationData.banData.reason}` : "No"))
+    .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `"Yes\nReason: ${moderationData.muteData.reason}"` : "No"))
     )
 
     return await interaction.editReply({embeds: [embed]});
