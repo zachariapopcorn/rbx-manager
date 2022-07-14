@@ -13,15 +13,15 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     if(!reasons) { // If nothing for the reason argument was inputted
         reasons = [];
         while(true) {
-            reasons.push("No reason provided");
             if(reasons.length === usernames.length) break;
+            reasons.push("No reason provided");
         }
     } else {
         reasons = reasons.split(",");
         if(reasons.length === 1) {
             while(true) {
-                reasons.push(reasons[0]);
                 if(reasons.length === usernames.length) break;
+                reasons.push(reasons[0]);
             }
         } else if(reasons.length !== usernames.length) {
             let embed = client.embedMaker("Argument Error", `You inputted an unequal amount of usernames and reasons, please make sure that these amounts are equal, or, if you wish to apply one reason to multiple people, only put that reason for the reason argument`, "error", interaction.user);
