@@ -67,7 +67,8 @@ export interface CommandFile {
 
 export interface CommandData {
     category: CommandCategory,
-    permissions?: string[]
+    permissions?: Discord.PermissionResolvable[] | string[],
+    useDiscordPermissionSystem?: boolean
 }
 
 export interface VerificationResult {
@@ -297,11 +298,19 @@ export class CommandHelpers {
         return args;
     }
     public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {
-        let roleIDsRequired = command.commandData.permissions;
-        if(!roleIDsRequired) return true;
-        roleIDsRequired = roleIDsRequired.concat(config.permissions.all);
-        if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
-        return false;
+        if(command.commandData.useDiscordPermissionSystem) {
+            let permissionsRequired = command.commandData.permissions as Discord.PermissionResolvable[];
+            for(let i = 0; i < permissionsRequired.length; i++) {
+                if(user.permissions.has(permissionsRequired[i])) return true;
+            }
+            return false;
+        } else {
+            let roleIDsRequired = command.commandData.permissions as string[];
+            if(!roleIDsRequired) return true;
+            roleIDsRequired = roleIDsRequired.concat(config.permissions.all);
+            if(user.roles.cache.some(role => roleIDsRequired.includes(role.id))) return true;
+            return false;
+        }
     }
 }
 
