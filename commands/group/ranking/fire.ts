@@ -66,9 +66,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        if(client.config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has fired **${await roblox.getUsernameFromId(robloxID)}**`);
-        }
+        await client.logAction(`<@${interaction.user.id}> has fired **${await roblox.getUsernameFromId(robloxID)}**`);
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }

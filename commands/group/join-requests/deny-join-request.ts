@@ -43,10 +43,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        if(config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has denined the join request of **${username}**`);
-            continue;
-        }
+        await client.logAction(`<@${interaction.user.id}> has denined the join request of **${username}**`);
+        continue;
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }

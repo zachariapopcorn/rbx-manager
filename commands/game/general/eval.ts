@@ -24,12 +24,10 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     }
     let embed = client.embedMaker("Success", "You've successfully sent out the following code to be executed based on the inputted settings", "success", interaction.user);
     await interaction.editReply(embed);
-    if(client.config.logging.enabled) {
-        if(typeOfOperation === "global") {
-            await client.logAction(`<@${interaction.user.id}> has executed **${code}** in all of the game servers`);
-        } else {
-            await client.logAction(`<@${interaction.user.id}> has executed **${code}** the game server with the job ID of **${jobID}**`);
-        }
+    if(typeOfOperation === "global") {
+        await client.logAction(`<@${interaction.user.id}> has executed **${code}** in all of the game servers`);
+    } else {
+        await client.logAction(`<@${interaction.user.id}> has executed **${code}** the game server with the job ID of **${jobID}**`);
     }
 }
 

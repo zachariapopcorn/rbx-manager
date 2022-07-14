@@ -24,12 +24,10 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     }
     let embed = client.embedMaker("Success", "You've successfully sent out the following shutdown to be executed based on the inputted settings", "success", interaction.user);
     await interaction.editReply(embed);
-    if(client.config.logging.enabled) {
-        if(typeOfOperation === "global") {
-            await client.logAction(`<@${interaction.user.id}> has shutdown all of the game servers for the reason of **${reason}**`);
-        } else {
-            await client.logAction(`<@${interaction.user.id}> has shutdown the game server with the job ID of **${jobID}** for the reason of **${reason}**`);
-        }
+    if(typeOfOperation === "global") {
+        await client.logAction(`<@${interaction.user.id}> has shutdown all of the game servers for the reason of **${reason}**`);
+    } else {
+        await client.logAction(`<@${interaction.user.id}> has shutdown the game server with the job ID of **${jobID}** for the reason of **${reason}**`);
     }
 }
 

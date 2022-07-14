@@ -31,10 +31,18 @@ export const config: BotConfig = {
         }
     },
     logging: {
-        enabled: true,
-        auditLogChannel: "989034080853180446",
-        shoutLogChannel: "989034080853180446",
-        commandLogChannel: "989034080853180446"
+        audit: {
+            enabled: true,
+            loggingChannel: "989034080853180446"
+        },
+        shout: {
+            enabled: true,
+            loggingChannel: "989034080853180446"
+        },
+        command: {
+            enabled: true,
+            loggingChannel: "989034080853180446"
+        }
     },
     embedColors: {
         info: "BLUE",

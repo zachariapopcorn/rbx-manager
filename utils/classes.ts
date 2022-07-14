@@ -42,10 +42,18 @@ export interface BotConfig {
         }
     },
     logging: {
-        enabled: boolean,
-        auditLogChannel: string,
-        shoutLogChannel: string,
-        commandLogChannel: string
+        audit: {
+            enabled: boolean,
+            loggingChannel: string
+        },
+        shout: {
+            enabled: boolean,
+            loggingChannel: string
+        },
+        command: {
+            enabled: boolean,
+            loggingChannel: string
+        }
     }
     embedColors: {
         info: Discord.ColorResolvable,
@@ -196,8 +204,9 @@ export class BotClient extends Discord.Client {
         return true;
     }
     public async logAction(logString: string): Promise<void> {
+        if(!this.config.logging.command.enabled) return;
         let embed = this.embedMaker("Command Executed", logString, "info");
-        let channel = await this.channels.fetch(this.config.logging.commandLogChannel) as Discord.TextChannel;
+        let channel = await this.channels.fetch(this.config.logging.command.loggingChannel) as Discord.TextChannel;
         if(channel) {
             try {
                 await channel.send(embed);

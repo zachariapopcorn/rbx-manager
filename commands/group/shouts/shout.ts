@@ -21,9 +21,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     }
     let embed = client.embedMaker("Success", "You've successfully shouted the inputted message to the group shout", "success", interaction.user);
     await interaction.editReply(embed);
-    if(client.config.logging.enabled) {
-        return await client.logAction(`<@${interaction.user.id}> has shouted "**${args["message"]}**" to the group`);
-    }
+    return await client.logAction(`<@${interaction.user.id}> has shouted "**${args["message"]}**" to the group`);
 }
 
 export const slashData = new Builders.SlashCommandBuilder()

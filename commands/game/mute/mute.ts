@@ -95,10 +95,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
                 status: "Success"
             });
         }
-        if(config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has muted **${username}** in the game for the reason of **${reason}**`);
-            continue;
-        }
+        await client.logAction(`<@${interaction.user.id}> has muted **${username}** in the game for the reason of **${reason}**`);
+        continue;
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }

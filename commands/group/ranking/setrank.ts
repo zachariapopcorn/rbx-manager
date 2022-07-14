@@ -108,9 +108,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        if(client.config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has ranked **${await roblox.getUsernameFromId(robloxID)}** from **${oldRank}** to **${newRank}**`);
-        }
+        await client.logAction(`<@${interaction.user.id}> has ranked **${await roblox.getUsernameFromId(robloxID)}** from **${oldRank}** to **${newRank}**`);
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }

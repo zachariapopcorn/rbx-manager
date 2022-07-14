@@ -107,9 +107,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
                 username: username,
                 status: "Success"
             });
-            if(config.logging.enabled) {
-                await client.logAction(`<@${interaction.user.id}> has demoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
-            }
+            await client.logAction(`<@${interaction.user.id}> has demoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
         } else {
             try {
                 await roblox.setRank(client.config.groupId, robloxID, potentialRole.rank);
@@ -125,9 +123,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
                 username: username,
                 status: "Success"
             });
-            if(config.logging.enabled) {
-                await client.logAction(`<@${interaction.user.id}> has demoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
-            }
+            await client.logAction(`<@${interaction.user.id}> has demoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
         }
     }
     await client.initiateLogEmbedSystem(interaction, logs, didReply);

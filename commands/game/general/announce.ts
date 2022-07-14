@@ -15,9 +15,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     }
     let embed = client.embedMaker("Success", "You've successfully sent this announcement to the game", "success", interaction.user);
     await interaction.editReply(embed);
-    if(client.config.logging.enabled) {
-        await client.logAction(`<@${interaction.user.id}> has announced **${message}** with the title of **${title}** to the game's players`);
-    }
+    await client.logAction(`<@${interaction.user.id}> has announced **${message}** with the title of **${title}** to the game's players`);
 }
 
 export const slashData = new Builders.SlashCommandBuilder()

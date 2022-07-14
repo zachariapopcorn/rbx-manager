@@ -18,9 +18,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     }
     let embed = client.embedMaker("Success", "You've successfully locked the inputted server", "success", interaction.user);
     await interaction.editReply(embed);
-    if(client.config.logging.enabled) {
-        await client.logAction(`<@${interaction.user.id}> has locked the server with the job id of **${jobID}** for the reason of **${reason}**`);
-    }
+    await client.logAction(`<@${interaction.user.id}> has locked the server with the job id of **${jobID}** for the reason of **${reason}**`);
+
 }
 
 export const slashData = new Builders.SlashCommandBuilder()

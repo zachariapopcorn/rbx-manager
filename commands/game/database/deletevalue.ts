@@ -5,8 +5,11 @@ import { config } from '../../../config';
 
 export async function run(interaction: Discord.CommandInteraction, client: BotClient, args: any) {
     let database = new RobloxDatastore(client.config.ROBLOX_API_KEY);
+    let name = args["name"];
+    let key = args["key"];
+    let scope = args["scope"] || "global";
     try {
-        await database.removeAsync(args["name"], args["key"], args["scope"]);
+        await database.removeAsync(name, key, scope);
     } catch(e) {
         let embed;
         if(e.response.data.error === "NOT_FOUND") {
@@ -17,6 +20,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         return await interaction.editReply(embed);
     }
     let embed = client.embedMaker("Success", `You've successfully deleted this data`, "success", interaction.user);
+    await client.logAction(`<@${interaction.user.id}> has deleted the **${key}** key in the **${name}** datastore, which is located in the **${scope}** scope`);
     return await interaction.editReply(embed);
 }
 

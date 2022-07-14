@@ -101,9 +101,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
                 username: username,
                 status: "Success"
             });
-            if(config.logging.enabled) {
-                await client.logAction(`<@${interaction.user.id}> has promoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
-            }
+            await client.logAction(`<@${interaction.user.id}> has promoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
         } else {
             if(config.verificationChecks) {
                 let authorRobloxID = await client.getRobloxUser(interaction.user.id);
@@ -131,9 +129,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
                 username: username,
                 status: "Success"
             });
-            if(config.logging.enabled) {
-                await client.logAction(`<@${interaction.user.id}> has promoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
-            }
+            await client.logAction(`<@${interaction.user.id}> has promoted **${await roblox.getUsernameFromId(robloxID)}** from **${oldRoleName}** to **${potentialRole.name}**`);
         }
     }
     await client.initiateLogEmbedSystem(interaction, logs, didReply);

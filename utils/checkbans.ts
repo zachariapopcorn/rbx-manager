@@ -35,5 +35,7 @@ export async function checkBans() {
     } catch(e) {
         console.error(e);
     }
-    setTimeout(checkBans, 30000);
+    setTimeout(async() => {
+        await checkBans();
+    }, 15000);
 }

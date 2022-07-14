@@ -12,6 +12,7 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { BotClient, CommandFile, CommandHelpers } from './utils/classes';
 import { checkBans } from './utils/checkbans';
+import { checkAudits } from './utils/checkAuditLog';
 
 const client = new BotClient();
 client.config = config;
@@ -81,48 +82,7 @@ export async function loginToRoblox(robloxCookie: string) {
         return;
     }
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
-    let auditLogListener = roblox.onAuditLog(config.groupId);
-    auditLogListener.on('data', async(data) => {
-        if(config.logging.enabled === false) return;
-        if(data.actionType === "Post Status") return;
-        if(data.actor.user.username === (await roblox.getCurrentUser()).UserName) return;
-        let embedDescription = "";
-        embedDescription += `**Actor**: ${data.actor.user.username}\n`;
-        embedDescription += `**Action**: ${data.actionType}\n`;
-        embedDescription += `**Date**: ${data.created}\n`;
-        let embed = client.embedMaker("New Audit Log", embedDescription, "info");
-        let channel = await client.channels.fetch(config.logging.auditLogChannel) as Discord.TextChannel;
-        if(!channel) return;
-        try {
-            await channel.send(embed);
-        } catch(e) {
-            console.error(`There was an error while trying to send the audit data to the Discord logging channel: ${e}`);
-        }
-    });
-    auditLogListener.on('error', async(e) => {
-        console.error(`There was an error while trying to fetch the audit data: ${e.message}`);
-    });
-    let shoutListener = roblox.onShout(config.groupId);
-    shoutListener.on('data', async(data) => {
-        if(config.logging.enabled === false) return;
-        if(data.poster.username === (await roblox.getCurrentUser()).UserName) return;
-        let embedDescription = "";
-        embedDescription += `**Poster**: ${data.poster.username}\n`;
-        embedDescription += `**Body**: ${data.body}\n`;
-        embedDescription += `**Created**: ${data.created}\n`;
-        let embed = client.embedMaker("New Shout", embedDescription, "info");
-        let channel = await client.channels.fetch(config.logging.shoutLogChannel) as Discord.TextChannel;
-        if(!channel) return;
-        try {
-            await channel.send(embed);
-        } catch(e) {
-            console.error(`There was an error while trying to send the shout data to the Discord logging channel: ${e}`);
-        }
-    });
-    shoutListener.on('error', async(e) => {
-        console.error(`There was an error while trying to fetch the shout data: ${e.message}`);
-    });
-
+    await checkAudits(client);
 }
 
 client.on('ready', async() => {

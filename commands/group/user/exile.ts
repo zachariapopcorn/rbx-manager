@@ -56,9 +56,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        if(config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group`);
-        }
+        await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group`);
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }

@@ -81,10 +81,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
             username: username,
             status: "Success"
         });
-        if(config.logging.enabled) {
-            await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the game with the reason of **${reason}**`);
-            continue;
-        }
+        await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the game with the reason of **${reason}**`);
+        continue;
     }
     await client.initiateLogEmbedSystem(interaction, logs);
 }
