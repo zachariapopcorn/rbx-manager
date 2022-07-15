@@ -114,11 +114,11 @@ export class BotClient extends Discord.Client {
 
     constructor() {
         super({
-            intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]
+            intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
         })
     }
 
-    public async request(requestOptions: {url: string, method?: axios.Method, headers?: any, body?: any, robloxRequest?: boolean}) : Promise<any> {
+    public async request(requestOptions: {url: string, method?: axios.Method, headers?: any, body?: any, robloxRequest?: boolean, returnFullResponse?: boolean}) : Promise<any> {
         const axiosClient = axios.default;
         let responseData: axios.AxiosResponse;
         if(requestOptions.robloxRequest) {
@@ -141,6 +141,7 @@ export class BotClient extends Discord.Client {
         } catch(e) {
             throw e;
         }
+        if(requestOptions.returnFullResponse) return responseData;
         return responseData.data;
     }
     public embedMaker(title: string, description: string, type: "info" | "success" | "error", author? : Discord.User, makeObject?: boolean): any {
