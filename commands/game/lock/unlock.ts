@@ -8,7 +8,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
     let jobID = args["jobid"];
     let reason = args["reason"];
     try {
-        await messaging.sendMessage("Lock", {
+        await messaging.sendMessage("Unlock", {
             jobID: jobID,
             reason: reason
         });
