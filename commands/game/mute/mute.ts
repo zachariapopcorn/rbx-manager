@@ -80,7 +80,7 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
         let didMuteError = false;
         try {
-            await messaging.sendMessage("Mute", {username: username});
+            await messaging.sendMessage("Mute", {username: username, reason: reason});
         } catch(e) {
             didMuteError = true;
             logs.push({

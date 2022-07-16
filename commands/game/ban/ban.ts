@@ -81,9 +81,8 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
         let didKickError = false;
         try {
-            await messaging.sendMessage("Kick", {username: username});
+            await messaging.sendMessage("Kick", {username: username, reason: reason});
         } catch(e) {
-            console.log(e.response.data);
             didKickError = true;
             logs.push({
                 username: username,

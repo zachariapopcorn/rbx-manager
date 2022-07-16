@@ -44,9 +44,13 @@ export async function run(interaction: Discord.CommandInteraction, client: BotCl
         }
         username = await roblox.getUsernameFromId(robloxID);
         try {
-            await messaging.sendMessage("Kick", {username: username});
+            await messaging.sendMessage("Kick", {username: username, reason: reason});
         } catch(e) {
-            
+            logs.push({
+                username: username,
+                status: "Error",
+                message: e
+            });
         }
         logs.push({
             username: username,
