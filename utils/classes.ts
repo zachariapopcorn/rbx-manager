@@ -15,8 +15,6 @@ type RobloxEconomyPermissions = "groupEconomyPermissions.spendGroupFunds" | "gro
 
 export interface BotConfig {
     DISCORD_TOKEN: string,
-    ROBLOX_USERNAME: string,
-    ROBLOX_PASSWORD: string,
     ROBLOX_COOKIE: string,
     ROBLOX_API_KEY: string,
     groupId: number,

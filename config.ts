@@ -4,8 +4,6 @@ require('dotenv').config();
 
 export const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
-    ROBLOX_USERNAME: process.env.ROBLOX_USERNAME,
-    ROBLOX_PASSWORD: process.env.ROBLOX_PASSWORD,
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     groupId: 5242495,
