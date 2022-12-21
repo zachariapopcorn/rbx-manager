@@ -1,10 +1,23 @@
 {
-  "dependencies": {
-    "axios": "^1.2.1",
-    "body-parser": "^1.20.1",
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "noblox.js": "^4.13.1"
-  }
+  "name": "roblox-manager",
+  "version": "1.0.0",
+  "description": "A Discord bot that allos you to manage your Roblox group and game",
+  "main": "index.ts",
+  "scripts": {
+    "winBuild": "rd build /s /q & cls & npx tsc --project ./",
+    "linuxBuild": "rm build -r ; clear ; npx tsc --project ./",
+    "winStart": "npm run winBuild & node build/index.js",
+    "linuxStart": "npm run linuxBuild ; node build/index.js",
+    "startWithNoBuild": "node build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachariapopcorn/roblox-manager.git"
+  },
+  "author": "zachariapopcorn#8105",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zachariapopcorn/roblox-manager/issues"
+  },
+  "homepage": "https://github.com/zachariapopcorn/roblox-manager#readme"
 }
