@@ -1,9 +1,10 @@
 import Discord from 'discord.js';
 
-export interface BotConfig {
+export default interface BotConfig {
     DISCORD_TOKEN: string,
     ROBLOX_COOKIE: string,
     ROBLOX_API_KEY: string,
+    ROVER_API_KEY: string,
     groupId: number,
     permissions: {
         all: string[],
