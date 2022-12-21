@@ -19,5 +19,16 @@
   "bugs": {
     "url": "https://github.com/zachariapopcorn/roblox-manager/issues"
   },
-  "homepage": "https://github.com/zachariapopcorn/roblox-manager#readme"
+  "homepage": "https://github.com/zachariapopcorn/roblox-manager#readme",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "body-parser": "^1.20.1",
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "noblox.js": "^4.13.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
 }
