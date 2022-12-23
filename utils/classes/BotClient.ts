@@ -12,8 +12,9 @@ const axiosClient = axios.default;
 export default class BotClient extends Discord.Client {
     public config: BotConfig
 
-    constructor() {
-        super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]})
+    constructor(config: BotConfig) {
+        super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]});
+        this.config = config;
     }
 
     public async request(requestOptions: RequestOptions) : Promise<axios.AxiosResponse> {

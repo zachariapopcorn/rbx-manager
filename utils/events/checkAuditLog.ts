@@ -4,7 +4,7 @@ import BotClient from '../classes/BotClient';
 
 let oldAuditLogDate;
 
-export async function checkAudits(client: BotClient) {
+export default async function checkAudits(client: BotClient) {
     let currentUser = await roblox.getCurrentUser();
     let groupID = client.config.groupId;
     try {

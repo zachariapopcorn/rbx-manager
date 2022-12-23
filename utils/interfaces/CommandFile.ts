@@ -4,7 +4,7 @@ import BotClient from '../classes/BotClient';
 import CommandData from './CommandData';
 
 export default interface CommandFile {
-    run: Function;(interaction: Discord.CommandInteraction, client: BotClient, args: any[]),
-    slashData: typeof SlashCommandBuilder,
+    run: Function;(interaction: Discord.CommandInteraction, client: BotClient, args: any),
+    slashData: SlashCommandBuilder,
     commandData: CommandData
 }
