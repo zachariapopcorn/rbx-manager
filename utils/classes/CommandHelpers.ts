@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import { config } from '../../config';
+import config from '../../config';
 import CommandFile from '../interfaces/CommandFile';
 
 export default class CommandHelpers {

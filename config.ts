@@ -2,7 +2,7 @@ import BotConfig from "./utils/classes/BotConfig";
 
 require('dotenv').config();
 
-export const config: BotConfig = {
+const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
@@ -54,3 +54,5 @@ export const config: BotConfig = {
     lockedRanks: ["Administrators/Moderators", "Developer"],
     whitelistedServers: ["658241441234944021"]
 }
+
+export default config;
