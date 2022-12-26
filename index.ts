@@ -16,7 +16,7 @@ import CommandFile from './utils/interfaces/CommandFile';
 import CommandHelpers from './utils/classes/CommandHelpers';
 import CommandInstance from './utils/interfaces/CommandInstance';
 
-import checkBans from './utils/events/checkbans';
+import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
 
 const client = new BotClient(config);
@@ -115,7 +115,7 @@ client.on('interactionCreate', async(interaction: Interaction) => {
                 return;
             }
             try {
-                await commands[i].file.run(interaction, client, args)
+                await commands[i].file.run(interaction, client, args);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: "There was an error while trying to run this command. The error has been logged in the console", type: "error", author: interaction.user});
                 await interaction.editReply({embeds: [embed]});
