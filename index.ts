@@ -44,7 +44,8 @@ async function readCommands(path?: string) {
         if(file.indexOf(".") === -1) {
             await readCommands(`${path}/${file}`);
         } else {
-            let commandFile = require(`${path}/${file}`) as CommandFile;
+            file = file.replace(".ts", ".js"); // This is here because when it compiles to JS, it saves to the build directory, and it starts as build/index.js, so it's reading files in build/commands, hence the string change
+            let commandFile = require(`${path}/${file}`).default as CommandFile; // .default cause when you call "export default <x>" it adds a default property to it (idk why)
             let command = {
                 file: commandFile,
                 name: file.split('.')[0],
