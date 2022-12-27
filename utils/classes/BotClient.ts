@@ -6,6 +6,7 @@ import BotConfig from './BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
+import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 
 const axiosClient = axios.default;
 
@@ -77,6 +78,33 @@ export default class BotClient extends Discord.Client {
         } catch(e) {
             return 0;
         }
+    }
+
+    private async getPermissions(rbxID: number) {
+        let rank = await roblox.getRankInGroup(this.config.groupId, rbxID);
+        let role = (await roblox.getRoles(this.config.groupId)).find(r => r.rank === rank);
+        let permissions = (await roblox.getRolePermissions(this.config.groupId, role.id)).permissions;
+        let permissionData = {
+            "JoinRequests": permissions.groupMembershipPermissions.inviteMembers,
+            "Ranking": permissions.groupMembershipPermissions.changeRank,
+            "Shouts": permissions.groupPostsPermissions.postToStatus,
+            "Exile": permissions.groupMembershipPermissions.removeMembers
+        }
+        return permissionData;
+    }
+
+    public async preformVerificationChecks(guildID: string, discordID: string, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
+        let robloxID = await this.getRobloxUser(guildID, discordID);
+        if(robloxID === 0) return false;
+        let authorGroupRole = await roblox.getRankInGroup(this.config.groupId, robloxID);
+        if(authorGroupRole === 0) return false;
+        let permissions = await this.getPermissions(robloxID);
+        if(!permissions[permissionNeeded]) return false;
+        if(victimUserID) {
+            let victimGroupRole = await roblox.getRankInGroup(this.config.groupId, victimUserID);
+            if(victimGroupRole >= authorGroupRole) return false;
+        }
+        return true;
     }
 
     public async logAction(logString: string): Promise<void> {
