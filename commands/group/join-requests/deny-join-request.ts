@@ -67,7 +67,7 @@ const command: CommandFile = {
     .setName("deny-join-request")
     .setDescription("Denies the join request of the user(s) inputted")
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to deny the join request of").setRequired(true))
-    .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're accepting the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
+    .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're denying the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
         permissions: config.permissions.group.joinrequests
