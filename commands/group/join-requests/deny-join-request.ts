@@ -10,7 +10,11 @@ import config from '../../../config';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         if(client.config.verificationChecks) {
-            let verificationStatus = await client.preformVerificationChecks(interaction.guild.id, interaction.user.id, "JoinRequests");
+            let verificationStatus = false;
+            let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+            if(robloxID === 0) {
+                verificationStatus = await client.preformVerificationChecks(robloxID, "JoinRequests");
+            }
             if(!verificationStatus) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});

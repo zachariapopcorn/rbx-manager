@@ -93,9 +93,7 @@ export default class BotClient extends Discord.Client {
         return permissionData;
     }
 
-    public async preformVerificationChecks(guildID: string, discordID: string, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
-        let robloxID = await this.getRobloxUser(guildID, discordID);
-        if(robloxID === 0) return false;
+    public async preformVerificationChecks(robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
         let authorGroupRole = await roblox.getRankInGroup(this.config.groupId, robloxID);
         if(authorGroupRole === 0) return false;
         let permissions = await this.getPermissions(robloxID);
