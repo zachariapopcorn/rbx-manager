@@ -62,7 +62,7 @@ async function registerSlashCommands() {
     for(let i = 0; i < commands.length; i++) {
         let commandData;
         try {
-            commandData = await commands[i].slashData.toJSON()
+            commandData = commands[i].slashData.toJSON()
             slashCommands.push(commandData);
         } catch(e) {
             console.log(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
