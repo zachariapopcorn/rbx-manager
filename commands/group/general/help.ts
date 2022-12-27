@@ -6,7 +6,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import { commands } from '../../..';
 
 const command: CommandFile = {
-    run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+    run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let helpData = {};
         for(let i = 0; i < commands.length; i++) {
             let commandName = commands[i].name;
