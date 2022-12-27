@@ -11,7 +11,7 @@ const command: CommandFile = {
         if(client.config.verificationChecks) {
             let verificationStatus = false;
             let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-            if(robloxID === 0) {
+            if(robloxID !== 0) {
                 verificationStatus = await client.preformVerificationChecks(robloxID, "JoinRequests");
             }
             if(!verificationStatus) {
