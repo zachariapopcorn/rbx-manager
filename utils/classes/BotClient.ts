@@ -8,8 +8,6 @@ import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 
-const axiosClient = axios.default;
-
 export default class BotClient extends Discord.Client {
     public config: BotConfig
 
@@ -28,7 +26,7 @@ export default class BotClient extends Discord.Client {
             }
         }
         try {
-            responseData = await axiosClient({
+            responseData = await axios.default({
                 url: requestOptions.url,
                 method: requestOptions.method,
                 headers: requestOptions.headers,
@@ -65,18 +63,20 @@ export default class BotClient extends Discord.Client {
             if(res.status === 200) {
                 return res.data.robloxId;
             }
-            if(res.status === 429) {
-                setTimeout(async() => {
-                    await this.getRobloxUser(guildID, discordID);
-                }, parseInt(res.headers["Retry-After"]) * 1000);
-            }
-            if(parseInt(res.headers["X-RateLimit-Remaining"]) === 0) {
-                setTimeout(async() => {
-                    await this.getRobloxUser(guildID, discordID);
-                }, parseInt(res.headers["X-RateLimit-Reset-After"]) * 1000);
-            }
         } catch(e) {
-            return 0;
+            let statusCode = e.response.status;
+            let headers = e.response.headers;
+            if(parseInt(headers["X-RateLimit-Remaining"]) === 0) {
+                setTimeout(async() => {
+                    await this.getRobloxUser(guildID, discordID);
+                }, parseInt(headers["X-RateLimit-Reset-After"]) * 1000);
+            } else if(statusCode === 429) {
+                setTimeout(async() => {
+                    await this.getRobloxUser(guildID, discordID);
+                }, parseInt(headers["Retry-After"]) * 1000);
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -151,8 +151,7 @@ export default class BotClient extends Discord.Client {
         return embeds;
     }
 
-    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[], didCommandReply?: boolean) {
-        if(didCommandReply === undefined) didCommandReply = false;
+    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[], didCommandReply: boolean) {
         let logEmbeds = this.createLogEmbeds(interaction.user, logs);
         if(logEmbeds.length === 1) {
             if(didCommandReply) {
@@ -172,7 +171,7 @@ export default class BotClient extends Discord.Client {
             await msg.react('⬅️');
             await msg.react('➡️');
             let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-            let collector = msg.createReactionCollector({filter: filter});
+            let collector = msg.createReactionCollector({filter: filter, time: this.config.collectorTime});
             collector.on('collect', async(reaction: Discord.MessageReaction) => {
                 if(reaction.emoji.name === "⬅️") {
                     index -= 1;

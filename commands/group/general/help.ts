@@ -32,7 +32,7 @@ const command: CommandFile = {
         await msg.react('⬅️');
         await msg.react('➡️');
         let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-        let collector = msg.createReactionCollector({filter: filter});
+        let collector = msg.createReactionCollector({filter: filter, time: client.config.collectorTime});
         collector.on('collect', async(reaction: Discord.MessageReaction) => {
             if(reaction.emoji.name === "⬅️") {
                 helpPageIndex -= 1;
@@ -42,10 +42,7 @@ const command: CommandFile = {
                 if(helpPageIndex === categories.length) helpPageIndex = 0;
             }
             embed = helpData[categories[helpPageIndex]].helpEmbed;
-            await msg.reactions.removeAll();
             await msg.edit({embeds: [embed]});
-            await msg.react('⬅️');
-            await msg.react('➡️');
         });
     },
     slashData: new Discord.SlashCommandBuilder()

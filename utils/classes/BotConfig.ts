@@ -49,6 +49,7 @@ export default interface BotConfig {
     universeId: number,
     datastoreName: string,
     verificationChecks: boolean,
+    collectorTime: number,
     lockedRanks: any[],
     whitelistedServers: string[]
 }

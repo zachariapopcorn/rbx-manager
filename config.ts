@@ -51,6 +51,7 @@ const config: BotConfig = {
     universeId: 3507532981,
     datastoreName: "moderations",
     verificationChecks: true,
+    collectorTime: 120000,
     lockedRanks: ["Administrators/Moderators", "Developer"],
     whitelistedServers: ["658241441234944021"]
 }
