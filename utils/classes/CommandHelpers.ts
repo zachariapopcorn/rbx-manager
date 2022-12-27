@@ -26,4 +26,25 @@ export default class CommandHelpers {
             return false;
         }
     }
+    public static parseReasons(usernames: string[], rawReasons: any): {parsedReasons: string[], didError: boolean} {
+        if(!rawReasons) {
+            let reasons = [];
+            while(true) {
+                if(reasons.length === usernames.length) break;
+                reasons.push("No reason provided");
+            }
+            return {parsedReasons: reasons, didError: false};
+        } else {
+            let reasons = rawReasons.split(",");
+            if(reasons.length === 1) {
+                while(true) {
+                    if(reasons.length === usernames.length) break;
+                    reasons.push(reasons[0]);
+                }
+                return {parsedReasons: reasons, didError: false};
+            } else if(reasons.length !== usernames.length) {
+                return {parsedReasons: [], didError: true};
+            }
+        }
+    }
 }
