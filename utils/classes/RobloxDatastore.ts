@@ -5,9 +5,9 @@ import ModerationData from '../interfaces/ModerationData';
 export default class RobloxDatastore {
     private API_KEY: string;
     private config: BotConfig;
-    constructor(config: BotConfig, key: string) {
+    constructor(config: BotConfig) {
         this.config = config;
-        this.API_KEY = key;
+        this.API_KEY = config.ROBLOX_API_KEY;
     }
     public async request(requestOptions: {url: string, method: axios.Method, headers: any, body: any}) : Promise<any> {
         const axiosClient = axios.default;
