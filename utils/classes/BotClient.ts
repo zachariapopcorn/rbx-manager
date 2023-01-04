@@ -42,7 +42,9 @@ export default class BotClient extends Discord.Client {
         let embed = new Discord.EmbedBuilder();
         embed.setAuthor({name: embedOptions.author.tag, iconURL: embedOptions.author.displayAvatarURL()});
         embed.setColor(this.config.embedColors[embedOptions.type]);
-        embed.setDescription(embedOptions.description);
+        if(embedOptions.description.length > 0) {
+            embed.setDescription(embedOptions.description);
+        }
         embed.setFooter({text: "Created by zachariapopcorn#8105 - https://discord.gg/XGGpf3q"});
         embed.setTitle(embedOptions.title);
         return embed;
