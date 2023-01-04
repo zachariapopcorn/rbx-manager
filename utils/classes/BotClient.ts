@@ -2,7 +2,7 @@ import Discord, { ActionRowBuilder, ButtonBuilder, Message } from 'discord.js';
 import roblox from 'noblox.js';
 import axios = require('axios');
 
-import BotConfig from './BotConfig';
+import BotConfig from '../interfaces/BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';

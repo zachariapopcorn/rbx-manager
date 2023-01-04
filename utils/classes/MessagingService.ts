@@ -1,5 +1,5 @@
 import axios = require('axios');
-import BotConfig from "./BotConfig";
+import BotConfig from "../interfaces/BotConfig";
 import RobloxRequestType from '../interfaces/RobloxRequestType';
 
 export class MessagingService {
