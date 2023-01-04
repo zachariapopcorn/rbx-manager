@@ -109,7 +109,21 @@ client.on('interactionCreate', async(interaction: Interaction) => {
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
             await interaction.deferReply();
+            let index = config.lockedCommands.findIndex(c => c.toLowerCase() === command);
+            if(index !== -1) {
+                let embed = client.embedMaker({title: "Locked Command", description: "This command is currently locked", type: "error", author: interaction.user});
+                await interaction.editReply({embeds: [embed]});
+                return;
+            }
             let args = CommandHelpers.loadArguments(interaction);
+            if(args["username"]) {
+                let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
+                if(usernames.length > config.maximumNumberOfUsers) {
+                    let embed = client.embedMaker({title: "Maximum Number of Users Exceeded", description: "You've inputted more users than the currently allowed maximum, please lower the amount of users in your command and try again", type: "error", author: interaction.user});
+                    await interaction.editReply({embeds: [embed]});
+                    return;
+                }
+            }
             if(!CommandHelpers.checkPermissions(commands[i].file, interaction.member as Discord.GuildMember)) {
                 let embed = client.embedMaker({title: "No Permission", description: "You don't have permission to run this command", type: "error", author: interaction.user});
                 await interaction.editReply({embeds: [embed]});

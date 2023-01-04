@@ -50,6 +50,8 @@ export default interface BotConfig {
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,
+    maximumNumberOfUsers: number,
     lockedRanks: any[],
+    lockedCommands: string[],
     whitelistedServers: string[]
 }
