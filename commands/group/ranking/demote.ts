@@ -29,7 +29,6 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let reasons = reasonData.parsedReasons;
-        let didReply = false;
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -78,7 +77,9 @@ const command: CommandFile = {
                 continue;
             }
             let oldRoleName = currentRole.name;
+            let lockedRank = false;
             if(client.isLockedRole(potentialRole)) {
+                lockedRank = true;
                 let shouldBreakAfterForLoop = false;
                 for(let i = currentRoleIndex - 1; i >= 0; i--) {
                     potentialRole = roles[i];
@@ -93,60 +94,46 @@ const command: CommandFile = {
                     if(!client.isLockedRole(potentialRole)) break;
                 }
                 if(shouldBreakAfterForLoop) continue; // If I call continue in the nested for loop (the one right above this line), it won't cause the main username for loop to skip over the rest of the code
+            }
+            let shouldContinue = false;
+            if(lockedRank) {
                 let embed = client.embedMaker({title: "Role Locked", description: `The role(s) below **${username}** is locked, would you like to demote **${username}** to **${potentialRole.name}**?`, type: "info", author: interaction.user});
-                let msg: Discord.Message;
-                if(i === 0) {
-                    msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-                } else {
-                    msg = await interaction.channel.send({embeds: [embed]}) as Discord.Message;
-                }
-                didReply = true;
+                let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
+                await msg.reactions.removeAll();
                 await msg.react("✅");
                 await msg.react("❌");
                 let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "✅" || reaction.emoji.name === "❌") && user.id === interaction.user.id;
-                let reaction = (await msg.awaitReactions({filter: filter, max: 1})).at(0);
-                if(reaction.emoji.name === "✅") {
-                    try {
-                        await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
-                    } catch(e) {
-                        logs.push({
-                            username: username,
-                            status: "Error",
-                            message: e
-                        });
-                        continue;
+                let reaction = (await msg.awaitReactions({filter: filter, time: client.config.collectorTime, max: 1})).at(0);
+                if(reaction) {
+                    if(reaction.emoji.name === "✅") {
+                        shouldContinue = true;
                     }
-                } else {
-                    logs.push({
-                        username: username,
-                        status: "Cancelled",
-                    });
-                    continue;
                 }
-                logs.push({
-                    username: username,
-                    status: "Success"
-                });
-                await client.logAction(`<@${interaction.user.id}> has demoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
-            } else {
-                try {
-                    await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
-                } catch(e) {
-                    logs.push({
-                        username: username,
-                        status: "Error",
-                        message: e
-                    });
-                    continue;
-                }
-                logs.push({
-                    username: username,
-                    status: "Success"
-                });
-                await client.logAction(`<@${interaction.user.id}> has demoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
             }
-            await client.initiateLogEmbedSystem(interaction, logs, didReply);
+            if(!shouldContinue) {
+                logs.push({
+                    username: username,
+                    status: "Cancelled",
+                });
+                continue;
+            }
+            try {
+                await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
+            } catch(e) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: e
+                });
+                continue;
+            }
+            logs.push({
+                username: username,
+                status: "Success"
+            });
+            await client.logAction(`<@${interaction.user.id}> has demoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
         }
+        await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("demote")

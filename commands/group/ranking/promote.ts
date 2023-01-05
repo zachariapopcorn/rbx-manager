@@ -29,7 +29,6 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let reasons = reasonData.parsedReasons;
-        let didReply = false;
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -69,88 +68,77 @@ const command: CommandFile = {
             let currentRoleIndex = roles.findIndex(role => role.rank === rankID);
             let currentRole = roles[currentRoleIndex];
             let potentialRole = roles[currentRoleIndex + 1];
+            let botRank = await roblox.getRankInGroup(client.config.groupId, await roblox.getCurrentUser("UserID"));
+            if(potentialRole.rank >= botRank) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: "The next rank of the user provided is equal to or higher than the bot account's rank"
+                });
+                continue;
+            }
             let oldRoleName = currentRole.name;
+            let lockedRank = false;
             if(client.isLockedRole(potentialRole)) {
+                lockedRank = true;
+                let shouldBreakAfterForLoop = false;
                 for(let i = currentRoleIndex + 1; i < roles.length; i++) {
                     potentialRole = roles[i];
-                    if(!client.isLockedRole(potentialRole)) break;
-                }
-                let authorRankID = await roblox.getRankInGroup(client.config.groupId, authorRobloxID);
-                if(potentialRole.rank >= authorRankID) {
-                    logs.push({
-                        username: username,
-                        status: "Error",
-                        message: "Verification checks have failed"
-                    });
-                    continue;
-                }
-                let embed = client.embedMaker({title: "Role Locked", description: `The role(s) above **${username}** is locked, would you like to promote **${username}** to **${potentialRole.name}**?`, type: "info", author: interaction.user});
-                let msg: Discord.Message;
-                if(i === 0) {
-                    msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-                } else {
-                    msg = await interaction.channel.send({embeds: [embed]}) as Discord.Message;
-                }
-                didReply = true;
-                await msg.react("✅");
-                await msg.react("❌");
-                let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "✅" || reaction.emoji.name === "❌") && user.id === interaction.user.id;
-                let reaction = (await msg.awaitReactions({filter: filter, max: 1})).at(0);
-                if(reaction.emoji.name === "✅") {
-                    try {
-                        await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
-                    } catch(e) {
+                    if(potentialRole.rank === botRank) {
                         logs.push({
                             username: username,
                             status: "Error",
-                            message: e
+                            message: "All the roles above the provided user are locked"
                         });
-                        continue;
+                        shouldBreakAfterForLoop = true;
                     }
-                } else {
-                    logs.push({
-                        username: username,
-                        status: "Cancelled",
-                    });
-                    continue;
+                    if(!client.isLockedRole(potentialRole)) break;
                 }
-                logs.push({
-                    username: username,
-                    status: "Success"
-                });
-                await client.logAction(`<@${interaction.user.id}> has promoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
-            } else {
-                let authorRankID = await roblox.getRankInGroup(client.config.groupId, authorRobloxID);
-                if(potentialRole.rank >= authorRankID) {
-                    logs.push({
-                        username: username,
-                        status: "Error",
-                        message: "Verification checks have failed"
-                    });
-                    continue;
-                }
-                try {
-                    await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
-                } catch(e) {
-                    logs.push({
-                        username: username,
-                        status: "Error",
-                        message: e
-                    });
-                    continue;
-                }
-                logs.push({
-                    username: username,
-                    status: "Success"
-                });
-                await client.logAction(`<@${interaction.user.id}> has promoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
+                if(shouldBreakAfterForLoop) continue; // If I call continue in the nested for loop (the one right above this line), it won't cause the main username for loop to skip over the rest of the code
             }
-            await client.initiateLogEmbedSystem(interaction, logs, didReply);
+            let shouldContinue = false;
+            if(lockedRank) {
+                let embed = client.embedMaker({title: "Role Locked", description: `The role(s) above **${username}** is locked, would you like to promote **${username}** to **${potentialRole.name}**?`, type: "info", author: interaction.user});
+                let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
+                await msg.reactions.removeAll();
+                await msg.react("✅");
+                await msg.react("❌");
+                let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "✅" || reaction.emoji.name === "❌") && user.id === interaction.user.id;
+                let reaction = (await msg.awaitReactions({filter: filter, time: client.config.collectorTime, max: 1})).at(0);
+                if(reaction) {
+                    if(reaction.emoji.name === "✅") {
+                        shouldContinue = true;
+                    }
+                }
+            }
+            if(!shouldContinue) {
+                logs.push({
+                    username: username,
+                    status: "Cancelled",
+                });
+                continue;
+            }
+            try {
+                await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
+            } catch(e) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: e
+                });
+                continue;
+            }
+            logs.push({
+                username: username,
+                status: "Success"
+            });
+            await client.logAction(`<@${interaction.user.id}> has promoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
         }
+        await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("promote")
-    .setDescription("Promotes the inputed user(s)")
+    .setDescription("Promotes the inputted user(s)")
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to promote").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the promote(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
