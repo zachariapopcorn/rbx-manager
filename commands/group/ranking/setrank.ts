@@ -131,7 +131,7 @@ const command: CommandFile = {
             });
             await client.logAction(`<@${interaction.user.id}> has ranked **${username}** from **${oldRank}** to **${newRank}** for the reason of **${reason}**`);
         }
-        await client.initiateLogEmbedSystem(interaction, logs, false);
+        await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("setrank")
