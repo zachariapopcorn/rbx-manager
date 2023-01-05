@@ -69,10 +69,12 @@ export default class BotClient extends Discord.Client {
             let statusCode = e.response.status;
             let headers = e.response.headers;
             if(parseInt(headers["X-RateLimit-Remaining"]) === 0) {
+                console.log("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
                 }, parseInt(headers["X-RateLimit-Reset-After"]) * 1000);
             } else if(statusCode === 429) {
+                console.log("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
                 }, parseInt(headers["Retry-After"]) * 1000);
