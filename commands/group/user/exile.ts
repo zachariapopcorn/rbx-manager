@@ -80,7 +80,7 @@ const command: CommandFile = {
             });
             await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group for the reason of **${reason}**`);
         }
-        await client.initiateLogEmbedSystem(interaction, logs, false);
+        await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("exile")

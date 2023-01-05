@@ -61,7 +61,7 @@ const command: CommandFile = {
             await client.logAction(`<@${interaction.user.id}> has denined the join request of **${username}** for the reason of **${reason}**`);
             continue;
         }
-        await client.initiateLogEmbedSystem(interaction, logs, false);
+        await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("deny-join-request")
