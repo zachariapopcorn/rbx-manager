@@ -2,7 +2,7 @@ import axios = require('axios');
 import BotConfig from "../interfaces/BotConfig";
 import RobloxRequestType from '../interfaces/RobloxRequestType';
 
-export class MessagingService {
+export default class MessagingService {
     private API_KEY: string;
     private config: BotConfig;
     constructor(config: BotConfig) {
