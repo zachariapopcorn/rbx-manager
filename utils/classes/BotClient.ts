@@ -153,23 +153,14 @@ export default class BotClient extends Discord.Client {
         return embeds;
     }
 
-    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[], didCommandReply: boolean) {
+    public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[]) {
         let logEmbeds = this.createLogEmbeds(interaction.user, logs);
         if(logEmbeds.length === 1) {
-            if(didCommandReply) {
-                return await interaction.channel.send({embeds: [logEmbeds[0]]});
-            } else {
-                return await interaction.editReply({embeds: [logEmbeds[0]]});
-            }
+            return await interaction.editReply({embeds: [logEmbeds[0]]});
         } else {
             let index = 0;
             let embed = logEmbeds[index];
-            let msg: Discord.Message;
-            if(didCommandReply) {
-                msg = await interaction.channel.send({embeds: [embed]}) as Discord.Message;
-            } else {
-                msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-            }
+            let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
             await msg.react('⬅️');
             await msg.react('➡️');
             let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
