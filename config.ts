@@ -53,7 +53,7 @@ const config: BotConfig = {
     verificationChecks: true,
     collectorTime: 120000,
     maximumNumberOfUsers: 5,
-    lockedRanks: ["Administrators/Moderators", "Developer"],
+    lockedRanks: ["Administrators/Moderators"],
     lockedCommands: ["exile"],
     whitelistedServers: ["658241441234944021"]
 }
