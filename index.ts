@@ -1,4 +1,4 @@
-import Discord, { Interaction } from 'discord.js';
+import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import bodyParser = require('body-parser');
 
@@ -103,7 +103,7 @@ client.once('ready', async() => {
     await registerSlashCommands();
 });
 
-client.on('interactionCreate', async(interaction: Interaction) => {
+client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     if(interaction.type !== InteractionType.ApplicationCommand) return;
     let command = interaction.commandName.toLowerCase();
     for(let i = 0; i < commands.length; i++) {
