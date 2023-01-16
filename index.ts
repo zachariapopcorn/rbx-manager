@@ -26,11 +26,15 @@ app.use(bodyParser.json());
 
 export const commands:CommandInstance[] = [];
 
-app.get('/', async (request, response) => {
-    response.sendStatus(200);
+app.get("/", async (request, response) => {
+    response.status(200).send("OK");
 });
 
-// Implement completion of Roblox requests later
+app.post("/get-job-id", async (request, response) => {
+    if(request.headers["api-key"] !== config.WEB_API_KEY) return response.status(403).send("Invalid API Key");
+    // Implement get-job-id logic later
+    response.status(200).send("OK");
+});
 
 let listener = app.listen(process.env.PORT, () => {
     console.log(`Your app is currently listening on port: ${(listener.address() as any).port}`);

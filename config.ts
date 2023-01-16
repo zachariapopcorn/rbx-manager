@@ -7,6 +7,7 @@ const config: BotConfig = {
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
+    WEB_API_KEY: process.env.WEB_API_KEY,
     groupId: 5242495,
     permissions: {
         all: ["990827999286919218"],
