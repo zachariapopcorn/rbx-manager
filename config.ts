@@ -8,9 +8,9 @@ const config: BotConfig = {
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
     WEB_API_KEY: process.env.WEB_API_KEY,
-    groupId: 5242495,
+    groupId: 0,
     permissions: {
-        all: ["990827999286919218"],
+        all: [""],
         group: {
             shout: [""],
             ranking: [""],
@@ -33,15 +33,15 @@ const config: BotConfig = {
     logging: {
         audit: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         shout: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         command: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         }
     },
     embedColors: {
@@ -49,14 +49,14 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
-    universeId: 3507532981,
+    universeId: 0,
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,
     maximumNumberOfUsers: 5,
-    lockedRanks: ["Administrators/Moderators"],
-    lockedCommands: ["exile"],
-    whitelistedServers: ["658241441234944021"]
+    lockedRanks: [""],
+    lockedCommands: [""],
+    whitelistedServers: [""]
 }
 
 export default config;
