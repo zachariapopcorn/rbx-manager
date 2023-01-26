@@ -32,7 +32,13 @@ app.get("/", async (request, response) => {
 
 app.post("/get-job-id", async (request, response) => {
     if(request.headers["api-key"] !== config.WEB_API_KEY) return response.status(403).send("Invalid API Key");
-    // Implement get-job-id logic later
+    let channelID = request.body["channelID"];
+    let msgID = request.body["msgID"];
+    let jobID = request.body["jobID"];
+    let msg = await (await client.channels.fetch(channelID) as Discord.TextChannel).messages.fetch(msgID);
+    let embed = client.embedMaker({title: "Job ID Found", description: `The job ID of the supplied user has been found, it is **${jobID}**`, type: "success", author: client.user});
+    embed.setAuthor(msg.embeds[0].author);
+    await msg.edit({embeds: [embed]});
     response.status(200).send("OK");
 });
 

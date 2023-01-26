@@ -25,6 +25,7 @@ const command: CommandFile = {
         try {
             await messaging.sendMessage("GetJobID", {
                 msgID: msg.id,
+                channelID: msg.channel.id,
                 username: username
             });
         } catch(e) {
