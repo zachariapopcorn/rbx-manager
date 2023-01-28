@@ -3,3 +3,4 @@ build
 .env
 .vscode
 Image.gif
+config.ts
