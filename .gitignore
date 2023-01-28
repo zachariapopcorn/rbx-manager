@@ -2,8 +2,5 @@ node_modules
 build
 .env
 .vscode
-<<<<<<< HEAD
 Image.gif
-=======
->>>>>>> 9c8158dbe78200660f12c2bc09d4495ea72f8771
 config.ts
