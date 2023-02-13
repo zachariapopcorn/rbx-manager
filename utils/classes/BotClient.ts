@@ -1,4 +1,4 @@
-import Discord, { ActionRowBuilder, ButtonBuilder, Message } from 'discord.js';
+import Discord from 'discord.js';
 import roblox from 'noblox.js';
 import axios = require('axios');
 
@@ -48,6 +48,26 @@ export default class BotClient extends Discord.Client {
         embed.setFooter({text: "Created by zachariapopcorn#8105 - https://discord.gg/XGGpf3q"});
         embed.setTitle(embedOptions.title);
         return embed;
+    }
+
+    public createButtons(buttonData: {customID: string, label: string, style: Discord.ButtonStyle}[]): Discord.MessageReplyOptions {
+        let components = [];
+        for(let i = 0; i < buttonData.length; i++) {
+            let newComponent = new Discord.ActionRowBuilder().addComponents(new Discord.ButtonBuilder().setCustomId(buttonData[i].customID).setLabel(buttonData[i].label).setStyle(buttonData[i].style));
+            components.push(newComponent);
+        }
+        return {components: components}
+    }
+
+    public disableButtons(componentData: Discord.MessageReplyOptions): Discord.MessageReplyOptions {
+        let components = [];
+        let oldComponents = componentData.components;
+        for(let i = 0; i < oldComponents.length; i++) {
+            let actionRow = (oldComponents[i] as Discord.ActionRowBuilder);
+            (actionRow.components[0] as Discord.ButtonBuilder).setDisabled(true);
+            components.push(actionRow);
+        }
+        return {components: components}
     }
 
     public async getRobloxUser(guildID: string, discordID: string): Promise<number> {

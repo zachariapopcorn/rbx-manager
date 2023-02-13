@@ -36,13 +36,15 @@ const command: CommandFile = {
         if(!previousPageCursor && !nextPageCursor) {
             return await interaction.editReply({embeds: [embed]});
         }
+        let componentData = client.createButtons([
+            {customID: "previousPage", label: "Previous Page", style: Discord.ButtonStyle.Primary},
+            {customID: "nextPage", label: "Next Page", style: Discord.ButtonStyle.Primary}
+        ]);
         let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-        await msg.react('⬅️');
-        await msg.react('➡️');
-        let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-        let collector = msg.createReactionCollector({filter: filter, time: client.config.collectorTime});
-        collector.on('collect', async(reaction: Discord.MessageReaction) => {
-            if(reaction.emoji.name === "⬅️") {
+        let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+        let collector = msg.createMessageComponentCollector({filter: filter, time: client.config.collectorTime});
+        collector.on('collect', async(button: Discord.ButtonInteraction) => {
+            if(button.customId === "previousPage") {
                 joinRequests = await roblox.getJoinRequests(client.config.groupId, "Asc", 10, previousPageCursor);
             } else {
                 joinRequests = await roblox.getJoinRequests(client.config.groupId, "Asc", 10, nextPageCursor);
@@ -56,6 +58,12 @@ const command: CommandFile = {
             }
             embed = client.embedMaker({title: "Join Requests", description: embedDescription, type: "info", author: interaction.user});
             await msg.edit({embeds: [embed]});
+            await button.reply({content: "ㅤ"});
+            await button.deleteReply();
+        });
+        collector.on('end', async() => {
+            let disabledComponents = client.disableButtons(componentData).components;
+            await msg.edit({components: disabledComponents});
         });
     },
     slashData: new Discord.SlashCommandBuilder()
