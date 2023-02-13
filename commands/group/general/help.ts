@@ -28,13 +28,15 @@ const command: CommandFile = {
         }
         let helpPageIndex = 0;
         let embed = helpData[categories[helpPageIndex]].helpEmbed;
-        let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-        await msg.react('⬅️');
-        await msg.react('➡️');
-        let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-        let collector = msg.createReactionCollector({filter: filter, time: client.config.collectorTime});
-        collector.on('collect', async(reaction: Discord.MessageReaction) => {
-            if(reaction.emoji.name === "⬅️") {
+        let componentData = client.createButtons([
+            {customID: "previousPage", label: "Previous Page", style: Discord.ButtonStyle.Primary},
+            {customID: "nextPage", label: "Next Page", style: Discord.ButtonStyle.Primary}
+        ]);
+        let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
+        let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+        let collector = msg.createMessageComponentCollector({filter: filter, time: client.config.collectorTime});
+        collector.on('collect', async(button: Discord.ButtonInteraction) => {
+            if(button.customId === "previousPage") {
                 helpPageIndex -= 1;
                 if(helpPageIndex === -1) helpPageIndex = categories.length - 1;
             } else {
@@ -43,6 +45,12 @@ const command: CommandFile = {
             }
             embed = helpData[categories[helpPageIndex]].helpEmbed;
             await msg.edit({embeds: [embed]});
+            await button.reply({content: "ㅤ"});
+            await button.deleteReply();
+        });
+        collector.on('end', async() => {
+            let disabledComponents = client.disableButtons(componentData).components;
+            await msg.edit({components: disabledComponents});
         });
     },
     slashData: new Discord.SlashCommandBuilder()
