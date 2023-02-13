@@ -50,6 +50,15 @@ export default class BotClient extends Discord.Client {
         return embed;
     }
 
+    public createButtons(buttonData: {customID: string, label: string, style: Discord.ButtonStyle}[]): Discord.MessageReplyOptions {
+        let components = [];
+        for(let i = 0; i < buttonData.length; i++) {
+            let newComponent = new Discord.ActionRowBuilder().addComponents(new Discord.ButtonBuilder().setCustomId(buttonData[i].customID).setLabel(buttonData[i].label).setStyle(buttonData[i].style));
+            components.push(newComponent);
+        }
+        return {components: components}
+    }
+
     public async getRobloxUser(guildID: string, discordID: string): Promise<number> {
         try {
             let res = await this.request({
