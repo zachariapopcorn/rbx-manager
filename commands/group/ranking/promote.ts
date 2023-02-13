@@ -99,16 +99,20 @@ const command: CommandFile = {
             let shouldContinue = false;
             if(lockedRank) {
                 let embed = client.embedMaker({title: "Role Locked", description: `The role(s) above **${username}** is locked, would you like to promote **${username}** to **${potentialRole.name}**?`, type: "info", author: interaction.user});
-                let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-                await msg.reactions.removeAll();
-                await msg.react("✅");
-                await msg.react("❌");
-                let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "✅" || reaction.emoji.name === "❌") && user.id === interaction.user.id;
-                let reaction = (await msg.awaitReactions({filter: filter, time: client.config.collectorTime, max: 1})).at(0);
-                if(reaction) {
-                    if(reaction.emoji.name === "✅") {
+                let componentData = client.createButtons([
+                    {customID: "yesButton", label: "Yes", style: Discord.ButtonStyle.Success},
+                    {customID: "noButton", label: "No", style: Discord.ButtonStyle.Danger}
+                ]);
+                let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
+                let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+                let button = (await msg.awaitMessageComponent({filter: filter, time: client.config.collectorTime}));
+                if(button) {
+                    if(button.customId === "yesButton") {
                         shouldContinue = true;
                     }
+                } else {
+                    let disabledComponents = client.disableButtons(componentData).components;
+                    await msg.edit({components: disabledComponents});
                 }
             }
             if(!shouldContinue) {
