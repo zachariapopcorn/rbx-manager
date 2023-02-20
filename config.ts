@@ -49,7 +49,7 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
-    universeId: 0,
+    universes: [],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,
