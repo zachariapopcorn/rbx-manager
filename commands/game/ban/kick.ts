@@ -21,6 +21,8 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let reasons = reasonData.parsedReasons;
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -37,7 +39,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await messaging.sendMessage("Kick", {username: username, reason: reason});
+                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -49,7 +51,7 @@ const command: CommandFile = {
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has kicked **${username}** from the game with the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has kicked **${username}** from **${universeName}** with the reason of **${reason}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
@@ -57,6 +59,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("kick")
     .setDescription("Kicks user(s) from the game")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to kick").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the kick(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
