@@ -24,6 +24,8 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let reasons = reasonData.parsedReasons;
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -42,7 +44,7 @@ const command: CommandFile = {
             try {
                 let oldData: ModerationData;
                 try {
-                    oldData = await database.getModerationData(robloxID);
+                    oldData = await database.getModerationData(universeID, robloxID);
                 } catch(e) {
                     if(!(e.response.data.error === "NOT_FOUND")) {
                         logs.push({
@@ -64,7 +66,7 @@ const command: CommandFile = {
                         }
                     }
                 }
-                await database.setModerationData(robloxID, {banData: {isBanned: true, reason: reason}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: true, reason: reason}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason}});
             } catch(e) {
                 console.log(e.response.data);
                 logs.push({
@@ -76,7 +78,7 @@ const command: CommandFile = {
             }
             let didKickError = false;
             try {
-                await messaging.sendMessage("Kick", {username: username, reason: reason});
+                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
             } catch(e) {
                 didKickError = true;
                 logs.push({
@@ -91,7 +93,7 @@ const command: CommandFile = {
                     status: "Success"
                 });
             }
-            await client.logAction(`<@${interaction.user.id}> has banned **${username}** from the game with the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has banned **${username}** from **${universeName}** with the reason of **${reason}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
@@ -99,6 +101,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("ban")
     .setDescription("Bans the inputted user(s) from the game")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to ban").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the bans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {

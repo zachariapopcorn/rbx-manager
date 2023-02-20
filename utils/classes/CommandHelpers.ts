@@ -47,4 +47,20 @@ export default class CommandHelpers {
             }
         }
     }
+    public static parseUniverses(): Discord.APIApplicationCommandOptionChoice[] {
+        let universes = config.universes;
+        let parsed: Discord.APIApplicationCommandOptionChoice[] = [];
+        for(let i = 0; i < universes.length; i++) {
+            parsed.push({name: universes[i].universeDisplayName, value: universes[i].universeDisplayName});
+        }
+        return parsed;
+    }
+    public static getUniverseIDFromName(name: string): number {
+        let universes = config.universes;
+        for(let i = 0; i < universes.length; i++) {
+            if(universes[i].universeDisplayName === name) {
+                return universes[i].universeID;
+            }
+        }
+    }
 }

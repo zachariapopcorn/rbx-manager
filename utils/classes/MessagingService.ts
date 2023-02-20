@@ -31,9 +31,9 @@ export default class MessagingService {
         }
         return responseData.data;
     }
-    public async sendMessage(type: RobloxRequestType, payload: any) {
+    public async sendMessage(universeID: number, type: RobloxRequestType, payload: any) {
         await this.request({
-            url: `https://apis.roblox.com/messaging-service/v1/universes/${this.config.universeId}/topics/DiscordModerationSystemCall`,
+            url: `https://apis.roblox.com/messaging-service/v1/universes/${universeID}/topics/DiscordModerationSystemCall`,
             method: "POST",
             body: {
                 message: JSON.stringify({type: type, payload: payload})

@@ -24,6 +24,8 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let reasons = reasonData.parsedReasons;
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -42,7 +44,7 @@ const command: CommandFile = {
             try {
                 let oldData: ModerationData;
                 try {
-                    oldData = await database.getModerationData(robloxID);
+                    oldData = await database.getModerationData(universeID, robloxID);
                 } catch(e) {
                     if(!(e.response.data.error === "NOT_FOUND")) {
                         logs.push({
@@ -64,7 +66,7 @@ const command: CommandFile = {
                         }
                     }
                 }
-                await database.setModerationData(robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason}, muteData: {isMuted: false, reason: ""}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason}, muteData: {isMuted: false, reason: ""}});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -75,7 +77,7 @@ const command: CommandFile = {
             }
             let didUnmuteError = false;
             try {
-                await messaging.sendMessage("Unmute", {username: username, reason: reason});
+                await messaging.sendMessage(universeID, "Unmute", {username: username, reason: reason});
             } catch(e) {
                 didUnmuteError = true;
                 logs.push({
@@ -90,7 +92,7 @@ const command: CommandFile = {
                     status: "Success"
                 });
             }
-            await client.logAction(`<@${interaction.user.id}> has unmuted **${username}** in the game for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has unmuted **${username}** in **${universeName}** for the reason of **${reason}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
@@ -98,6 +100,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("unmute")
     .setDescription("Unmutes the inputted user(s)")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to unmute").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unmute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
