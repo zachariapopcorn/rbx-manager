@@ -4,6 +4,7 @@ import roblox = require('noblox.js');
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import MessagingService from '../../../utils/classes/MessagingService';
+import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
 
@@ -12,6 +13,8 @@ const messaging = new MessagingService(config);
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         let rbxID;
         try {
             rbxID = await roblox.getIdFromUsername(username);
@@ -23,7 +26,7 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Awaiting...", description: "Because this function requires a message from the Roblox game, you'll have to wait for it to get your response. This message will be edited with the job id if it's found, and it'll stay the same if it wasn't found", type: "info", author: interaction.user});
         let msg = await interaction.editReply({embeds: [embed]});
         try {
-            await messaging.sendMessage("GetJobID", {
+            await messaging.sendMessage(universeID, "GetJobID", {
                 msgID: msg.id,
                 channelID: msg.channel.id,
                 username: username
@@ -36,6 +39,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("getjobid")
     .setDescription("Gets the job ID of the server the inputted user is in")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to get the server job ID of").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "JobID",
