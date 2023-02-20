@@ -7,6 +7,7 @@ import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import ModerationData from '../../../utils/interfaces/ModerationData';
 import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
 
@@ -15,6 +16,8 @@ const database = new RobloxDatastore(config);
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         let robloxID;
         try {
             robloxID = await roblox.getIdFromUsername(username);
@@ -25,7 +28,7 @@ const command: CommandFile = {
         username = await roblox.getUsernameFromId(robloxID);
         let moderationData: ModerationData | string = "";
         try {
-            moderationData = await database.getModerationData(robloxID);
+            moderationData = await database.getModerationData(universeID, robloxID);
         } catch(e) {
             if(e.response.data.error === "NOT_FOUND") { // Meaning that the data doesn't exist, meaning that they have a clean slate
                 moderationData = {
@@ -68,6 +71,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("checkuser")
     .setDescription("Gets information about the inputted user")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to check").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
