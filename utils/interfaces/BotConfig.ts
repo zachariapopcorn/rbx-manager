@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import UniverseEntry from './UniverseEntry';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
@@ -47,7 +48,7 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
-    universeId: number,
+    universes: UniverseEntry[],
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,

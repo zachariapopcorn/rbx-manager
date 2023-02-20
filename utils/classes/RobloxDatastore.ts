@@ -28,33 +28,33 @@ export default class RobloxDatastore {
         }
         return responseData.data;
     }
-    public async getAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
+    public async getAsync(universeID: number, datastoreName: string, entryKey: string, scope?: string): Promise<any> {
         if(!scope) scope = "global";
         let response = await this.request({
-            url: `https://apis.roblox.com/datastores/v1/universes/${this.config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
+            url: `https://apis.roblox.com/datastores/v1/universes/${universeID}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
             method: "GET",
             headers: {"Content-Type": "application/json"},
             body: {}
         });
         return response;
     }
-    public async removeAsync(datastoreName: string, entryKey: string, scope?: string): Promise<any> {
+    public async removeAsync(universeID: number, datastoreName: string, entryKey: string, scope?: string): Promise<any> {
         if(!scope) scope = "global";
         let response = await this.request({
-            url: `https://apis.roblox.com/datastores/v1/universes/${this.config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
+            url: `https://apis.roblox.com/datastores/v1/universes/${universeID}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&scope=${scope}&entryKey=${entryKey}`,
             method: "DELETE",
             headers: {"Content-Type": "application/json"},
             body: {}
         });
         return response;
     }
-    public async getModerationData(userID: number): Promise<ModerationData> {
-        let response = await this.getAsync(this.config.datastoreName, `${userID}-moderationData`);
+    public async getModerationData(universeID: number, userID: number): Promise<ModerationData> {
+        let response = await this.getAsync(universeID, this.config.datastoreName, `${userID}-moderationData`);
         return response;
     }
-    public async setModerationData(userID: number, moderationData: ModerationData) {
+    public async setModerationData(universeID: number, userID: number, moderationData: ModerationData) {
         await this.request({
-            url: `https://apis.roblox.com/datastores/v1/universes/${this.config.universeId}/standard-datastores/datastore/entries/entry?datastoreName=${this.config.datastoreName}&entryKey=${userID}-moderationData`,
+            url: `https://apis.roblox.com/datastores/v1/universes/${universeID}/standard-datastores/datastore/entries/entry?datastoreName=${this.config.datastoreName}&entryKey=${userID}-moderationData`,
             method: "POST",
             headers: {
                 "content-md5": require('crypto').createHash('md5').update(JSON.stringify(moderationData)).digest('base64')
