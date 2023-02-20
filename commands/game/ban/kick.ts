@@ -59,7 +59,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("kick")
     .setDescription("Kicks user(s) from the game")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to kick").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the kick(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {

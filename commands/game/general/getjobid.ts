@@ -39,7 +39,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("getjobid")
     .setDescription("Gets the job ID of the server the inputted user is in")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to get the server job ID of").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "JobID",

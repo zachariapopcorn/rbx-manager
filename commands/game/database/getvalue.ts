@@ -39,7 +39,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("getvalue")
     .setDescription("Gets the datastore value with the inputted settings")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("name").setDescription("The name of the datastore to fetch data from").setRequired(true))
     .addStringOption(o => o.setName("key").setDescription("The entry key of the data to fetch from the datastore").setRequired(true))
     .addStringOption(o => o.setName("scope").setDescription("The scope of which the datastore is located at").setRequired(false)) as Discord.SlashCommandBuilder,

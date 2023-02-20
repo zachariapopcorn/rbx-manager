@@ -41,7 +41,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("eval")
     .setDescription("Runs serverside code on either all servers or a specific one")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("type").setDescription("The type of execution to preform").setRequired(true).addChoices({name: "global", value: "global"}, {name: "jobID", value: "jobID"}))
     .addStringOption(o => o.setName("code").setDescription("The code to execute in the game").setRequired(true))
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to run the code in (only if you choose so)").setRequired(false)) as Discord.SlashCommandBuilder,

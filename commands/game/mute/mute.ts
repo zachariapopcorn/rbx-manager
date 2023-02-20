@@ -100,7 +100,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("mute")
     .setDescription("Mutes the inputted user(s)")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to mute").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the mute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {

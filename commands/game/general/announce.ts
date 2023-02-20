@@ -28,7 +28,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("announce")
     .setDescription("Announces the inputted message to every game server")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("title").setDescription("The title of the announcement").setRequired(true))
     .addStringOption(o => o.setName("message").setDescription("The message that you wish to announce").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {

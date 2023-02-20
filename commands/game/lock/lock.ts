@@ -31,7 +31,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("lock")
     .setDescription("Locks the inputted server")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to lock").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason of why you want to lock the supplied server").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {

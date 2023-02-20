@@ -71,7 +71,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("checkuser")
     .setDescription("Gets information about the inputted user")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to check").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
