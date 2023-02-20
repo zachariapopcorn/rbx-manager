@@ -3,6 +3,7 @@ import Discord, { EmbedBuilder } from 'discord.js';
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
 
@@ -10,12 +11,14 @@ const database = new RobloxDatastore(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let name = args["name"];
-        let key = args["key"];
-        let scope = args["scope"] || "global";
+        let name = args["name"] as string;
+        let key = args["key"] as string;
+        let scope = args["scope"] as string || "global";
+        let universeName = args["universe"];
+        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         let returnedData;
         try {
-            returnedData = await database.getAsync(name, key, scope);
+            returnedData = await database.getAsync(universeID, name, key, scope);
         } catch(e) {
             let embed: EmbedBuilder;
             if(e.response.data.error === "NOT_FOUND") {
@@ -36,6 +39,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("getvalue")
     .setDescription("Gets the datastore value with the inputted settings")
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("name").setDescription("The name of the datastore to fetch data from").setRequired(true))
     .addStringOption(o => o.setName("key").setDescription("The entry key of the data to fetch from the datastore").setRequired(true))
     .addStringOption(o => o.setName("scope").setDescription("The scope of which the datastore is located at").setRequired(false)) as Discord.SlashCommandBuilder,
