@@ -29,6 +29,7 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "funcaptcha": "^1.0.34",
     "noblox.js": "^4.13.1"
   },
   "devDependencies": {
