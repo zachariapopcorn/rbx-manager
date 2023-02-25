@@ -90,7 +90,7 @@ async function registerSlashCommands() {
     }
 }
 
-async function loginToRoblox(robloxCookie: string) {
+export async function loginToRoblox(robloxCookie: string) {
     try {
         await roblox.setCookie(robloxCookie);
     } catch {
