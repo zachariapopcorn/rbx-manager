@@ -51,6 +51,7 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
+    suspensionRank: 0,
     universes: [],
     datastoreName: "moderations",
     verificationChecks: true,
