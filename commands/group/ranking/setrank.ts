@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import fs from "fs/promises";
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
@@ -7,6 +8,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -65,6 +67,16 @@ const command: CommandFile = {
                     });
                     continue;
                 }
+            }
+            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
+            let index = suspensions.users.findIndex(v => v.userId === victimRobloxID);
+            if(index != -1) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: "This user is currently suspended"
+                });
+                continue;
             }
             let rankID = await roblox.getRankInGroup(client.config.groupId, victimRobloxID);
             if(rankID === 0) {

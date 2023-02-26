@@ -18,6 +18,7 @@ import CommandInstance from './utils/interfaces/CommandInstance';
 
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
+import checkSuspensions from './utils/events/checkSuspensions';
 
 const client = new BotClient(config);
 
@@ -100,6 +101,7 @@ export async function loginToRoblox(robloxCookie: string) {
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
     await checkAudits(client);
     await checkBans(client);
+    await checkSuspensions(client);
 }
 
 client.once('ready', async() => {
