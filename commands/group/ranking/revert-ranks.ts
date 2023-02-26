@@ -66,7 +66,7 @@ const command: CommandFile = {
             });
         }
         let embed = client.embedMaker({title: "Reversing Process Starting...", description: "I am now starting the reversal progress with the given settings. Please be patient as this may take some time. This message will be edited once the process is complete", type: "info", author: interaction.user});
-        let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
+        await interaction.editReply({embeds: [embed]}) as Discord.Message;
         if(userID) {
             await client.logAction(`<@${interaction.user.id}> has started a rank reversal. The parameters they chose are the following\n\n**Number of Users**: ${logs.data.length}\n**Author to Revert**: ${await roblox.getUsernameFromId(userID)}\n**Start Date**: ${(logDate ? logDate : "No date filter provided")}`);
         } else {
@@ -84,7 +84,7 @@ const command: CommandFile = {
         }
         let sucRate = Math.round(((logs.data.length - failedAmount) / logs.data.length) * 100);
         let newEmbed = client.embedMaker({title: "Reserving Complete", description: `I've finished the rank reversing process\n\nSuccess Percentage: ${sucRate}% (${logs.data.length - failedAmount}/${logs.data.length})\nFailure Percentage: ${100 - sucRate}% (${failedAmount}/${logs.data.length})`, type: "info", author: interaction.user});
-        return await interaction.editReply({content: `<@${interaction.user.id}>`, embeds: [newEmbed]});
+        await interaction.editReply({content: `<@${interaction.user.id}>`, embeds: [newEmbed]});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("revert-ranks")

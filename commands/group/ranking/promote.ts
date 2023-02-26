@@ -109,6 +109,8 @@ const command: CommandFile = {
                 if(button) {
                     if(button.customId === "yesButton") {
                         shouldContinue = true;
+                        await button.reply({content: "ㅤ"});
+                        await button.deleteReply();
                     }
                 } else {
                     let disabledComponents = client.disableButtons(componentData).components;
