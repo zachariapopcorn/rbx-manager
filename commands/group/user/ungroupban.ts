@@ -9,6 +9,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import GroupBanFile from '../../../utils/interfaces/GroupBanFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -57,7 +58,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8"));
+            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
             let index = bannedUsers.userIDs.findIndex(v => v === victimRobloxID);
             if(index === -1) {
                 logs.push({
