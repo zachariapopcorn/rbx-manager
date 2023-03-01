@@ -176,7 +176,7 @@ export default class BotClient extends Discord.Client {
     public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[]) {
         let logEmbeds = this.createLogEmbeds(interaction.user, logs);
         if(logEmbeds.length === 1) {
-            return await interaction.editReply({embeds: [logEmbeds[0]]});
+            return await interaction.editReply({embeds: [logEmbeds[0]], components: []});
         } else {
             let index = 0;
             let embed = logEmbeds[index];

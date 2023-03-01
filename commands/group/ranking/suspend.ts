@@ -26,11 +26,9 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Invalid Time Suppiled", description: "You inputted an invalid time, please input a valid one", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let oldRoleID = (await roblox.getRoles(client.config.groupId)).find(async(v) => v.rank === await roblox.getRankInGroup(client.config.groupId, userID)).id;
-        try {
-            await roblox.setRank(client.config.groupId, userID, client.config.suspensionRank);
-        } catch(e) {
-            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to change the rank of this user: ${e}`, type: "error", author: interaction.user});
+        let oldRank = await roblox.getRankInGroup(client.config.groupId, userID);
+        if(oldRank === 0) {
+            let embed = client.embedMaker({title: "User Not In Group", description: "This user is currently not in the group", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
@@ -38,11 +36,19 @@ const command: CommandFile = {
         if(index != -1) {
             suspensions.users[index].timeToRelease = Date.now() + (time as any);
         } else {
+            let oldRoleID = (await roblox.getRoles(client.config.groupId)).find(v => v.rank === oldRank).id;
             suspensions.users.push({
                 userId: userID,
+                reason: args["reason"],
                 oldRoleID: oldRoleID,
                 timeToRelease: Date.now() + (time as any)
             });
+            try {
+                await roblox.setRank(client.config.groupId, userID, client.config.suspensionRank);
+            } catch(e) {
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to change the rank of this user: ${e}`, type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
         }
         await fs.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
         await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}**`);

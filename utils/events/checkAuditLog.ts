@@ -32,7 +32,7 @@ export default async function checkAudits(client: BotClient) {
                 let isUserSuspended = false;
                 let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile).users;
                 let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"]);
-                if(susIndex === -1) isUserSuspended = true;
+                if(susIndex !== -1) isUserSuspended = true;
                 let isLockedRank = client.isLockedRole((await roblox.getRoles(client.config.groupId)).find(v => v.name === log.description["NewRoleSetName"]));
                 if(isUserSuspended && await roblox.getRankInGroup(client.config.groupId, log.description["TargetId"]) != client.config.suspensionRank) {
                     try {
