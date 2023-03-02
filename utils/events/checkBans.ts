@@ -36,5 +36,5 @@ export default async function checkBans(client: BotClient) {
     }
     setTimeout(async() => {
         await checkBans(client);
-    }, 15000);
+    }, 10000);
 }

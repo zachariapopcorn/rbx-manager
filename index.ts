@@ -19,6 +19,7 @@ import CommandInstance from './utils/interfaces/CommandInstance';
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
 import checkSuspensions from './utils/events/checkSuspensions';
+import checkCooldowns from './utils/events/checkCooldowns';
 
 const client = new BotClient(config);
 
@@ -110,6 +111,7 @@ client.once('ready', async() => {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
         return process.exit();
     }
+    checkCooldowns(client);
     await loginToRoblox(client.config.ROBLOX_COOKIE);
     await readCommands();
     await registerSlashCommands();

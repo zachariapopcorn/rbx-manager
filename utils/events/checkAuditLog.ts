@@ -86,5 +86,5 @@ export default async function checkAudits(client: BotClient) {
     }
     setTimeout(async() => {
         await checkAudits(client);
-    }, 15000);
+    }, 10000);
 }

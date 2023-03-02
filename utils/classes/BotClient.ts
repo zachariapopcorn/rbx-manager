@@ -7,9 +7,11 @@ import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
+import CooldownEntry from '../interfaces/CooldownEntry';
 
 export default class BotClient extends Discord.Client {
-    public config: BotConfig
+    public config: BotConfig;
+    public cooldowns: CooldownEntry[] = [];
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]});
@@ -214,5 +216,9 @@ export default class BotClient extends Discord.Client {
         if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
         if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
         return isLocked;
+    }
+
+    public isUserOnCooldown(commandName: string, userID: string): boolean {
+        return (this.cooldowns.findIndex(v => v.commandName === commandName && v.userID === userID)) !== -1;
     }
 }
