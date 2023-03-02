@@ -50,7 +50,8 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
-    cooldown: number,
+    defaultCooldown: number,
+    cooldownOverrides: {},
     suspensionRank: number,
     universes: UniverseEntry[],
     datastoreName: string,

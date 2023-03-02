@@ -221,4 +221,8 @@ export default class BotClient extends Discord.Client {
     public isUserOnCooldown(commandName: string, userID: string): boolean {
         return (this.cooldowns.findIndex(v => v.commandName === commandName && v.userID === userID)) !== -1;
     }
+
+    public getCooldownForCommand(commandName: string): number {
+        return this.config.cooldownOverrides[commandName] || this.config.defaultCooldown;
+    }
 }
