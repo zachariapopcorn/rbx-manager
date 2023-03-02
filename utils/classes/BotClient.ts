@@ -180,13 +180,15 @@ export default class BotClient extends Discord.Client {
         } else {
             let index = 0;
             let embed = logEmbeds[index];
-            let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-            await msg.react('⬅️');
-            await msg.react('➡️');
-            let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-            let collector = msg.createReactionCollector({filter: filter, time: this.config.collectorTime});
-            collector.on('collect', async(reaction: Discord.MessageReaction) => {
-                if(reaction.emoji.name === "⬅️") {
+            let componentData = this.createButtons([
+                {customID: "backButton", label: "Previous Page", style: Discord.ButtonStyle.Success},
+                {customID: "forwardButton", label: "Next Page", style: Discord.ButtonStyle.Danger}
+            ]);
+            let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
+            let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+            let collector = msg.createMessageComponentCollector({filter: filter, time: this.config.collectorTime});
+            collector.on("collect", async(button) => {
+                if(button.customId === "backButton") {
                     index -= 1;
                     if(index < 0) {
                         index = logEmbeds.length - 1;
@@ -199,6 +201,10 @@ export default class BotClient extends Discord.Client {
                 }
                 embed = logEmbeds[index];
                 await msg.edit({embeds: [embed]});
+            });
+            collector.on("end", async() => {
+                let disabledComponents = this.disableButtons(componentData).components;
+                await msg.edit({components: disabledComponents});
             });
         }
     }
