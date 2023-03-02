@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import ms from 'ms';
 import config from '../../config';
 import CommandFile from '../interfaces/CommandFile';
 
@@ -47,6 +48,30 @@ export default class CommandHelpers {
             }
         }
     }
+    public static parseTimes(usernames: string[], rawTimes: any): {parsedTimes: number[], didError: boolean} {
+        let times = rawTimes.replaceAll(" ", "").split(",");
+        if(times.length === 1) {
+            if(!ms(times[0])) {
+                return {parsedTimes: [], didError: true};
+            }
+            times[0] = ms(times[0]);
+            while(true) {
+                if(times.length === usernames.length) break;
+                times.push(times[0]);
+            }
+            return {parsedTimes: times, didError: false};
+        } else if(times.length === usernames.length) {
+            let newTimes = [];
+            for(let i = 0; i < times.length; i++) {
+                let newTime = ms(times[i]);
+                if(!newTime) return {parsedTimes: [], didError: true};
+                newTimes.push(newTime);
+            }
+            return {parsedTimes: newTimes, didError: false};
+        } else {
+            return {parsedTimes: [], didError: true};
+        }
+    }
     public static parseUniverses(): Discord.APIApplicationCommandOptionChoice[] {
         let universes = config.universes;
         let parsed: Discord.APIApplicationCommandOptionChoice[] = [];
@@ -56,11 +81,6 @@ export default class CommandHelpers {
         return parsed;
     }
     public static getUniverseIDFromName(name: string): number {
-        let universes = config.universes;
-        for(let i = 0; i < universes.length; i++) {
-            if(universes[i].universeDisplayName === name) {
-                return universes[i].universeID;
-            }
-        }
+        return config.universes.find(v => v.universeDisplayName === name).universeID;
     }
 }

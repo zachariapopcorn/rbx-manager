@@ -70,7 +70,6 @@ const command: CommandFile = {
             } catch(e) {
                 let fieldData = JSON.parse(e.response.data.errors[0].fieldData);
                 if(!fieldData) {
-                    console.log(e.response.data)
                     let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
                     return await interaction.editReply({embeds: [embed]});
                 }
@@ -142,7 +141,6 @@ const command: CommandFile = {
         try {
             res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, cID, cToken);
         } catch(e) {
-            console.log(e.response.data);
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${e.response.data.errors[0].message}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }

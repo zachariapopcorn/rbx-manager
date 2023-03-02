@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import ms = require('ms');
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
@@ -18,6 +19,12 @@ const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
+        let timeData = CommandHelpers.parseTimes(usernames, args["time"]);
+        if(timeData.didError) {
+            let embed = client.embedMaker({title: "Argument Error", description: `Something about your time input was wrong. Most likely it was because of invalid times, please input valid ones`, type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
+        }
+        let times = timeData.parsedTimes;
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
         if(reasonData.didError) {
             let embed = client.embedMaker({title: "Argument Error", description: `You inputted an unequal amount of usernames and reasons, please make sure that these amounts are equal, or, if you wish to apply one reason to multiple people, only put that reason for the reason argument`, type: "error", author: interaction.user})
@@ -28,6 +35,7 @@ const command: CommandFile = {
         let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
+            let time = times[i];
             let reason = reasons[i];
             let robloxID;
             try {
@@ -66,7 +74,7 @@ const command: CommandFile = {
                         }
                     }
                 }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason, releaseTime: oldData.banData.releaseTime}, muteData: {isMuted: true, reason: reason}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason, releaseTime: oldData.banData.releaseTime}, muteData: {isMuted: true, reason: reason, releaseTime: (Date.now() + time)}});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -92,16 +100,17 @@ const command: CommandFile = {
                     status: "Success"
                 });
             }
-            await client.logAction(`<@${interaction.user.id}> has muted **${username}** in **${universeName}** for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has muted **${username}** in **${universeName}** for **${ms(time, {long: true})}** with the reason of **${reason}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
-    .setName("mute")
-    .setDescription("Mutes the inputted user(s)")
+    .setName("timemute")
+    .setDescription("Mutes the inputted user(s) for the given time")
     .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to mute").setRequired(true))
+    .addStringOption(o => o.setName("time").setDescription("The duration of the mute(s)").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the mute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Mute",

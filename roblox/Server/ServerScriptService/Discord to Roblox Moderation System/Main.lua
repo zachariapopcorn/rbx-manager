@@ -8,14 +8,28 @@ Players.PlayerAdded:Connect(function(plr)
 	if(config.INTERNAL_IS_SERVER_LOCKED) then return plr:Kick("This server is currently locked. Reason: " .. config.INTERNAL_SERVER_LOCK_REASON) end
 	local modData = Database:GetModerationInformation(plr.UserId)
 	if(modData == nil) then return plr:Kick("Error loading moderation data, please rejoin") end
-	if(modData.banData.isBanned) then return plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason) end
+	if(modData.banData.releaseTime) then
+		local currentTime = os.time() * 1000
+		if(currentTime < modData.banData.releaseTime) then return plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason) end
+		Database:UnbanPlayer(plr.UserId, modData)
+	else
+		if(modData.banData.isBanned) then return plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason) end
+	end
 	if(modData.muteData.isMuted) then
-		task.wait(1) -- Wait for player speaker object to be created
-		local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
-		local channel = chatService:GetChannel("All")
-		pcall(function()
-			channel:MuteSpeaker(plr.DisplayName, modData.muteData.reason)
-		end)
+		local continueOn = true
+		if(modData.muteData.releaseTime) then
+			local currentTime = os.time() * 1000
+			if(currentTime >= modData.muteData.releaseTime) then continueOn = false end
+			Database:UnmutePlayer(plr.UserId, modData)
+		end
+		if(continueOn) then
+			task.wait(1) -- Wait for player speaker object to be created
+			local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
+			local channel = chatService:GetChannel("All")
+			pcall(function()
+				channel:MuteSpeaker(plr.DisplayName, modData.muteData.reason)
+			end)
+		end
 	end
 end)
 
