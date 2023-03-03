@@ -5,11 +5,13 @@ local database = DatastoreService:GetDataStore(config.DATASTORE_NAME)
 type ModerationData = {
 	banData: {
 		isBanned: boolean,
-		reason: string
+		reason: string,
+		releaseTime: number
 	},
 	muteData: {
 		isMuted: boolean,
-		reason: string
+		reason: string,
+		releaseTime: number
 	}
 }
 
@@ -34,6 +36,26 @@ function module:GetModerationInformation(userID: number) : ModerationData
 		}
 	end
 	return modData
+end
+
+function module:UnbanPlayer(userID: number, modData: ModerationData)
+	local s,e = pcall(function()
+		database:SetAsync(tostring(userID) .. "-moderationData", {banData = {isBanned = false, reason = ""}, muteData = {isMuted = modData.muteData.isMuted, reason = modData.muteData.reason, releaseTime = modData.muteData.releaseTime}})
+	end)
+	if(e) then
+		task.wait(10)
+		module:UnbanPlayer(userID, modData)
+	end
+end
+
+function module:UnmutePlayer(userID: number, modData: ModerationData)
+	local s,e = pcall(function()
+		database:SetAsync(tostring(userID) .. "-moderationData", {banData = {isBanned = modData.banData.isBanned, reason = modData.banData.reason, releaseTime = modData.banData.releaseTime}, muteData = {isMuted = false, reason = ""}})
+	end)
+	if(e) then
+		task.wait(10)
+		module:UnmutePlayer(userID, modData)
+	end
 end
 
 return module

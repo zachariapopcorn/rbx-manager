@@ -3,6 +3,8 @@ import UniverseEntry from './UniverseEntry';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
+    ROBLOX_USERNAME: string,
+    ROBLOX_PASSWORD: string,
     ROBLOX_COOKIE: string,
     ROBLOX_API_KEY: string,
     ROVER_API_KEY: string,
@@ -48,6 +50,9 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
+    defaultCooldown: number,
+    cooldownOverrides: {},
+    suspensionRank: number,
     universes: UniverseEntry[],
     datastoreName: string,
     verificationChecks: boolean,

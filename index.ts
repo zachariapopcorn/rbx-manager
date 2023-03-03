@@ -18,6 +18,8 @@ import CommandInstance from './utils/interfaces/CommandInstance';
 
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
+import checkSuspensions from './utils/events/checkSuspensions';
+import checkCooldowns from './utils/events/checkCooldowns';
 
 const client = new BotClient(config);
 
@@ -90,7 +92,7 @@ async function registerSlashCommands() {
     }
 }
 
-async function loginToRoblox(robloxCookie: string) {
+export async function loginToRoblox(robloxCookie: string) {
     try {
         await roblox.setCookie(robloxCookie);
     } catch {
@@ -100,6 +102,7 @@ async function loginToRoblox(robloxCookie: string) {
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
     await checkAudits(client);
     await checkBans(client);
+    await checkSuspensions(client);
 }
 
 client.once('ready', async() => {
@@ -108,6 +111,7 @@ client.once('ready', async() => {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
         return process.exit();
     }
+    checkCooldowns(client);
     await loginToRoblox(client.config.ROBLOX_COOKIE);
     await readCommands();
     await registerSlashCommands();

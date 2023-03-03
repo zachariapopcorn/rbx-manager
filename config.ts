@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
+    ROBLOX_USERNAME: process.env.ROBLOX_USERNAME,
+    ROBLOX_PASSWORD: process.env.ROBLOX_PASSWORD,
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
@@ -49,6 +51,9 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
+    defaultCooldown: 5000,
+    cooldownOverrides: {},
+    suspensionRank: 0,
     universes: [],
     datastoreName: "moderations",
     verificationChecks: true,

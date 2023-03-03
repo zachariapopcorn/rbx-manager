@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import fs from "fs/promises"
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
@@ -7,9 +8,14 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        if(client.isUserOnCooldown(require('path').parse(__filename).name, interaction.user.id)) {
+            let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
+        }
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
         if(client.config.verificationChecks) {
             let verificationStatus = false;
@@ -54,6 +60,16 @@ const command: CommandFile = {
                     });
                     continue;
                 }
+            }
+            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
+            let index = suspensions.users.findIndex(v => v.userId === victimRobloxID);
+            if(index != -1) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: "This user is currently suspended"
+                });
+                continue;
             }
             let rankID = await roblox.getRankInGroup(client.config.groupId, victimRobloxID);
             if(rankID === 0) {
@@ -108,6 +124,8 @@ const command: CommandFile = {
                 if(button) {
                     if(button.customId === "yesButton") {
                         shouldContinue = true;
+                        await button.reply({content: "ㅤ"});
+                        await button.deleteReply();
                     }
                 } else {
                     let disabledComponents = client.disableButtons(componentData).components;
@@ -138,6 +156,7 @@ const command: CommandFile = {
             await client.logAction(`<@${interaction.user.id}> has demoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
+        client.cooldowns.push({commandName: require('path').parse(__filename).name, userID: interaction.user.id, cooldownExpires: (Date.now() + (client.getCooldownForCommand(require('path').parse(__filename).name) * usernames.length))});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("demote")

@@ -7,9 +7,11 @@ import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
+import CooldownEntry from '../interfaces/CooldownEntry';
 
 export default class BotClient extends Discord.Client {
-    public config: BotConfig
+    public config: BotConfig;
+    public cooldowns: CooldownEntry[] = [];
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]});
@@ -176,17 +178,19 @@ export default class BotClient extends Discord.Client {
     public async initiateLogEmbedSystem(interaction: Discord.CommandInteraction, logs: CommandLog[]) {
         let logEmbeds = this.createLogEmbeds(interaction.user, logs);
         if(logEmbeds.length === 1) {
-            return await interaction.editReply({embeds: [logEmbeds[0]]});
+            return await interaction.editReply({embeds: [logEmbeds[0]], components: []});
         } else {
             let index = 0;
             let embed = logEmbeds[index];
-            let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
-            await msg.react('⬅️');
-            await msg.react('➡️');
-            let filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === "⬅️" || reaction.emoji.name === "➡️") && user.id === interaction.user.id;
-            let collector = msg.createReactionCollector({filter: filter, time: this.config.collectorTime});
-            collector.on('collect', async(reaction: Discord.MessageReaction) => {
-                if(reaction.emoji.name === "⬅️") {
+            let componentData = this.createButtons([
+                {customID: "backButton", label: "Previous Page", style: Discord.ButtonStyle.Success},
+                {customID: "forwardButton", label: "Next Page", style: Discord.ButtonStyle.Danger}
+            ]);
+            let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
+            let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
+            let collector = msg.createMessageComponentCollector({filter: filter, time: this.config.collectorTime});
+            collector.on("collect", async(button) => {
+                if(button.customId === "backButton") {
                     index -= 1;
                     if(index < 0) {
                         index = logEmbeds.length - 1;
@@ -200,6 +204,10 @@ export default class BotClient extends Discord.Client {
                 embed = logEmbeds[index];
                 await msg.edit({embeds: [embed]});
             });
+            collector.on("end", async() => {
+                let disabledComponents = this.disableButtons(componentData).components;
+                await msg.edit({components: disabledComponents});
+            });
         }
     }
 
@@ -208,5 +216,13 @@ export default class BotClient extends Discord.Client {
         if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
         if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
         return isLocked;
+    }
+
+    public isUserOnCooldown(commandName: string, userID: string): boolean {
+        return (this.cooldowns.findIndex(v => v.commandName === commandName && v.userID === userID)) !== -1;
+    }
+
+    public getCooldownForCommand(commandName: string): number {
+        return this.config.cooldownOverrides[commandName] || this.config.defaultCooldown;
     }
 }

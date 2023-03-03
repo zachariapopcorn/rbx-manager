@@ -11,6 +11,10 @@ import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
 
+import GroupBanFile from '../../../utils/interfaces/GroupBanFile';
+import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
+import ms = require('ms');
+
 const database = new RobloxDatastore(config);
 
 const command: CommandFile = {
@@ -43,10 +47,23 @@ const command: CommandFile = {
                 }
             }
         }
-        let isGroupBanned = false;
-        let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8"));
-        let index = bannedUsers.userIDs.findIndex(v => v === robloxID);
-        if(index !== -1) isGroupBanned = true;
+        let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
+        let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
+        let bannedIndex = bannedUsers.userIDs.findIndex(v => v === robloxID);
+        let isGroupBanned = (bannedIndex !== -1);
+        let suspendedIndex = suspendedUsers.users.findIndex(v => v.userId === robloxID);
+        let isSuspended = (suspendedIndex !== -1);
+        let extraGroupData = "Is User Suspended: No";
+        if(isSuspended) {
+            let oldRole = (await roblox.getRoles(client.config.groupId)).find(v => v.id === suspendedUsers.users[suspendedIndex].oldRoleID).name;
+            let time = suspendedUsers.users[suspendedIndex].timeToRelease - Date.now() as any;
+            if(time <= 0) {
+                time = "Officially, this user is not suspended anymore, the next suspension check will delete their record from the DB"
+            } else {
+                time = ms(time, {long: true})
+            }
+            extraGroupData = `Is User Suspended: Yes\nSuspension Reason: ${suspendedUsers.users[suspendedIndex].reason}\nSuspended From: ${oldRole}\nSuspended For: ${time}`;
+        }
         let embed = client.embedMaker({title: "Information", description: "", type: "info", author: interaction.user});
         embed.addFields({
             name: "User Data",
@@ -56,10 +73,11 @@ const command: CommandFile = {
         },
         {
             name: "Group Data",
-            value: "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n```"
+            value: "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n\n<extra>```"
             .replace("<rank name>", await roblox.getRankNameInGroup(client.config.groupId, robloxID))
             .replace("<rank id>", (await roblox.getRankInGroup(client.config.groupId, robloxID)).toString())
             .replace("<ban status>", isGroupBanned ? "Yes" : "No")
+            .replace("<extra>", extraGroupData)
         }, {
             name: "Game Data",
             value: "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\n```"
