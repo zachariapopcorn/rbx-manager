@@ -105,7 +105,7 @@ const command: CommandFile = {
             await interaction.editReply({embeds: [embed]});
             for(let i = 0; i < amountOfWaves; i++) {
                 await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
-                let msg = await interaction.channel.send({files: [`${process.cwd()}/Image.gif`]});
+                let msg = await (interaction.channel as Discord.TextChannel).send({files: [`${process.cwd()}/Image.gif`]});
                 for(let i = 0; i < keys.length; i++) {
                     await msg.react(keys[i]);
                 }
