@@ -12,6 +12,7 @@ import CooldownEntry from '../interfaces/CooldownEntry';
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
     public cooldowns: CooldownEntry[] = [];
+    public roverCache: {discordID: string, robloxID: number}[] = [];
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]});
@@ -73,6 +74,10 @@ export default class BotClient extends Discord.Client {
     }
 
     public async getRobloxUser(guildID: string, discordID: string): Promise<number> {
+        let index = this.roverCache.findIndex(v => v.discordID === discordID);
+        if(index != -1) {
+            return this.roverCache[index].robloxID;
+        }
         try {
             let res = await this.request({
                 url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
@@ -85,6 +90,7 @@ export default class BotClient extends Discord.Client {
                 robloxRequest: false
             });
             if(res.status === 200) {
+                this.roverCache.push({discordID: discordID, robloxID: res.data.robloxId});
                 return res.data.robloxId;
             }
         } catch(e) {
