@@ -112,6 +112,7 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
+    roblox.setAPIKey(client.config.ROBLOX_API_KEY);
     await loginToRoblox(client.config.ROBLOX_COOKIE);
     await readCommands();
     await registerSlashCommands();

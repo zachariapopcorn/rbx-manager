@@ -1,22 +1,10 @@
 import roblox = require('noblox.js');
 import * as fs from 'fs/promises';
-import axios = require('axios');
 import BotClient from '../classes/BotClient';
 
-const axiosClient = axios.default;
-
 async function isUserInGroup(userID: number, groupID: number): Promise<boolean> {
-    let res;
-    try {
-        res = await axiosClient({
-            url: `https://groups.roblox.com/v2/users/${userID}/groups/roles`,
-            method: "GET"
-        });
-    } catch(e) {
-        console.error(e);
-        return true; // Just in case it fails and that person is in the group
-    }
-    let userData = res.data.data;
+    let res = await fetch(`https://groups.roblox.com/v2/users/${userID}/groups/roles`);
+    let userData = (await res.json()).data;
     let index = userData.findIndex(data => data.group.id === groupID);
     if(index === -1) return false;
     return true;

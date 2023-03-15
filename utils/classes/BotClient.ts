@@ -1,6 +1,5 @@
 import Discord from 'discord.js';
 import roblox from 'noblox.js';
-import axios = require('axios');
 
 import BotConfig from '../interfaces/BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
@@ -19,8 +18,7 @@ export default class BotClient extends Discord.Client {
         this.config = config;
     }
 
-    public async request(requestOptions: RequestOptions) : Promise<axios.AxiosResponse> {
-        let responseData: axios.AxiosResponse;
+    public async request(requestOptions: RequestOptions) : Promise<Response> {
         if(requestOptions.robloxRequest) {
             requestOptions.headers = {
                 "X-CSRF-TOKEN": await roblox.getGeneralToken(),
@@ -28,17 +26,11 @@ export default class BotClient extends Discord.Client {
                 ...requestOptions.headers
             }
         }
-        try {
-            responseData = await axios.default({
-                url: requestOptions.url,
-                method: requestOptions.method,
-                headers: requestOptions.headers,
-                data: requestOptions.body
-            })
-        } catch(e) {
-            throw e;
-        }
-        return responseData;
+        return await fetch(requestOptions.url, {
+            method: requestOptions.method,
+            headers: requestOptions.headers,
+            body: JSON.stringify(requestOptions.body)
+        })
     }
 
     public embedMaker(embedOptions: EmbedMakerOptions): Discord.EmbedBuilder {
@@ -78,34 +70,32 @@ export default class BotClient extends Discord.Client {
         if(index != -1) {
             return this.roverCache[index].robloxID;
         }
-        try {
-            let res = await this.request({
-                url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json;charset=UTF-8",
-                    "Authorization": `Bearer ${this.config.ROVER_API_KEY}`
-                },
-                body: {},
-                robloxRequest: false
-            });
-            if(res.status === 200) {
-                this.roverCache.push({discordID: discordID, robloxID: res.data.robloxId});
-                return res.data.robloxId;
-            }
-        } catch(e) {
-            let statusCode = e.response.status;
-            let headers = e.response.headers;
-            if(parseInt(headers["X-RateLimit-Remaining"]) === 0) {
+        let res = await this.request({
+            url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8",
+                "Authorization": `Bearer ${this.config.ROVER_API_KEY}`
+            },
+            body: {},
+            robloxRequest: false
+        });
+        if(res.status === 200) {
+            let rbxID = (await res.json()).robloxId;
+            this.roverCache.push({discordID: discordID, robloxID: rbxID});
+            return rbxID;
+        } else {
+            let headers = res.headers;
+            if(parseInt(headers.get("X-RateLimit-Remaining")) === 0) {
                 console.log("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
-                }, parseInt(headers["X-RateLimit-Reset-After"]) * 1000);
-            } else if(statusCode === 429) {
+                }, parseInt(headers.get("X-RateLimit-Reset-After")) * 1000);
+            } else if(res.status === 429) {
                 console.log("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
-                }, parseInt(headers["Retry-After"]) * 1000);
+                }, parseInt(headers.get("Retry-After")) * 1000);
             } else {
                 return 0;
             }
