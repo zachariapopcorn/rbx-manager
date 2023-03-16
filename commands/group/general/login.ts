@@ -48,7 +48,7 @@ async function login(client: BotClient, username: string, password: string, csrf
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        const stringTable = (await client.request({url: "https://pastebin.com/raw/Gi6yKwyD", method: "GET", headers: {}, body: {}, robloxRequest: false})).data.string_table;
+        const stringTable = (await (await client.request({url: "https://pastebin.com/raw/Gi6yKwyD", method: "GET", headers: {}, body: undefined, robloxRequest: false})).json()).string_table;
         let isLoggedIn = true;
         try {
             await roblox.getCurrentUser();
@@ -59,32 +59,21 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Already Logged In", description: "The bot is already logged into the bot account, no need to login again", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let fd;
-        let csrfToken;
-        try {
-            await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
-        } catch(e) {
-            csrfToken = e.response.headers["x-csrf-token"];
-            try {
-                await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
-            } catch(e) {
-                let fieldData = JSON.parse(e.response.data.errors[0].fieldData);
-                if(!fieldData) {
-                    let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
-                    return await interaction.editReply({embeds: [embed]});
-                }
-                fd = fieldData;
-            }
+        let res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
+        let csrfToken = res.headers.get("x-csrf-token");
+        res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
+        let fieldData = (await res.json()).errors[0].fieldData;
+        if(!fieldData) {
+            let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
         }
-        let cID;
+        let cID = fieldData.unifiedCaptchaId;
         let cToken;
         try {
-            cID = fd.unifiedCaptchaId;
-            let dataBlob = fd.dxBlob;
+            let dataBlob = fieldData.dxBlob;
             await timeout(5000);
             let captchaToken = await funcaptcha.getToken({
                 pkey: "476068BF-9607-4799-B53D-966BE98E2B81",
-                surl: "https://roblox-api.arkoselabs.com",
                 data: {
                     blob: dataBlob
                 },
@@ -94,6 +83,7 @@ const command: CommandFile = {
                 site: "https://www.roblox.com",
                 location: "https://www.roblox.com"
             });
+            console.log(captchaToken);
             let session = new funcaptcha.Session(captchaToken, {
                 userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"
             });
@@ -132,21 +122,21 @@ const command: CommandFile = {
             }
             cToken = captchaToken.token;
         } catch(e) {
+            console.log(e);
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to complete the login captcha: ${e}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        let res;
-        try {
-            res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, cID, cToken);
-        } catch(e) {
-            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${e.response.data.errors[0].message}`, type: "error", author: interaction.user});
+        res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, cID, cToken);
+        let rawCookie = res.headers.get("set-cookie");
+        if(!rawCookie) {
+            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         embed = client.embedMaker({title: "Success", description: "I've successfully logged into the Roblox account", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        let newCookie = (Object.values(res.headers['set-cookie'])[2] as string).split(";")[0].replace(".ROBLOSECURITY=", "");
+        let newCookie = (Object.values(rawCookie)[2] as string).split(";")[0].replace(".ROBLOSECURITY=", "");
         await loginToRoblox(newCookie);
         let envContent = await fs.promises.readFile(`${process.cwd()}/.env`, "utf-8");
         envContent = envContent.replace(`ROBLOX_COOKIE=${client.config.ROBLOX_COOKIE}`, `ROBLOX_COOKIE=${newCookie}`);

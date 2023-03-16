@@ -1,4 +1,5 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import Discord from 'discord.js';
+import roblox = require('noblox.js');
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
@@ -16,23 +17,24 @@ const command: CommandFile = {
         let scope = args["scope"] as string || "global";
         let universeName = args["universe"];
         let universeID = CommandHelpers.getUniverseIDFromName(universeName);
-        let returnedData;
+        let returnedData: roblox.DatastoreEntry;
         try {
-            returnedData = await database.getAsync(universeID, name, key, scope);
+            returnedData = await (await roblox.getDatastoreEntry(universeID, name, key, scope));
         } catch(e) {
-            let embed: EmbedBuilder;
-            if(e.response.data.error === "NOT_FOUND") {
+            let embed: Discord.EmbedBuilder;
+            if(e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.") {
                 embed = client.embedMaker({title: "Error", description: "The supplied data doesn't return any data, please try a different combination", type: "error", author: interaction.user});
             } else {
                 embed = client.embedMaker({title: "Error", description: `There was an error while trying to fetch data: ${e}`, type: "error", author: interaction.user});
             }
             return await interaction.editReply({embeds: [embed]});
         }
-        if(typeof(returnedData) === "object") returnedData = returnedData = JSON.stringify(returnedData)
+        if(typeof(returnedData.data) === "object") returnedData.data = JSON.stringify(returnedData.data, null, "\t")
         let topData = `Datastore Name: ${name}\nScope: ${scope}\nEntry Key: ${key}`;
-        let description = "**Provided Data**\n```{topData}```\n**Data Returned**\n```json\n{returnedData}```";
+        let description = "**Provided Data**\n```{topData}```\n**Returned Data**\n```json\n{returnedData}```\n**Metadata**\n```json\n{metadata}```";
         description = description.replace("{topData}", topData);
-        description = description.replace("{returnedData}", returnedData);
+        description = description.replace("{returnedData}", returnedData.data);
+        description = description.replace("{metadata}", JSON.stringify(returnedData.metadata, null, "\t"));
         let embed = client.embedMaker({title: "Success", description: description, type: "success", author: interaction.user});
         return await interaction.editReply({embeds: [embed]});
     },

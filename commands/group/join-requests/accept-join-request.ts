@@ -36,10 +36,8 @@ const command: CommandFile = {
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
-            let robloxID;
-            try {
-                robloxID = await roblox.getIdFromUsername(username);
-            } catch {
+            let robloxID = await roblox.getIdFromUsername(username) as number;
+            if(!robloxID) {
                 logs.push({
                     username: username,
                     status: "Error",
@@ -49,7 +47,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await roblox.handleJoinRequest(client.config.groupId, robloxID, true);
+                await roblox.handleJoinRequest(client.config.groupId, robloxID as any, true);
             } catch(e) {
                 logs.push({
                     username: username,

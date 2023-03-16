@@ -77,7 +77,7 @@ export default class BotClient extends Discord.Client {
                 "Content-Type": "application/json;charset=UTF-8",
                 "Authorization": `Bearer ${this.config.ROVER_API_KEY}`
             },
-            body: {},
+            body: undefined,
             robloxRequest: false
         });
         if(res.status === 200) {
