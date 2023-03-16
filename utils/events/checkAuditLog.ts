@@ -7,6 +7,7 @@ import fs from "fs/promises"
 let oldAuditLogDate;
 
 export default async function checkAudits(client: BotClient) {
+    if(client.config.logging.audit.enabled === false && client.config.logging.shout.enabled === false) return;
     let currentUser = await roblox.getCurrentUser();
     let groupID = client.config.groupId;
     try {

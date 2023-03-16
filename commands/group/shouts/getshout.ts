@@ -7,6 +7,10 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let shout = await roblox.getShout(client.config.groupId);
+        if(!shout) {
+            let embed = client.embedMaker({title: "No Shout", description: "The group linked doesn't have a shout", type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
+        }
         let embedDescription = "";
         embedDescription += `**Poster**: ${shout.poster.username}\n`;
         embedDescription += `**Body**: ${shout.body}\n`;
