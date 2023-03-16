@@ -57,7 +57,7 @@ const command: CommandFile = {
         if(logs.data.length > limit) logs.data = logs.data.slice(0, limit);
         if(date) {
             logs.data = logs.data.filter(log => {
-                let formattedDate = format(log.created); // 0 = year, 1 = month, 2 = day
+                let formattedDate = format(log.created.toISOString()); // 0 = year, 1 = month, 2 = day
                 if(parseInt(formattedDate[0]) === parseInt(date[2])) {
                     if(parseInt(formattedDate[1]) === parseInt(date[0])) {
                         return (parseInt(formattedDate[2]) >= parseInt(date[1]));
@@ -68,6 +68,10 @@ const command: CommandFile = {
                     return (parseInt(formattedDate[0]) > parseInt(date[2]));
                 }
             });
+        }
+        if(logs.data.length === 0) {
+            let embed = client.embedMaker({title: "No Reversing Possible", description: "Based on the given settings, no rank reversing is possible", type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
         }
         let embed = client.embedMaker({title: "Reversing Process Starting...", description: "I am now starting the reversal progress with the given settings. Please be patient as this may take some time. This message will be edited once the process is complete", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]}) as Discord.Message;

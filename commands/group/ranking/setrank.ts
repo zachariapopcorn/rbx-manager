@@ -49,10 +49,8 @@ const command: CommandFile = {
             let username = usernames[i];
             let reason = reasons[i];
             let rank = ranks[i];
-            let victimRobloxID;
-            try {
-                victimRobloxID = await roblox.getIdFromUsername(username);
-            } catch {
+            let victimRobloxID = await roblox.getIdFromUsername(username) as number;
+            if(!victimRobloxID) {
                 logs.push({
                     username: username,
                     status: "Error",

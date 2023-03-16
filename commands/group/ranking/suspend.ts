@@ -17,10 +17,8 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let username = args["username"];
-        let userID;
-        try {
-            userID = await roblox.getIdFromUsername(username);
-        } catch {
+        let userID = await roblox.getIdFromUsername(username) as number;
+        if(!userID) {
             let embed = client.embedMaker({title: "Invalid Username", description: "The username provided is an invalid Roblox username", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }

@@ -22,11 +22,9 @@ const command: CommandFile = {
         let username = args["username"];
         let universeName = args["universe"];
         let universeID = CommandHelpers.getUniverseIDFromName(universeName);
-        let robloxID;
-        try {
-            robloxID = await roblox.getIdFromUsername(username);
-        } catch {
-            let embed = client.embedMaker({title: "Invalid Username", description: `The username that you provided is invalid`, type: "error", author: interaction.user});
+        let robloxID = await roblox.getIdFromUsername(username) as number;
+        if(!robloxID) {
+            let embed = client.embedMaker({title: "Invalid Username", description: "The username provided is an invalid Roblox username", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         username = await roblox.getUsernameFromId(robloxID);
@@ -34,7 +32,7 @@ const command: CommandFile = {
         try {
             moderationData = await database.getModerationData(universeID, robloxID);
         } catch(e) {
-            if(e.response.data.error === "NOT_FOUND") { // Meaning that the data doesn't exist, meaning that they have a clean slate
+            if((e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.")) {
                 moderationData = {
                     banData: {
                         isBanned: false,
@@ -69,11 +67,11 @@ const command: CommandFile = {
             name: "User Data",
             value: "```\nUsername: <username>\nRoblox ID: <id>\n```"
             .replace("<username>", username)
-            .replace("<id>", robloxID)
+            .replace("<id>", `${robloxID}`)
         },
         {
             name: "Group Data",
-            value: "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n\n<extra>```"
+            value: "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n<extra>```"
             .replace("<rank name>", await roblox.getRankNameInGroup(client.config.groupId, robloxID))
             .replace("<rank id>", (await roblox.getRankInGroup(client.config.groupId, robloxID)).toString())
             .replace("<ban status>", isGroupBanned ? "Yes" : "No")

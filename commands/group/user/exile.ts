@@ -36,10 +36,8 @@ const command: CommandFile = {
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
-            let victimRobloxID;
-            try {
-                victimRobloxID = await roblox.getIdFromUsername(username);
-            } catch {
+            let victimRobloxID = await roblox.getIdFromUsername(username) as number;
+            if(!victimRobloxID) {
                 logs.push({
                     username: username,
                     status: "Error",

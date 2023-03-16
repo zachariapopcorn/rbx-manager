@@ -41,10 +41,8 @@ const command: CommandFile = {
             let username = usernames[i];
             let time = times[i];
             let reason = reasons[i];
-            let robloxID;
-            try {
-                robloxID = await roblox.getIdFromUsername(username);
-            } catch {
+            let robloxID = await roblox.getIdFromUsername(username) as number;
+            if(!robloxID) {
                 logs.push({
                     username: username,
                     status: "Error",
@@ -58,7 +56,7 @@ const command: CommandFile = {
                 try {
                     oldData = await database.getModerationData(universeID, robloxID);
                 } catch(e) {
-                    if(!(e.response.data.error === "NOT_FOUND")) {
+                    if(!(e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.")) {
                         logs.push({
                             username: username,
                             status: "Error",

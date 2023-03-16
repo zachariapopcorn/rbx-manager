@@ -1,4 +1,5 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import Discord from 'discord.js';
+import roblox = require('noblox.js');
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
@@ -21,10 +22,10 @@ const command: CommandFile = {
         let universeName = args["universe"];
         let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         try {
-            await database.removeAsync(universeID, name, key, scope);
+            await roblox.deleteDatastoreEntry(universeID, name, key, scope);
         } catch(e) {
-            let embed: EmbedBuilder;
-            if(e.response.data.error === "NOT_FOUND") {
+            let embed: Discord.EmbedBuilder;
+            if(e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.") {
                 embed = client.embedMaker({title: "Error", description: "The supplied data doesn't return any data, please try a different combination", type: "error", author: interaction.user});
             } else {
                 embed = client.embedMaker({title: "Error", description: `There was an error while trying to delete data: ${e}`, type: "error", author: interaction.user});
