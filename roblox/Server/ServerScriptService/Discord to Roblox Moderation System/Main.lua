@@ -1,7 +1,8 @@
 local Players = game:GetService("Players")
 local MessagingService = game:GetService("MessagingService")
-local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
 local Database = require(script.Parent.Utils.DatabaseHandler)
+local muteRemote = game:GetService("ReplicatedStorage")["Discord to Roblox Moderation System"].SendMutes
 
 Players.PlayerAdded:Connect(function(plr)
 	local config = require(script.Parent.Config)
@@ -23,11 +24,18 @@ Players.PlayerAdded:Connect(function(plr)
 			Database:UnmutePlayer(plr.UserId, modData)
 		end
 		if(continueOn) then
-			task.wait(1) -- Wait for player speaker object to be created
-			local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
-			local channel = chatService:GetChannel("All")
 			pcall(function()
-				channel:MuteSpeaker(plr.DisplayName, modData.muteData.reason)
+				if(TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService) then
+					task.wait(1) -- Wait for player speaker object to be created
+					local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
+					local channel = chatService:GetChannel("All")
+					channel:MuteSpeaker(plr.DisplayName, modData.muteData.reason)
+				else
+					for i,v:TextChannel in pairs(TextChatService.TextChannels:GetChildren()) do
+						v[plr.DisplayName].CanSend = false
+					end
+					muteRemote:FireClient(plr, true, modData.muteData.reason)
+				end
 			end)
 		end
 	end
