@@ -20,6 +20,8 @@ const map = {
     "5️⃣": 5
 }
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+
 const keys = Object.keys(map);
 
 function timeout(ms: number) {
@@ -32,7 +34,7 @@ async function login(client: BotClient, username: string, password: string, csrf
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-			"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1",
+			"User-Agent": UA,
 			"X-CSRF-TOKEN": csrfToken || "",
         },
         body: {
@@ -48,7 +50,6 @@ async function login(client: BotClient, username: string, password: string, csrf
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        const stringTable = (await (await client.request({url: "https://pastebin.com/raw/Gi6yKwyD", method: "GET", headers: {}, body: undefined, robloxRequest: false})).json()).string_table;
         let isLoggedIn = true;
         try {
             await roblox.getCurrentUser();
@@ -59,6 +60,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Already Logged In", description: "The bot is already logged into the bot account, no need to login again", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
+        const stringTable = (await (await client.request({url: "https://pastebin.com/raw/Gi6yKwyD", method: "GET", headers: {}, body: undefined, robloxRequest: false})).json()).string_table;
         let res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
         let csrfToken = res.headers.get("x-csrf-token");
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
@@ -67,6 +69,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
+        fieldData = JSON.parse(fieldData);
         let cID = fieldData.unifiedCaptchaId;
         let cToken;
         try {
@@ -74,18 +77,23 @@ const command: CommandFile = {
             await timeout(5000);
             let captchaToken = await funcaptcha.getToken({
                 pkey: "476068BF-9607-4799-B53D-966BE98E2B81",
+                surl: "https://roblox-api.arkoselabs.com",
                 data: {
-                    blob: dataBlob
+                    "blob": dataBlob,
                 },
                 headers: {
-                    "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"
+                    "User-Agent": UA,
                 },
                 site: "https://www.roblox.com",
-                location: "https://www.roblox.com"
-            });
-            console.log(captchaToken);
+                location: "https://www.roblox.com/login"
+            })
+            if(!captchaToken.token) {
+                console.log(captchaToken);
+                let embed = client.embedMaker({title: "Captcha Implementation Broken", description: "The captcha implementation is currently broken. Please wait for a fix", type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
             let session = new funcaptcha.Session(captchaToken, {
-                userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"
+                userAgent: UA
             });
             let challenge = await session.getChallenge();
             if(challenge instanceof Challenge1) throw new Error("Captcha type given not implemented");
@@ -136,7 +144,8 @@ const command: CommandFile = {
         }
         embed = client.embedMaker({title: "Success", description: "I've successfully logged into the Roblox account", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        let newCookie = (Object.values(rawCookie)[2] as string).split(";")[0].replace(".ROBLOSECURITY=", "");
+        let newCookie = rawCookie.split(" ").find(v => v.startsWith(".ROBLOSECURITY=")).replace(".ROBLOSECURITY=", "");
+        newCookie = newCookie.substring(0, newCookie.length - 1);
         await loginToRoblox(newCookie);
         let envContent = await fs.promises.readFile(`${process.cwd()}/.env`, "utf-8");
         envContent = envContent.replace(`ROBLOX_COOKIE=${client.config.ROBLOX_COOKIE}`, `ROBLOX_COOKIE=${newCookie}`);
