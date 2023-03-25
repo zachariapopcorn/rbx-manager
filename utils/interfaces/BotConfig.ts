@@ -31,6 +31,11 @@ export default interface BotConfig {
             mute: string[]
         }
     },
+    antiAbuse: {
+        enabled: boolean,
+        threshold: number,
+        action: "Exile" | "Fire"
+    }
     logging: {
         audit: {
             enabled: boolean,
@@ -41,6 +46,10 @@ export default interface BotConfig {
             loggingChannel: string
         },
         command: {
+            enabled: boolean,
+            loggingChannel: string
+        },
+        antiAbuse: {
             enabled: boolean,
             loggingChannel: string
         }

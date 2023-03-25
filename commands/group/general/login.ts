@@ -20,7 +20,7 @@ const map = {
     "5️⃣": 5
 }
 
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
 const keys = Object.keys(map);
 
@@ -69,6 +69,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
+        fieldData = JSON.parse(fieldData);
         let cID = fieldData.unifiedCaptchaId;
         let cToken;
         try {
@@ -76,17 +77,18 @@ const command: CommandFile = {
             await timeout(5000);
             let captchaToken = await funcaptcha.getToken({
                 pkey: "476068BF-9607-4799-B53D-966BE98E2B81",
+                surl: "https://roblox-api.arkoselabs.com",
                 data: {
-                    blob: dataBlob
+                    "blob": dataBlob,
                 },
                 headers: {
-                    "user-agent": UA
+                    "User-Agent": UA,
                 },
                 site: "https://www.roblox.com",
-                location: "https://www.roblox.com"
-            });
-            console.log(captchaToken);
+                location: "https://www.roblox.com/login"
+            })
             if(!captchaToken.token) {
+                console.log(captchaToken);
                 let embed = client.embedMaker({title: "Captcha Implementation Broken", description: "The captcha implementation is currently broken. Please wait for a fix", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
@@ -142,7 +144,8 @@ const command: CommandFile = {
         }
         embed = client.embedMaker({title: "Success", description: "I've successfully logged into the Roblox account", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        let newCookie = (Object.values(rawCookie)[2] as string).split(";")[0].replace(".ROBLOSECURITY=", "");
+        let newCookie = rawCookie.split(" ").find(v => v.startsWith(".ROBLOSECURITY=")).replace(".ROBLOSECURITY=", "");
+        newCookie = newCookie.substring(0, newCookie.length - 1);
         await loginToRoblox(newCookie);
         let envContent = await fs.promises.readFile(`${process.cwd()}/.env`, "utf-8");
         envContent = envContent.replace(`ROBLOX_COOKIE=${client.config.ROBLOX_COOKIE}`, `ROBLOX_COOKIE=${newCookie}`);
