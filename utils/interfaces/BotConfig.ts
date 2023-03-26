@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import UniverseEntry from './UniverseEntry';
+import AntiAbuseAction from './AntiAbuseAction';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
@@ -30,6 +31,17 @@ export default interface BotConfig {
             lock: string[],
             mute: string[]
         }
+    },
+    antiAbuse: {
+        enabled: boolean,
+        thresholds: {
+            ranks: number,
+            exiles: number
+        },
+        actions: {
+            ranks: AntiAbuseAction,
+            exiles: AntiAbuseAction
+        }
     }
     logging: {
         audit: {
@@ -41,6 +53,10 @@ export default interface BotConfig {
             loggingChannel: string
         },
         command: {
+            enabled: boolean,
+            loggingChannel: string
+        },
+        antiAbuse: {
             enabled: boolean,
             loggingChannel: string
         }

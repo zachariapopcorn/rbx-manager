@@ -7,10 +7,12 @@ import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
+import GroupLog from '../interfaces/GroupLog';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
     public commandCooldowns: CooldownEntry[] = [];
+    public groupLogs: GroupLog[] = [];
     public roverCache: {discordID: string, robloxID: number}[] = [];
 
     constructor(config: BotConfig) {

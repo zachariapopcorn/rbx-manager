@@ -32,6 +32,17 @@ const config: BotConfig = {
             mute: [""]
         }
     },
+    antiAbuse: {
+        enabled: true,
+        thresholds: {
+            ranks: 10,
+            exiles: 5
+        },
+        actions: {
+            ranks: "Suspend",
+            exiles: "Exile"
+        }
+    },
     logging: {
         audit: {
             enabled: true,
@@ -42,6 +53,10 @@ const config: BotConfig = {
             loggingChannel: ""
         },
         command: {
+            enabled: true,
+            loggingChannel: ""
+        },
+        antiAbuse: {
             enabled: true,
             loggingChannel: ""
         }

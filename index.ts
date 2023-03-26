@@ -20,6 +20,7 @@ import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
 import checkSuspensions from './utils/events/checkSuspensions';
 import checkCooldowns from './utils/events/checkCooldowns';
+import checkAbuse from './utils/events/checkAbuse';
 
 const client = new BotClient(config);
 
@@ -108,6 +109,7 @@ export async function loginToRoblox(robloxCookie: string) {
     await checkAudits(client);
     await checkBans(client);
     await checkSuspensions(client);
+    await checkAbuse(client);
 }
 
 client.once('ready', async() => {
