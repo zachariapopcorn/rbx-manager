@@ -72,6 +72,11 @@ async function readCommands(path?: string) {
 async function registerSlashCommands() {
     let slashCommands = [];
     for(let i = 0; i < commands.length; i++) {
+        let index = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        if(index !== -1) {
+            console.log(`Skipped registering the ${commands[i].name} command because it's locked`);
+            continue;
+        }
         let commandData;
         try {
             commandData = commands[i].slashData.toJSON()
@@ -124,12 +129,6 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
             await interaction.deferReply();
-            let index = config.lockedCommands.findIndex(c => c.toLowerCase() === command);
-            if(index !== -1) {
-                let embed = client.embedMaker({title: "Locked Command", description: "This command is currently locked", type: "error", author: interaction.user});
-                await interaction.editReply({embeds: [embed]});
-                return;
-            }
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
