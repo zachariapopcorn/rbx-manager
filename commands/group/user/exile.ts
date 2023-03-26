@@ -10,10 +10,6 @@ import config from '../../../config';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        if(client.isUserOnCooldown(require('path').parse(__filename).name, interaction.user.id)) {
-            let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
         if(client.config.verificationChecks) {
             let verificationStatus = false;
@@ -83,7 +79,6 @@ const command: CommandFile = {
             await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group for the reason of **${reason}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
-        client.cooldowns.push({commandName: require('path').parse(__filename).name, userID: interaction.user.id, cooldownExpires: (Date.now() + (client.getCooldownForCommand(require('path').parse(__filename).name) * usernames.length))});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("exile")
@@ -93,7 +88,8 @@ const command: CommandFile = {
     commandData: {
         category: "User",
         permissions: config.permissions.group.user
-    }
+    },
+    hasCooldown: true
 }
 
 export default command;

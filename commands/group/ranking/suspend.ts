@@ -12,10 +12,6 @@ import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        if(client.isUserOnCooldown(require('path').parse(__filename).name, interaction.user.id)) {
-            let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         let username = args["username"];
         let userID = await roblox.getIdFromUsername(username) as number;
         if(!userID) {
@@ -56,7 +52,6 @@ const command: CommandFile = {
         await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}**`);
         let embed = client.embedMaker({title: "Success", description: `You've successfully suspended this user`, type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        client.cooldowns.push({commandName: require('path').parse(__filename).name, userID: interaction.user.id, cooldownExpires: (Date.now() + (client.getCooldownForCommand(require('path').parse(__filename).name)))});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("suspend")
@@ -67,7 +62,8 @@ const command: CommandFile = {
     commandData: {
         category: "Ranking",
         permissions: config.permissions.group.ranking
-    }
+    },
+    hasCooldown: true
 }
 
 export default command;

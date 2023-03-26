@@ -44,7 +44,8 @@ const command: CommandFile = {
     commandData: {
         category: "JobID",
         permissions: config.permissions.game.jobIDs
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

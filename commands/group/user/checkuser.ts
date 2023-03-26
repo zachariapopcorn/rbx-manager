@@ -92,7 +92,8 @@ const command: CommandFile = {
     commandData: {
         category: "User",
         permissions: config.permissions.group.user
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

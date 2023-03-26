@@ -58,7 +58,8 @@ const command: CommandFile = {
     .setDescription("Gets a list of commands"),
     commandData: {
         category: "General Group",
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

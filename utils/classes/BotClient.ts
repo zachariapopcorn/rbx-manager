@@ -10,7 +10,7 @@ import CooldownEntry from '../interfaces/CooldownEntry';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
-    public cooldowns: CooldownEntry[] = [];
+    public commandCooldowns: CooldownEntry[] = [];
     public roverCache: {discordID: string, robloxID: number}[] = [];
 
     constructor(config: BotConfig) {
@@ -215,7 +215,7 @@ export default class BotClient extends Discord.Client {
     }
 
     public isUserOnCooldown(commandName: string, userID: string): boolean {
-        return (this.cooldowns.findIndex(v => v.commandName === commandName && v.userID === userID)) !== -1;
+        return (this.commandCooldowns.findIndex(v => v.commandName === commandName && v.userID === userID)) !== -1;
     }
 
     public getCooldownForCommand(commandName: string): number {

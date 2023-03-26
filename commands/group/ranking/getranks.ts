@@ -23,7 +23,8 @@ const command: CommandFile = {
     .setDescription("Gets the ranks of the group"),
     commandData: {
         category: "Ranking"
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

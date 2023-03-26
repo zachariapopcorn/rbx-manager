@@ -144,12 +144,31 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 return;
             }
+            if(commands[i].file.hasCooldown) {
+                if(client.isUserOnCooldown(commands[i].file.slashData.name, interaction.user.id)) {
+                    let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
+                    await interaction.editReply({embeds: [embed]});
+                    return;
+                }
+            }
+            let res;
             try {
-                await commands[i].file.run(interaction, client, args);
+                res = await commands[i].file.run(interaction, client, args);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: "There was an error while trying to run this command. The error has been logged in the console", type: "error", author: interaction.user});
                 await interaction.editReply({embeds: [embed]});
                 console.error(e);
+            }
+            if(commands[i].file.hasCooldown) {
+                let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
+                if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
+                } else if(args["username"]) {
+                    let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * usernames.length)});
+                } else {
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + commandCooldown});
+                }
             }
         }
     }
