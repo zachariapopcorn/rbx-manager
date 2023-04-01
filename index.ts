@@ -28,6 +28,7 @@ const app = express();
 app.use(bodyParser.json());
 
 export const commands:CommandInstance[] = [];
+export const registeredCommands: CommandInstance[] = [];
 
 app.get("/", async (request, response) => {
     response.status(200).send("OK");
@@ -72,12 +73,16 @@ async function readCommands(path?: string) {
 
 async function registerSlashCommands() {
     let slashCommands = [];
+    if(client.config.groupId === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
+    if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     for(let i = 0; i < commands.length; i++) {
-        let index = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
-        if(index !== -1) {
-            console.log(`Skipped registering the ${commands[i].name} command because it's locked`);
+        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
+            console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
             continue;
         }
+        registeredCommands.push(commands[i]);
         let commandData;
         try {
             commandData = commands[i].slashData.toJSON()
@@ -119,8 +124,10 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
-    roblox.setAPIKey(client.config.ROBLOX_API_KEY);
-    await loginToRoblox(client.config.ROBLOX_COOKIE);
+    if(client.config.groupId !== 0) {
+        await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
+        await loginToRoblox(client.config.ROBLOX_COOKIE);
+    }
     await readCommands();
     await registerSlashCommands();
 });

@@ -20,47 +20,61 @@ const database = new RobloxDatastore(config);
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
-        let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
         let robloxID = await roblox.getIdFromUsername(username) as number;
         if(!robloxID) {
             let embed = client.embedMaker({title: "Invalid Username", description: "The username provided is an invalid Roblox username", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         username = await roblox.getUsernameFromId(robloxID);
-        let moderationData: ModerationData | string = "";
-        try {
-            moderationData = await database.getModerationData(universeID, robloxID);
-        } catch(e) {
-            if((e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.")) {
-                moderationData = {
-                    banData: {
-                        isBanned: false,
-                        reason: ""
-                    },
-                    muteData: {
-                        isMuted: false,
-                        reason: ""
+        let groupDataValue;
+        let gameDataValue;
+        if(client.config.universes.length !== 0) {
+            let universeName = args["universe"];
+            let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+            let moderationData: ModerationData | string = "";
+            try {
+                moderationData = await database.getModerationData(universeID, robloxID);
+            } catch(e) {
+                if((e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.")) {
+                    moderationData = {
+                        banData: {
+                            isBanned: false,
+                            reason: ""
+                        },
+                        muteData: {
+                            isMuted: false,
+                            reason: ""
+                        }
                     }
                 }
             }
+            gameDataValue = "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\n```"
+            .replace("<ban status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.banData.isBanned ? `Yes\nBan Reason: ${moderationData.banData.reason}` : "No"))
+            .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `Yes\nMute Reason: ${moderationData.muteData.reason}` : "No"))
         }
-        let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
-        let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
-        let bannedIndex = bannedUsers.userIDs.findIndex(v => v === robloxID);
-        let isGroupBanned = (bannedIndex !== -1);
-        let suspendedIndex = suspendedUsers.users.findIndex(v => v.userId === robloxID);
-        let isSuspended = (suspendedIndex !== -1);
-        let extraGroupData = "Is User Suspended: No";
-        if(isSuspended) {
-            let oldRole = (await roblox.getRoles(client.config.groupId)).find(v => v.id === suspendedUsers.users[suspendedIndex].oldRoleID).name;
-            let time = suspendedUsers.users[suspendedIndex].timeToRelease - Date.now() as any;
-            if(time <= 0) {
-                time = "Officially, this user is not suspended anymore, the next suspension check will delete their record from the DB"
-            } else {
-                time = ms(time, {long: true})
+        if(client.config.groupId !== 0) {
+            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
+            let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
+            let bannedIndex = bannedUsers.userIDs.findIndex(v => v === robloxID);
+            let isGroupBanned = (bannedIndex !== -1);
+            let suspendedIndex = suspendedUsers.users.findIndex(v => v.userId === robloxID);
+            let isSuspended = (suspendedIndex !== -1);
+            let extraGroupData = "Is User Suspended: No";
+            if(isSuspended) {
+                let oldRole = (await roblox.getRoles(client.config.groupId)).find(v => v.id === suspendedUsers.users[suspendedIndex].oldRoleID).name;
+                let time = suspendedUsers.users[suspendedIndex].timeToRelease - Date.now() as any;
+                if(time <= 0) {
+                    time = "Officially, this user is not suspended anymore, the next suspension check will delete their record from the DB"
+                } else {
+                    time = ms(time, {long: true})
+                }
+                extraGroupData = `Is User Suspended: Yes\nSuspension Reason: ${suspendedUsers.users[suspendedIndex].reason}\nSuspended From: ${oldRole}\nSuspended For: ${time}`;
             }
-            extraGroupData = `Is User Suspended: Yes\nSuspension Reason: ${suspendedUsers.users[suspendedIndex].reason}\nSuspended From: ${oldRole}\nSuspended For: ${time}`;
+            groupDataValue = "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n<extra>```"
+            .replace("<rank name>", await roblox.getRankNameInGroup(client.config.groupId, robloxID))
+            .replace("<rank id>", (await roblox.getRankInGroup(client.config.groupId, robloxID)).toString())
+            .replace("<ban status>", isGroupBanned ? "Yes" : "No")
+            .replace("<extra>", extraGroupData)
         }
         let embed = client.embedMaker({title: "Information", description: "", type: "info", author: interaction.user});
         embed.addFields({
@@ -68,32 +82,35 @@ const command: CommandFile = {
             value: "```\nUsername: <username>\nRoblox ID: <id>\n```"
             .replace("<username>", username)
             .replace("<id>", `${robloxID}`)
-        },
-        {
-            name: "Group Data",
-            value: "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n<extra>```"
-            .replace("<rank name>", await roblox.getRankNameInGroup(client.config.groupId, robloxID))
-            .replace("<rank id>", (await roblox.getRankInGroup(client.config.groupId, robloxID)).toString())
-            .replace("<ban status>", isGroupBanned ? "Yes" : "No")
-            .replace("<extra>", extraGroupData)
-        }, {
-            name: "Game Data",
-            value: "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\n```"
-            .replace("<ban status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.banData.isBanned ? `Yes\nBan Reason: ${moderationData.banData.reason}` : "No"))
-            .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `Yes\nMute Reason: ${moderationData.muteData.reason}` : "No"))
         });
+        if(groupDataValue) {
+            embed.addFields({
+                name: "Group Data",
+                value: groupDataValue
+            });
+        }
+        if(gameDataValue) {
+            embed.addFields({
+                name: "Game Data",
+                value: gameDataValue
+            });
+        }
         return await interaction.editReply({embeds: [embed]});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("checkuser")
     .setDescription("Gets information about the inputted user")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    //.addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to check").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
         permissions: config.permissions.group.user
     },
     hasCooldown: false
+}
+
+if(config.universes.length !== 0) {
+    command.slashData.addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
 }
 
 export default command;

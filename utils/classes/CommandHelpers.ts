@@ -1,9 +1,12 @@
 import Discord from 'discord.js';
 import ms from 'ms';
+import { commands } from '../..';
 import config from '../../config';
+import CommandCategory from '../interfaces/CommandCategory';
 import CommandFile from '../interfaces/CommandFile';
 
 export default class CommandHelpers {
+    public static allowedCommands = ["help", "checkuser"];
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};
@@ -82,5 +85,25 @@ export default class CommandHelpers {
     }
     public static getUniverseIDFromName(name: string): number {
         return config.universes.find(v => v.universeDisplayName === name).universeID;
+    }
+    public static getGroupCommands(): string[] {
+        let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User"];
+        let cmds = [];
+        for(let i = 0; i < commands.length; i++) {
+            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+                cmds.push(commands[i].name);
+            }
+        }
+        return cmds;
+    }
+    public static getGameCommands(): string[] {
+        let categories: CommandCategory[] = ["Ban", "Database", "General Game", "JobID", "Lock", "Mute"];
+        let cmds = [];
+        for(let i = 0; i < commands.length; i++) {
+            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+                cmds.push(commands[i].name);
+            }
+        }
+        return cmds;
     }
 }
