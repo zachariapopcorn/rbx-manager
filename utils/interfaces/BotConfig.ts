@@ -59,6 +59,10 @@ export default interface BotConfig {
         antiAbuse: {
             enabled: boolean,
             loggingChannel: string
+        },
+        sales: {
+            enabled: boolean,
+            loggingChannel: string
         }
     }
     embedColors: {

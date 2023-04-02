@@ -4,15 +4,15 @@ import BotClient from '../classes/BotClient';
 import SuspensionFile from '../interfaces/SuspensionFile';
 import fs from "fs/promises"
 
-let oldAuditLogDate;
+let oldDate;
 
 export default async function checkAudits(client: BotClient) {
     let currentUser = await roblox.getCurrentUser();
     let groupID = client.config.groupId;
     try {
         let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Asc", 100);
-        if(!oldAuditLogDate) oldAuditLogDate = auditLog.data[0].created;
-        let index = auditLog.data.findIndex(log => log.created === oldAuditLogDate);
+        if(!oldDate) oldDate = auditLog.data[0].created;
+        let index = auditLog.data.findIndex(log => log.created.toISOString() === oldDate.toISOString());
         if(index === 0 || index === -1) throw("Skip check");
         for(let i = index - 1; i >= 0; i--) {
             let log = auditLog.data[i];
@@ -93,7 +93,7 @@ export default async function checkAudits(client: BotClient) {
                 }
             }
         }
-        oldAuditLogDate = auditLog.data[0].created;
+        oldDate = auditLog.data[0].created;
     } catch(e) {
         if(e !== "Skip check") {
             console.error(`There was an error while trying to check the audit logs: ${e}`);

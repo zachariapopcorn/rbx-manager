@@ -59,6 +59,10 @@ const config: BotConfig = {
         antiAbuse: {
             enabled: true,
             loggingChannel: ""
+        },
+        sales: {
+            enabled: true,
+            loggingChannel: ""
         }
     },
     embedColors: {
