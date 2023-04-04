@@ -58,11 +58,12 @@ const command: CommandFile = {
                             muteData: {
                                 isMuted: false,
                                 reason: ""
-                            }
+                            },
+                            warns: []
                         }
                     }
                 }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: (oldData.warns || [])});
             } catch(e) {
                 logs.push({
                     username: username,

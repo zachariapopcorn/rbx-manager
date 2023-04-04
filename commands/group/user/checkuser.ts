@@ -17,6 +17,26 @@ import ms = require('ms');
 
 const database = new RobloxDatastore(config);
 
+function formatWarnDate(date: Date): string {
+    let hour = date.getHours();
+    let isAM = false;
+    if(hour === 0) {
+        hour = 12;
+        isAM = true;
+    } else if(hour === 12) {
+        isAM = false;
+    } else {
+        if(hour < 12) {
+            isAM = true;
+        } else {
+            hour -= 12;
+        }
+    }
+    let mins = `${date.getMinutes()}`;
+    if(mins.length === 1) mins = `0${mins}`;
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} - ${hour}:${mins} ${isAM ? "AM" : "PM"}`;
+}
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
@@ -44,13 +64,28 @@ const command: CommandFile = {
                         muteData: {
                             isMuted: false,
                             reason: ""
-                        }
+                        },
+                        warns: []
                     }
                 }
             }
-            gameDataValue = "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\n```"
+            let warnsString = "There were len warnings found for this user\n\n";
+            if(typeof(moderationData) !== "string") {
+                if(moderationData.warns) {
+                    if(moderationData.warns.length === 0) {
+                        warnsString = "No warnings present";
+                    } else {
+                        for(let i = 0; i < moderationData.warns.length; i++) {
+                            warnsString += `Author: ${moderationData.warns[i].author} | Reason: ${moderationData.warns[i].reason} | Date Assigned: ${formatWarnDate(new Date(moderationData.warns[i].dateAssigned))}\n`;
+                        }
+                        warnsString = warnsString.replace("len", moderationData.warns.length.toString());
+                    }
+                }
+            }
+            gameDataValue = "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\nWarnings: <warnings>```"
             .replace("<ban status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.banData.isBanned ? `Yes\nBan Reason: ${moderationData.banData.reason}` : "No"))
             .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `Yes\nMute Reason: ${moderationData.muteData.reason}` : "No"))
+            gameDataValue = gameDataValue.replace("<warnings>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.warns ? moderationData.warns.length === 0 ? "No warnings present" : warnsString : "No warnings present"))
         }
         if(client.config.groupId !== 0) {
             let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
@@ -100,7 +135,6 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("checkuser")
     .setDescription("Gets information about the inputted user")
-    //.addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to check").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
