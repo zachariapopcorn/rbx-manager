@@ -72,7 +72,8 @@ const command: CommandFile = {
     commandData: {
         category: "Join Request",
         permissions: config.permissions.group.joinrequests
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

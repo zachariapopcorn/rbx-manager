@@ -23,7 +23,8 @@ const command: CommandFile = {
     .setDescription("Gets the current group shout"),
     commandData: {
         category: "Shout"
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

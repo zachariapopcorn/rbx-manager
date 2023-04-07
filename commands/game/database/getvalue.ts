@@ -48,7 +48,8 @@ const command: CommandFile = {
     commandData: {
         category: "Database",
         permissions: config.permissions.game.datastore
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

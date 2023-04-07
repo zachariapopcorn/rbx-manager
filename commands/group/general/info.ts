@@ -22,7 +22,8 @@ const command: CommandFile = {
     .setDescription("Gets the information of the group"),
     commandData: {
         category: "General Group",
-    }
+    },
+    hasCooldown: false
 }
 
 export default command;

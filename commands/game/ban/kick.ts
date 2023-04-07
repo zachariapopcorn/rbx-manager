@@ -13,10 +13,6 @@ const messaging = new MessagingService(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        if(client.isUserOnCooldown(require('path').parse(__filename).name, interaction.user.id)) {
-            let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -30,10 +26,8 @@ const command: CommandFile = {
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
-            let robloxID;
-            try {
-                robloxID = await roblox.getIdFromUsername(username);
-            } catch {
+            let robloxID = await roblox.getIdFromUsername(username) as number;
+            if(!robloxID) {
                 logs.push({
                     username: username,
                     status: "Error",
@@ -59,7 +53,6 @@ const command: CommandFile = {
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
-        client.cooldowns.push({commandName: require('path').parse(__filename).name, userID: interaction.user.id, cooldownExpires: (Date.now() + (client.getCooldownForCommand(require('path').parse(__filename).name) * usernames.length))});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("kick")
@@ -70,7 +63,8 @@ const command: CommandFile = {
     commandData: {
         category: "Ban",
         permissions: config.permissions.game.kick
-    }
+    },
+    hasCooldown: true
 }
 
 export default command;

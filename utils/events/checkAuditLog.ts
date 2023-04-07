@@ -4,16 +4,15 @@ import BotClient from '../classes/BotClient';
 import SuspensionFile from '../interfaces/SuspensionFile';
 import fs from "fs/promises"
 
-let oldAuditLogDate;
+let oldDate;
 
 export default async function checkAudits(client: BotClient) {
-    if(client.config.logging.audit.enabled === false && client.config.logging.shout.enabled === false) return;
     let currentUser = await roblox.getCurrentUser();
     let groupID = client.config.groupId;
     try {
         let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Asc", 100);
-        if(!oldAuditLogDate) oldAuditLogDate = auditLog.data[0].created;
-        let index = auditLog.data.findIndex(log => log.created === oldAuditLogDate);
+        if(!oldDate) oldDate = auditLog.data[0].created;
+        let index = auditLog.data.findIndex(log => log.created.toISOString() === oldDate.toISOString());
         if(index === 0 || index === -1) throw("Skip check");
         for(let i = index - 1; i >= 0; i--) {
             let log = auditLog.data[i];
@@ -29,7 +28,7 @@ export default async function checkAudits(client: BotClient) {
                     let embed = client.embedMaker({title: "New Shout Detected", description: embedDescription, type: "info", author: client.user});
                     await channel.send({embeds: [embed]});
                 }
-            } else if(log.actionType === "Change Rank" && client.config.logging.audit.enabled) {
+            } else if(log.actionType === "Change Rank") {
                 let isUserSuspended = false;
                 let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile).users;
                 let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"]);
@@ -78,8 +77,23 @@ export default async function checkAudits(client: BotClient) {
                     await channel.send({embeds: [embed]});
                 }
             }
+            if(log.actionType === "Change Rank") {
+                let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Rank");
+                if(antiAAIndex === -1) {
+                    client.groupLogs.push({userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Rank", amount: 1});
+                } else {
+                    client.groupLogs[antiAAIndex].amount += 1;
+                }
+            } else if(log.actionType === "Remove Member") {
+                let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Exile");
+                if(antiAAIndex === -1) {
+                    client.groupLogs.push({userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Exile", amount: 1});
+                } else {
+                    client.groupLogs[antiAAIndex].amount += 1;
+                }
+            }
         }
-        oldAuditLogDate = auditLog.data[0].created;
+        oldDate = auditLog.data[0].created;
     } catch(e) {
         if(e !== "Skip check") {
             console.error(`There was an error while trying to check the audit logs: ${e}`);
@@ -87,5 +101,5 @@ export default async function checkAudits(client: BotClient) {
     }
     setTimeout(async() => {
         await checkAudits(client);
-    }, 10000);
+    }, 5000);
 }

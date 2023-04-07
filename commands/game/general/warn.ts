@@ -65,7 +65,13 @@ const command: CommandFile = {
                         }
                     }
                 }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: true, reason: reason}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: (oldData.warns || [])});
+                if(!oldData.warns) oldData.warns = [];
+                oldData.warns.push({
+                    author: interaction.user.tag,
+                    reason: reason,
+                    dateAssigned: Date.now()
+                });
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason, releaseTime: oldData.banData.releaseTime}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: oldData.warns});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -74,37 +80,37 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let didKickError = false;
+            let didNotifyError = false;
             try {
-                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
+                await messaging.sendMessage(universeID, "Warn", {username: username, reason: reason});
             } catch(e) {
-                didKickError = true;
+                didNotifyError = true;
                 logs.push({
                     username: username,
                     status: "Error",
-                    message: `Although this user is now banned, I couldn't kick them from the game because of the following error: ${e}`
+                    message: `Although this user's warn got registered, I couldn't notify them because of the following error: ${e}`
                 });
             }
-            if(!didKickError) {
+            if(!didNotifyError) {
                 logs.push({
                     username: username,
                     status: "Success"
                 });
             }
-            await client.logAction(`<@${interaction.user.id}> has banned **${username}** from **${universeName}** with the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has warned **${username}** in **${universeName}** for the reason of **${reason}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
-    .setName("ban")
-    .setDescription("Bans the inputted user(s) from the game")
+    .setName("warn")
+    .setDescription("Warns a user(s)")
     .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
-    .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to ban").setRequired(true))
-    .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the bans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
+    .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to warn").setRequired(true))
+    .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the warn(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
-        category: "Ban",
-        permissions: config.permissions.game.ban
+        category: "General Game",
+        permissions: config.permissions.game.general
     },
     hasCooldown: true
 }

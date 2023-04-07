@@ -20,6 +20,8 @@ import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
 import checkSuspensions from './utils/events/checkSuspensions';
 import checkCooldowns from './utils/events/checkCooldowns';
+import checkAbuse from './utils/events/checkAbuse';
+import checkSales from './utils/events/checkSales';
 
 const client = new BotClient(config);
 
@@ -27,6 +29,7 @@ const app = express();
 app.use(bodyParser.json());
 
 export const commands:CommandInstance[] = [];
+export const registeredCommands: CommandInstance[] = [];
 
 app.get("/", async (request, response) => {
     response.status(200).send("OK");
@@ -71,7 +74,16 @@ async function readCommands(path?: string) {
 
 async function registerSlashCommands() {
     let slashCommands = [];
+    if(client.config.groupId === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
+    if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     for(let i = 0; i < commands.length; i++) {
+        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
+            console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
+            continue;
+        }
+        registeredCommands.push(commands[i]);
         let commandData;
         try {
             commandData = commands[i].slashData.toJSON()
@@ -103,6 +115,8 @@ export async function loginToRoblox(robloxCookie: string) {
     await checkAudits(client);
     await checkBans(client);
     await checkSuspensions(client);
+    await checkAbuse(client);
+    await checkSales(client);
 }
 
 client.once('ready', async() => {
@@ -112,8 +126,10 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
-    roblox.setAPIKey(client.config.ROBLOX_API_KEY);
-    await loginToRoblox(client.config.ROBLOX_COOKIE);
+    if(client.config.groupId !== 0) {
+        await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
+        await loginToRoblox(client.config.ROBLOX_COOKIE);
+    }
     await readCommands();
     await registerSlashCommands();
 });
@@ -124,12 +140,6 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
             await interaction.deferReply();
-            let index = config.lockedCommands.findIndex(c => c.toLowerCase() === command);
-            if(index !== -1) {
-                let embed = client.embedMaker({title: "Locked Command", description: "This command is currently locked", type: "error", author: interaction.user});
-                await interaction.editReply({embeds: [embed]});
-                return;
-            }
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
@@ -144,15 +154,39 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 return;
             }
+            if(commands[i].file.hasCooldown) {
+                if(client.isUserOnCooldown(commands[i].file.slashData.name, interaction.user.id)) {
+                    let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
+                    await interaction.editReply({embeds: [embed]});
+                    return;
+                }
+            }
+            let res;
             try {
-                await commands[i].file.run(interaction, client, args);
+                res = await commands[i].file.run(interaction, client, args);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: "There was an error while trying to run this command. The error has been logged in the console", type: "error", author: interaction.user});
                 await interaction.editReply({embeds: [embed]});
                 console.error(e);
             }
+            if(commands[i].file.hasCooldown) {
+                let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
+                if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
+                } else if(args["username"]) {
+                    let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * usernames.length)});
+                } else {
+                    client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + commandCooldown});
+                }
+            }
         }
     }
 });
+
+let oldMethod = console.error
+console.error = function(msg: string) {
+    if(msg.indexOf("The Fetch API is an experimental feature") === -1) oldMethod(msg);
+}
 
 client.login(client.config.DISCORD_TOKEN);

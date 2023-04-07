@@ -11,10 +11,6 @@ const messaging = new MessagingService(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        if(client.isUserOnCooldown(require('path').parse(__filename).name, interaction.user.id)) {
-            let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         let jobID = args["jobid"];
         let reason = args["reason"];
         let universeName = args["universe"];
@@ -31,7 +27,6 @@ const command: CommandFile = {
         await client.logAction(`<@${interaction.user.id}> has unlocked the server of **${universeName}** with the job id of **${jobID}** for the reason of **${reason}**`);
         let embed = client.embedMaker({title: "Success", description: "You've successfully unlocked the inputted server", type: "success", author: interaction.user})
         await interaction.editReply({embeds: [embed]});
-        client.cooldowns.push({commandName: require('path').parse(__filename).name, userID: interaction.user.id, cooldownExpires: (Date.now() + (client.getCooldownForCommand(require('path').parse(__filename).name)))});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("unlock")
@@ -42,7 +37,8 @@ const command: CommandFile = {
     commandData: {
         category: "Lock",
         permissions: config.permissions.game.lock
-    }
+    },
+    hasCooldown: true
 }
 
 export default command;
