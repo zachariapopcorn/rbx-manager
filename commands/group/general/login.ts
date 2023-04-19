@@ -28,6 +28,15 @@ function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function getENVString(): string {
+    const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY", "WEB_API_KEY"];
+    let formatted = "";
+    for(let i = 0; i < values.length; i++) {
+        formatted += `${values[i]}=${process.env[values[i]]}\n`;
+    }
+    return formatted;
+}
+
 async function login(client: BotClient, username: string, password: string, csrfToken?: string, captchaId?: string, captchaToken?: string) {
     return await client.request({
         url: "https://auth.roblox.com/v2/login",
@@ -64,8 +73,10 @@ const command: CommandFile = {
         let res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
         let csrfToken = res.headers.get("x-csrf-token");
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
-        let fieldData = (await res.json()).errors[0].fieldData;
+        let body = await res.json();
+        let fieldData = body.errors[0].fieldData;
         if(!fieldData) {
+            console.log(body.toString());
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
@@ -138,7 +149,7 @@ const command: CommandFile = {
         await interaction.editReply({embeds: [embed]});
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, cID, cToken);
         let rawCookie = res.headers.get("set-cookie");
-        if(!rawCookie) {
+        if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
@@ -147,7 +158,7 @@ const command: CommandFile = {
         let newCookie = rawCookie.split(" ").find(v => v.startsWith(".ROBLOSECURITY=")).replace(".ROBLOSECURITY=", "");
         newCookie = newCookie.substring(0, newCookie.length - 1);
         await loginToRoblox(newCookie);
-        let envContent = await fs.promises.readFile(`${process.cwd()}/.env`, "utf-8");
+        let envContent = getENVString();
         envContent = envContent.replace(`ROBLOX_COOKIE=${client.config.ROBLOX_COOKIE}`, `ROBLOX_COOKIE=${newCookie}`);
         await fs.promises.writeFile(`${process.cwd()}/.env`, envContent);
         await fs.promises.unlink(`${process.cwd()}/Image.gif`);
