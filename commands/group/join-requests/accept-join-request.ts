@@ -43,7 +43,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await roblox.handleJoinRequest(client.config.groupId, robloxID as any, true);
+                await roblox.handleJoinRequest(client.config.groupId, robloxID, true);
             } catch(e) {
                 logs.push({
                     username: username,
