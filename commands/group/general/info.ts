@@ -6,7 +6,13 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        let groupInfo = await roblox.getGroup(client.config.groupId);
+        let groupInfo: roblox.Group;
+        try {
+            groupInfo = await roblox.getGroup(client.config.groupId);
+        } catch(e) {
+            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to get the group information: ${e}`, type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
+        }
         let embedDescription = "";
         embedDescription += `**Group Name**: ${groupInfo.name}\n`;
         embedDescription += `**Group Description**: ${groupInfo.description}\n`;
