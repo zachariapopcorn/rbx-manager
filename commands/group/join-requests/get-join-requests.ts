@@ -29,7 +29,7 @@ const command: CommandFile = {
         let embedDescription = "";
         let counter = 1;
         for(let i = 0; i < joinRequests.data.length; i++) {
-            embedDescription += `**${counter}**: ${joinRequests.data[i].requester.username}`;
+            embedDescription += `**${counter}**: ${joinRequests.data[i].requester.username}\n`;
             counter++;
         }
         let embed = client.embedMaker({title: "Join Requests", description: embedDescription, type: "info", author: interaction.user});
