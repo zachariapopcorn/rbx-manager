@@ -39,7 +39,7 @@ const command: CommandFile = {
         await interaction.editReply({embeds: [embed]});
     },
     slashData: new Discord.SlashCommandBuilder()
-    .setName("eval")
+    .setName("game-eval")
     .setDescription("Runs serverside code on either all servers or a specific one")
     .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("type").setDescription("The type of execution to preform").setRequired(true).addChoices({name: "global", value: "global"}, {name: "jobID", value: "jobID"}))

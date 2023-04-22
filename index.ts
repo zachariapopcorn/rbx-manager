@@ -139,7 +139,11 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     let command = interaction.commandName.toLowerCase();
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
-            await interaction.deferReply();
+            if(command === "node-eval") { // Only command that uses ephemeral responses
+                await interaction.deferReply({ephemeral: true});
+            } else {
+                await interaction.deferReply();
+            }
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
