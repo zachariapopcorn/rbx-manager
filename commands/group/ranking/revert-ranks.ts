@@ -23,11 +23,10 @@ const command: CommandFile = {
             if(date[2].length === 2) date[2] = "20" + date[2];
         }
         let logs: roblox.AuditPage;
-        let userID;
+        let userID: number;
         if(username) {
-            try {
-                userID = await roblox.getIdFromUsername(username);
-            } catch {
+            userID = await roblox.getIdFromUsername(username) as number;
+            if(!userID) {
                 let embed = client.embedMaker({title: "Invalid Username", description: "The username that you provided is invalid", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
@@ -94,7 +93,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("revert-ranks")
     .setDescription("Reverts rank actions based on given settings (user/date parameters are filters, both are accepted)")
-    .addStringOption(o => o.setName("limit").setDescription("The amount of actionst to revert").setRequired(true))
+    .addStringOption(o => o.setName("limit").setDescription("The amount of actions to revert").setRequired(true))
     .addStringOption(o => o.setName("user").setDescription("The username of the user whose actions you want to revert").setRequired(false))
     .addStringOption(o => o.setName("date").setDescription("The date that you want start from (formatted MM/DD/YYYY)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
