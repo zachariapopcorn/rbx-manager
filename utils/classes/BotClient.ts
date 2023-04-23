@@ -24,7 +24,7 @@ export default class BotClient extends Discord.Client {
         if(requestOptions.robloxRequest) {
             requestOptions.headers = {
                 "X-CSRF-TOKEN": await roblox.getGeneralToken(),
-                "Cookie": this.config.ROBLOX_COOKIE,
+                "Cookie": `.ROBLOSECURITY=${this.config.ROBLOX_COOKIE}`,
                 ...requestOptions.headers
             }
         }
@@ -32,7 +32,7 @@ export default class BotClient extends Discord.Client {
             method: requestOptions.method,
             headers: requestOptions.headers,
             body: JSON.stringify(requestOptions.body)
-        })
+        });
     }
 
     public embedMaker(embedOptions: EmbedMakerOptions): Discord.EmbedBuilder {
