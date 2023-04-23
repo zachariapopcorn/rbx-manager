@@ -11,6 +11,7 @@ async function isUserInGroup(userID: number, groupID: number): Promise<boolean> 
 }
 
 export default async function checkBans(client: BotClient) {
+    if(!client.isLoggedIn) return;
     try {
         let bannedUsers = (JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8"))).userIDs;
         for(let i = 0; i < bannedUsers.length; i++) {

@@ -22,6 +22,7 @@ async function getSales(client: BotClient, groupID: number): Promise<SalesLog[]>
 }
 
 export default async function checkSales(client: BotClient) {
+    if(!client.isLoggedIn) return;
     if(client.config.logging.sales.enabled === false) return;
     try {
         let sales = await getSales(client, client.config.groupId);

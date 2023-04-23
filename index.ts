@@ -22,6 +22,7 @@ import checkSuspensions from './utils/events/checkSuspensions';
 import checkCooldowns from './utils/events/checkCooldowns';
 import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
+import checkLoginStatus from './utils/events/checkLoginStatus';
 
 const client = new BotClient(config);
 
@@ -109,14 +110,18 @@ export async function loginToRoblox(robloxCookie: string) {
         await roblox.setCookie(robloxCookie);
     } catch {
         console.error("Unable to login to Roblox");
+        client.user.setActivity("Logged Into Roblox? ❌");
+        client.isLoggedIn = false;
         return;
     }
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
+    client.isLoggedIn = true;
     await checkAudits(client);
     await checkBans(client);
     await checkSuspensions(client);
     await checkAbuse(client);
     await checkSales(client);
+    await checkLoginStatus(client);
 }
 
 client.once('ready', async() => {

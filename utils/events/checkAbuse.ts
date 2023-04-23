@@ -3,6 +3,7 @@ import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
 
 export default async function checkAbuse(client: BotClient) {
+    if(!client.isLoggedIn) return;
     for(let i = client.groupLogs.length - 1; i >= 0; i--) {
         if(client.groupLogs[i].cooldownExpires >= Date.now()) {
             client.commandCooldowns.splice(i, 1);

@@ -7,6 +7,7 @@ import fs from "fs/promises"
 let oldDate;
 
 export default async function checkAudits(client: BotClient) {
+    if(!client.isLoggedIn) return;
     let currentUser = await roblox.getCurrentUser();
     let groupID = client.config.groupId;
     try {

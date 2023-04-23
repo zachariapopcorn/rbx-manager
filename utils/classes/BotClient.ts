@@ -11,6 +11,7 @@ import GroupLog from '../interfaces/GroupLog';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
+    public isLoggedIn: boolean
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
     public roverCache: {discordID: string, robloxID: number}[] = [];

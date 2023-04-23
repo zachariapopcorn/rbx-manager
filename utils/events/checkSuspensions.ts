@@ -4,6 +4,7 @@ import SuspensionFile from '../interfaces/SuspensionFile';
 import fs from "fs/promises";
 
 export default async function checkSuspensions(client: BotClient) {
+    if(!client.isLoggedIn) return;
     let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
     for(let i = suspensions.users.length - 1; i >= 0; i--) {
         if(Date.now() < suspensions.users[i].timeToRelease) continue;
