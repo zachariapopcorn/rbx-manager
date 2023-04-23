@@ -20,6 +20,9 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Argument Error", description: "You didn't supply a Job ID even though you supplied the jobID execution type", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
+        if(code.startsWith("https://")) {
+            code = await (await fetch(code, {method: "GET"})).text();
+        }
         try {
             await messaging.sendMessage(universeID, "Eval", {
                 isGlobal: (typeOfOperation === "global"),
@@ -43,7 +46,7 @@ const command: CommandFile = {
     .setDescription("Runs serverside code on either all servers or a specific one")
     .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
     .addStringOption(o => o.setName("type").setDescription("The type of execution to preform").setRequired(true).addChoices({name: "global", value: "global"}, {name: "jobID", value: "jobID"}))
-    .addStringOption(o => o.setName("code").setDescription("The code to execute in the game").setRequired(true))
+    .addStringOption(o => o.setName("code").setDescription("The code to execute in the game (can also be a URL to the code to run)").setRequired(true))
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to run the code in (only if you choose so)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",

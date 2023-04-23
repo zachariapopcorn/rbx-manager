@@ -23,6 +23,9 @@ const command: CommandFile = {
             loggedData.push(msg.toString());
             oldMethod(msg);
         }
+        if(code.startsWith("https://")) {
+            code = await (await fetch(code, {method: "GET"})).text();
+        }
         try {
             let res = await eval(code);
             let embed = client.embedMaker({title: "Success", description: "The supplied code has ran successfully", type: "success", author: interaction.user});
@@ -52,7 +55,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("node-eval")
     .setDescription("Runs Node.js code in the bot environment")
-    .addStringOption(o => o.setName("code").setDescription("The code to run").setRequired(true)) as Discord.SlashCommandBuilder,
+    .addStringOption(o => o.setName("code").setDescription("The code to run (can also be a URL to the code to run)").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Group",
         permissions: config.permissions.game.execution // Counter intuitive but I don't feel like make another permission entry 
