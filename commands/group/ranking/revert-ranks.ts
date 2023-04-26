@@ -1,10 +1,21 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import fs from 'fs';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
 import config from '../../../config';
+
+const fileName = "RevertRanksData"; // No extension so that Discord doesn't embed file contents
+
+async function logAction(msg: string) {
+    await fs.promises.appendFile(`${process.cwd()}/${fileName}`, `${msg}\n`);
+}
+
+function getRankNameFromID(roles: roblox.Role[], roleSetID: any) {
+    return roles.find(r => r.id === roleSetID).name;
+}
 
 function format(logDate: string) {
     return logDate.slice(0, logDate.indexOf("T")).split("-");
@@ -75,19 +86,29 @@ const command: CommandFile = {
         } else {
             await client.logAction(`<@${interaction.user.id}> has started a rank reversal. The parameters they chose are the following\n\n**Numbers of Users**: ${logs.data.length}\n**Author to Revert**: No user filter provided\n**Start Date**: ${(logDate ? logDate : "No date filter provided")}`);
         }
+        let roles = await roblox.getRoles(client.config.groupId);
         let failedAmount = 0;
         for(let i = 0; i < logs.data.length; i++) {
             let des = logs.data[i].description as any;
+            let oldRankName = await roblox.getRankNameInGroup(client.config.groupId, des.TargetId);
+            let didSuc = true;
             try {
                 await roblox.setRank(client.config.groupId, des.TargetId, des.OldRoleSetId);
             } catch(e) {
                 console.error(`There was an error while trying to reverse the rank of ${des.TargetName}: ${e}`);
+                await logAction(`${i + 1}: ${des.TargetName} (${des.TargetId}) was unable to get their rank reverted from ${oldRankName} to ${getRankNameFromID(roles, des.OldRoleSetId)} because of the following error: ${e}`);
                 failedAmount++;
+                didSuc = false;
+            }
+            if(didSuc) {
+                await logAction(`${i + 1}: ${des.TargetName} (${des.TargetId}) was able to get their rank reverted from ${oldRankName} to ${getRankNameFromID(roles, des.OldRoleSetId)}`);
             }
         }
         let sucRate = Math.round(((logs.data.length - failedAmount) / logs.data.length) * 100);
-        let newEmbed = client.embedMaker({title: "Reserving Complete", description: `I've finished the rank reversing process\n\nSuccess Percentage: ${sucRate}% (${logs.data.length - failedAmount}/${logs.data.length})\nFailure Percentage: ${100 - sucRate}% (${failedAmount}/${logs.data.length})`, type: "info", author: interaction.user});
+        let newEmbed = client.embedMaker({title: "Reserving Complete", description: `I've finished the rank reversing process. The log has been attached below\n\nSuccess Percentage: ${sucRate}% (${logs.data.length - failedAmount}/${logs.data.length})\nFailure Percentage: ${100 - sucRate}% (${failedAmount}/${logs.data.length})`, type: "info", author: interaction.user});
         await interaction.editReply({content: `<@${interaction.user.id}>`, embeds: [newEmbed]});
+        await interaction.channel.send({files: [`${process.cwd()}/${fileName}`]});
+        await fs.promises.unlink(`${process.cwd()}/${fileName}`);
         return logs.data.length; // This is the only command where the multiplier is calculated, so I return it to multiply it in the main file
     },
     slashData: new Discord.SlashCommandBuilder()
