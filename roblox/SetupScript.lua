@@ -1,3 +1,11 @@
+-- CONFIGURATION --
+
+local SERVER = ""
+local WEB_API_KEY = ""
+local DATASTORE_NAME = "moderations"
+
+-- MAIN CODE --
+
 local httpService = game:GetService("HttpService")
 local scriptEditor = game:GetService("ScriptEditorService")
 
@@ -6,13 +14,25 @@ local CLIENT_FILES_URL = "https://api.github.com/repos/zachariapopcorn/rbx-manag
 
 local folderName = "Discord to Roblox Moderation System"
 
+local regularScripts = {"Main.lua"}
+
+function hasValue(tab, val)
+	for i,v in ipairs(tab) do
+		if(v == val) then
+			return true
+		end
+	end
+	return false
+end
+
+
 function parseURL(url: string, folder: Folder, isServer: boolean)
 	local res = httpService:JSONDecode(httpService:GetAsync(url))
 	for _,file in pairs(res) do
 		if(string.find(file.name, ".lua")) then
 			local scriptInstance;
 			if(isServer) then
-				if(file.name == "Main.lua") then
+				if(hasValue(regularScripts, file.name)) then
 					scriptInstance = Instance.new("Script", folder)
 				else
 					scriptInstance = Instance.new("ModuleScript", folder)
@@ -23,7 +43,16 @@ function parseURL(url: string, folder: Folder, isServer: boolean)
 			scriptInstance.Name = file.name:gsub(".lua", "")
 			scriptEditor:OpenScriptDocumentAsync(scriptInstance)
 			local script = scriptEditor:FindScriptDocument(scriptInstance)
-			script:EditTextAsync(httpService:GetAsync(file.download_url), 1, 1, 1, 1)
+			local source = httpService:GetAsync(file.download_url)
+			if(file.name == "Config.lua") then
+				local temp = 'SERVER = "con"'
+				source = source:gsub('SERVER = ""', temp:gsub("con", SERVER))
+				temp = 'WEB_API_KEY = "con"'
+				source = source:gsub('WEB_API_KEY = ""', temp:gsub("con", WEB_API_KEY))
+				temp = 'DATASTORE_NAME = "con"'
+				source = source:gsub('DATASTORE_NAME = "moderations"', temp:gsub("con", DATASTORE_NAME))
+			end
+			script:EditTextAsync(source, 1, 1, 1, 1)
 			script:CloseAsync()
 		else
 			Instance.new("Folder", folder).Name = file.name
@@ -31,6 +60,13 @@ function parseURL(url: string, folder: Folder, isServer: boolean)
 		end
 	end
 end
+
+pcall(function()
+	local config = require(game:GetService("ServerScriptService")["Discord to Roblox Moderation System"].Config)
+	SERVER = config.SERVER
+	WEB_API_KEY = config.WEB_API_KEY
+	DATASTORE_NAME = DATASTORE_NAME
+end)
 
 pcall(function()
 	game:GetService("ReplicatedStorage")[folderName]:Destroy()
