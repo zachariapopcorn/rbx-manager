@@ -1,7 +1,7 @@
 -- CONFIGURATION --
 
-local SERVER = ""
-local WEB_API_KEY = ""
+local SERVER = "Where the system is hosted"
+local WEB_API_KEY = "What you put in the env file in Step 5.7"
 local DATASTORE_NAME = "moderations"
 
 -- MAIN CODE --
