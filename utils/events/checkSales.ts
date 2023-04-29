@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
 import SalesLog from '../interfaces/SaleLog';
+import GroupHandler from '../classes/GroupHandler';
 
 let oldDate;
 
@@ -33,7 +34,7 @@ export default async function checkSales(groupID: number, client: BotClient) {
             let log = sales[i];
             let channel = await client.channels.fetch(client.config.logging.sales.loggingChannel) as Discord.TextChannel;
             if(channel) {
-                let embed = client.embedMaker({title: "New Sale", description: `**${log.agent.name}** has bought **${log.details.name}** for **${log.currency.amount}** robux after tax`, type: "info", author: client.user});
+                let embed = client.embedMaker({title: "New Sale", description: `**${log.agent.name}** has bought **${log.details.name}** for **${log.currency.amount}** robux after tax from **${GroupHandler.getNameFromID(groupID)}**`, type: "info", author: client.user});
                 await channel.send({embeds: [embed]});
             }
         }

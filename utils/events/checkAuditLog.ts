@@ -1,10 +1,11 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
-import SuspensionFile from '../interfaces/SuspensionFile';
+import SuspensionEntry from '../interfaces/SuspensionEntry';
 import fs from "fs/promises"
+import GroupHandler from '../classes/GroupHandler';
 
-let oldDate;
+let oldDate: Date;
 
 export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
@@ -21,6 +22,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 let channel = await client.channels.fetch(client.config.logging.shout.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
                     embedDescription += `**Shout Poster**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Shout Content**: ${log.description["Text"]}\n`;
@@ -30,8 +32,8 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 }
             } else if(log.actionType === "Change Rank") {
                 let isUserSuspended = false;
-                let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile).users;
-                let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"]);
+                let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[]);
+                let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"] && v.groupID === groupID);
                 if(susIndex !== -1) isUserSuspended = true;
                 let isLockedRank = client.isLockedRole((await roblox.getRoles(groupID)).find(v => v.name === log.description["NewRoleSetName"]));
                 if(isUserSuspended && await roblox.getRankInGroup(groupID, log.description["TargetId"]) != client.config.suspensionRank) {
@@ -51,6 +53,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                     let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let embedDescription = "";
+                        embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
                         embedDescription += `**Ranker**: ${log.actor.user.username}\n`;
                         embedDescription += `**Role**: ${log.actor.role.name}\n`;
                         embedDescription += `**Target**: ${log.description["TargetName"]}\n`;
@@ -69,6 +72,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
                     embedDescription += `**Author**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Action Type**: ${log.actionType}\n`;

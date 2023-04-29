@@ -1,6 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
+import GroupHandler from '../classes/GroupHandler';
 
 export default async function checkAbuse(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
@@ -26,7 +27,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
-                        let description = `A rank abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing rank changing privileges`;
+                        let description = `A rank abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing rank changing privileges in **${GroupHandler.getNameFromID(groupID)}**`;
                         if(didError) {
                             description += "\n\n**THE AUTOMATIC ACTION CONFIGURED FAILED TO PUNISH THE USER**"
                         }
@@ -51,7 +52,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
-                        let description = `An exile abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing exile privileges`;
+                        let description = `An exile abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing exile privileges in **${GroupHandler.getNameFromID(groupID)}**`;
                         if(didError) {
                             description += "\n\n**THE AUTOMATIC ACTION CONFIGURED FAILED TO PUNISH THE USER**"
                         }
