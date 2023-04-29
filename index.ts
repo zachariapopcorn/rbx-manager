@@ -119,11 +119,11 @@ export async function loginToRoblox(robloxCookie: string) {
     for(let i = 0; i < client.config.groupIds.length; i++) {
         let groupID = client.config.groupIds[i];
         await checkAudits(groupID, client);
-        await checkBans(groupID, client);
-        await checkSuspensions(groupID, client);
         await checkAbuse(groupID, client);
         await checkSales(groupID, client);
     }
+    await checkBans(client);
+    await checkSuspensions(client);
     await checkLoginStatus(client);
 }
 
