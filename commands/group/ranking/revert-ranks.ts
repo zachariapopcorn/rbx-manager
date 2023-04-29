@@ -7,7 +7,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 
 import config from '../../../config';
 
-const fileName = "RevertRanksData"; // No extension so that Discord doesn't embed file contents
+const fileName = "RevertRanksData.txt";
 
 async function logAction(msg: string) {
     await fs.promises.appendFile(`${process.cwd()}/${fileName}`, `${msg}\n`);
