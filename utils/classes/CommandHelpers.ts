@@ -1,5 +1,7 @@
 import Discord from 'discord.js';
+import roblox = require('noblox.js');
 import ms from 'ms';
+
 import { commands } from '../..';
 import config from '../../config';
 import CommandCategory from '../interfaces/CommandCategory';
@@ -7,6 +9,15 @@ import CommandFile from '../interfaces/CommandFile';
 
 export default class CommandHelpers {
     public static allowedCommands = ["help", "checkuser"];
+    private static groupNames = [];
+    private static async loadGroupNames() {
+        if(this.groupNames.length === 0) {
+            for(let i = 0; i < config.groupIds.length; i++) {
+                let groupInfo = await roblox.getGroup(config.groupIds[i]);
+                this.groupNames.push(groupInfo.name);
+            }
+        }
+    }
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};
@@ -82,6 +93,16 @@ export default class CommandHelpers {
             parsed.push({name: universes[i].universeDisplayName, value: universes[i].universeDisplayName});
         }
         return parsed;
+    }
+    public static parseGroups(): Discord.APIApplicationCommandOptionChoice[] {
+        this.loadGroupNames().then(() => {
+            let parsed: Discord.APIApplicationCommandOptionChoice[] = [];
+            for(let i = 0; i < this.groupNames.length; i++) {
+                parsed.push({name: this.groupNames[i], value: this.groupNames[i]});
+            }
+            return parsed;
+        });
+        return [];
     }
     public static getUniverseIDFromName(name: string): number {
         return config.universes.find(v => v.universeDisplayName === name).universeID;

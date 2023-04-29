@@ -105,10 +105,10 @@ export default class BotClient extends Discord.Client {
         }
     }
 
-    private async getPermissions(rbxID: number) {
-        let rank = await roblox.getRankInGroup(this.config.groupId, rbxID);
-        let role = (await roblox.getRoles(this.config.groupId)).find(r => r.rank === rank);
-        let permissions = (await roblox.getRolePermissions(this.config.groupId, role.id)).permissions;
+    private async getPermissions(groupID: number, rbxID: number) {
+        let rank = await roblox.getRankInGroup(groupID, rbxID);
+        let role = (await roblox.getRoles(groupID)).find(r => r.rank === rank);
+        let permissions = (await roblox.getRolePermissions(groupID, role.id)).permissions;
         let permissionData = {
             "JoinRequests": permissions.groupMembershipPermissions.inviteMembers,
             "Ranking": permissions.groupMembershipPermissions.changeRank,
@@ -118,13 +118,13 @@ export default class BotClient extends Discord.Client {
         return permissionData;
     }
 
-    public async preformVerificationChecks(robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
-        let authorGroupRole = await roblox.getRankInGroup(this.config.groupId, robloxID);
+    public async preformVerificationChecks(groupID: number, robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
+        let authorGroupRole = await roblox.getRankInGroup(groupID, robloxID);
         if(authorGroupRole === 0) return false;
-        let permissions = await this.getPermissions(robloxID);
+        let permissions = await this.getPermissions(groupID, robloxID);
         if(!permissions[permissionNeeded]) return false;
         if(victimUserID) {
-            let victimGroupRole = await roblox.getRankInGroup(this.config.groupId, victimUserID);
+            let victimGroupRole = await roblox.getRankInGroup(groupID, victimUserID);
             if(victimGroupRole >= authorGroupRole) return false;
         }
         return true;

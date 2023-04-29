@@ -6,10 +6,9 @@ import fs from "fs/promises"
 
 let oldDate;
 
-export default async function checkAudits(client: BotClient) {
+export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
     let currentUser = await roblox.getCurrentUser();
-    let groupID = client.config.groupId;
     try {
         let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Asc", 100);
         if(!oldDate) oldDate = auditLog.data[0].created;
@@ -34,16 +33,16 @@ export default async function checkAudits(client: BotClient) {
                 let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile).users;
                 let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"]);
                 if(susIndex !== -1) isUserSuspended = true;
-                let isLockedRank = client.isLockedRole((await roblox.getRoles(client.config.groupId)).find(v => v.name === log.description["NewRoleSetName"]));
-                if(isUserSuspended && await roblox.getRankInGroup(client.config.groupId, log.description["TargetId"]) != client.config.suspensionRank) {
+                let isLockedRank = client.isLockedRole((await roblox.getRoles(groupID)).find(v => v.name === log.description["NewRoleSetName"]));
+                if(isUserSuspended && await roblox.getRankInGroup(groupID, log.description["TargetId"]) != client.config.suspensionRank) {
                     try {
-                        await roblox.setRank(client.config.groupId, log.description["TargetId"], client.config.suspensionRank);
+                        await roblox.setRank(groupID, log.description["TargetId"], client.config.suspensionRank);
                     } catch(e) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to the suspended role: ${e}`);
                     }
                 } else if(isLockedRank) {
                     try {
-                        await roblox.setRank(client.config.groupId, log.description["TargetId"], log.description["OldRoleSetId"]);
+                        await roblox.setRank(groupID, log.description["TargetId"], log.description["OldRoleSetId"]);
                     } catch(e) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to their old role: ${e}`);
                     }
@@ -81,14 +80,14 @@ export default async function checkAudits(client: BotClient) {
             if(log.actionType === "Change Rank") {
                 let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Rank");
                 if(antiAAIndex === -1) {
-                    client.groupLogs.push({userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Rank", amount: 1});
+                    client.groupLogs.push({groupID: groupID, userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Rank", amount: 1});
                 } else {
                     client.groupLogs[antiAAIndex].amount += 1;
                 }
             } else if(log.actionType === "Remove Member") {
                 let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Exile");
                 if(antiAAIndex === -1) {
-                    client.groupLogs.push({userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Exile", amount: 1});
+                    client.groupLogs.push({groupID: groupID, userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Exile", amount: 1});
                 } else {
                     client.groupLogs[antiAAIndex].amount += 1;
                 }
@@ -101,6 +100,6 @@ export default async function checkAudits(client: BotClient) {
         }
     }
     setTimeout(async() => {
-        await checkAudits(client);
+        await checkAudits(groupID, client);
     }, 5000);
 }

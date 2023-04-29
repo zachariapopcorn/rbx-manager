@@ -75,7 +75,7 @@ async function readCommands(path?: string) {
 
 async function registerSlashCommands() {
     let slashCommands = [];
-    if(client.config.groupId === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
+    if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
     if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     for(let i = 0; i < commands.length; i++) {
         let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
@@ -116,11 +116,14 @@ export async function loginToRoblox(robloxCookie: string) {
     }
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
     client.isLoggedIn = true;
-    await checkAudits(client);
-    await checkBans(client);
-    await checkSuspensions(client);
-    await checkAbuse(client);
-    await checkSales(client);
+    for(let i = 0; i < client.config.groupIds.length; i++) {
+        let groupID = client.config.groupIds[i];
+        await checkAudits(groupID, client);
+        await checkBans(groupID, client);
+        await checkSuspensions(groupID, client);
+        await checkAbuse(groupID, client);
+        await checkSales(groupID, client);
+    }
     await checkLoginStatus(client);
 }
 
@@ -131,7 +134,7 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
-    if(client.config.groupId !== 0) {
+    if(client.config.groupIds.length !== 0) {
         await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
         await loginToRoblox(client.config.ROBLOX_COOKIE);
     }

@@ -10,20 +10,20 @@ async function isUserInGroup(userID: number, groupID: number): Promise<boolean> 
     return true;
 }
 
-export default async function checkBans(client: BotClient) {
+export default async function checkBans(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
     try {
         let bannedUsers = (JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8"))).userIDs;
         for(let i = 0; i < bannedUsers.length; i++) {
             let userID = bannedUsers[i];
-            if(await isUserInGroup(userID, client.config.groupId)) {
-                await roblox.exile(client.config.groupId, userID);
+            if(await isUserInGroup(userID, groupID)) {
+                await roblox.exile(groupID, userID);
             }
         }
     } catch(e) {
         console.error(e);
     }
     setTimeout(async() => {
-        await checkBans(client);
+        await checkBans(groupID, client);
     }, 10000);
 }
