@@ -88,7 +88,7 @@ The value, ``WEB_API_KEY``, is your API key for the bot's API. This can be anyth
 Now that you're done configuring the .env file, close it, and open the ``config.ts`` file with your favorite text editor.
 
 # Step 6.1
-The value, ``groupId``, is the group ID of the group you want the bot to manage. To get it, go to your group page and it is the numbers after ``/groups/`` 
+The value, ``groupIds``, is an array of group IDs of the groups you want the bot to manage. To get them, go to the group page and it is the numbers after ``/groups/``
 ![image|304x39](upload://g4xudwRW9kFU2FATi9VQISvUENd.png)
 
 # Step 6.2
@@ -117,9 +117,8 @@ The value, ``cooldownOverrides``, are exceptions to the default cooldown set in 
 The value, ``suspensionRank``, is the rank ID of the suspended rank in your group. This is the rank that people get set to when suspended
 
 # Step 6.9
-The value, ``universes``, is an array value representing the universes that you want to link. These must be in the format ``universeID: number, universeDisplayName: string`` To get a universe ID, go to [your creations page](https://create.roblox.com/creations), click the "..." on the games you want to configure, and click "Copy Universe ID" and set it in the config. For the ``universeDisplayName`` value, that can be anything you want, but I recommend setting it to your universe's name
-
-EX: ``universes: [{universeID: 0, universeDisplayName: "NAME"}]``
+The value, ``universes``, is an array value representing the universes that you want to link. This is an array of universe IDs
+To get a universe ID, go to [your creations page](https://create.roblox.com/creations), click the "..." on the games you want to configure, and click "Copy Universe ID" and set it in the config
 
 # Step 6.10
 The value, ``datastoreName``, is the name of the datastore to use. You don't need to configure this
@@ -140,9 +139,6 @@ The value, ``lockedRanks``, "locks" the ranks inputted, meaning that you can't p
 
 # Step 6.15
 The value, ``lockedCommands``, locks commands, meaning that no one can use them. Simply type a command name and it will lock it. Casing does not matter
-
-# Step 6.16
-The value, ``whitelistedServers``, are the server IDs that the bot registers commands for. Put your server IDs in here
 
 # Step 7
 Now that you've configured your bot, go back to your bot's Discord develop page and copy it's client ID. After doing so, paste the following link into your browser: ``https://discord.com/oauth2/authorize?client_id=CLIENT_ID_HERE&permissions=8&scope=applications.commands%20bot`` and replace CLIENT_ID_HERE with your bot's client ID
