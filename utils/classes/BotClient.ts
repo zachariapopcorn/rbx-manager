@@ -17,7 +17,7 @@ export default class BotClient extends Discord.Client {
     public roverCache: {discordID: string, robloxID: number}[] = [];
 
     constructor(config: BotConfig) {
-        super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions]});
+        super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions, Discord.IntentsBitField.Flags.MessageContent]});
         this.config = config;
     }
 
