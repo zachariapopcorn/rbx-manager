@@ -10,9 +10,9 @@ const config: BotConfig = {
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
     WEB_API_KEY: process.env.WEB_API_KEY,
-    groupIds: [5242495],
+    groupIds: [],
     permissions: {
-        all: ["990827999286919218"],
+        all: [""],
         group: {
             shout: [""],
             ranking: [""],
@@ -46,23 +46,23 @@ const config: BotConfig = {
     logging: {
         audit: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         shout: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         command: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         antiAbuse: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         },
         sales: {
             enabled: true,
-            loggingChannel: "1019800364712734821"
+            loggingChannel: ""
         }
     },
     embedColors: {
@@ -73,7 +73,7 @@ const config: BotConfig = {
     defaultCooldown: 5000,
     cooldownOverrides: {},
     suspensionRank: 1,
-    universes: [3507532981],
+    universes: [],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,
