@@ -7,14 +7,16 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         if(client.config.verificationChecks) {
             let verificationStatus = false;
             let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
             if(robloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(robloxID, "JoinRequests");
+                verificationStatus = await client.preformVerificationChecks(groupID, robloxID, "JoinRequests");
             }
             if(!verificationStatus) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
@@ -43,7 +45,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await roblox.handleJoinRequest(client.config.groupId, robloxID, false);
+                await roblox.handleJoinRequest(groupID, robloxID, false);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -64,6 +66,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("deny-join-request")
     .setDescription("Denies the join request of the user(s) inputted")
+    .addStringOption(o => o.setName("group").setDescription("The group to deny these join request in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to deny the join request of").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're denying the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
