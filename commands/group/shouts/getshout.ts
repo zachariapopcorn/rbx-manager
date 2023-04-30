@@ -25,9 +25,10 @@ const command: CommandFile = {
     .setDescription("Gets the current group shout")
     .addStringOption(o => o.setName("group").setDescription("The group get the shout of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
-        category: "Shout"
-    },
-    hasCooldown: false
+        category: "Shout",
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false,
+    }
 }
 
 export default command;

@@ -34,17 +34,6 @@ function parseUsers(users: roblox.GroupJoinRequest[]): Number[] {
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-            if(robloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, robloxID, "JoinRequests");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let reason = args["reason"];
         let joinRequests = await roblox.getJoinRequests(groupID, "Asc", 100);
         if(joinRequests.data.length === 0) {
@@ -81,9 +70,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason for why you are denying all these requests").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
-        permissions: config.permissions.group.joinrequests
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.joinrequests,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "JoinRequests"
+    }
 }
 
 export default command;

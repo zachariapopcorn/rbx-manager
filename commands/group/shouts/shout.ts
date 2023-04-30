@@ -10,17 +10,6 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Shouts");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let message = args["message"];
         try {
             await roblox.shout(groupID, message);
@@ -39,9 +28,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("message").setDescription("The message that you wish to shout to the group").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Shout",
-        permissions: config.permissions.group.shout
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.shout,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "Shouts"
+    }
 }
 
 export default command;

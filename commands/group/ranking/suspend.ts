@@ -15,16 +15,6 @@ const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let username = args["username"];
         let userID = await roblox.getIdFromUsername(username) as number;
         if(!userID) {
@@ -32,6 +22,13 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         username = await roblox.getUsernameFromId(userID);
+        if(config.verificationChecks) {
+            let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
+            if(!verificationStatus) {
+                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
+        }
         let time = ms(args["time"]);
         if(!time) {
             let embed = client.embedMaker({title: "Invalid Time Suppiled", description: "You inputted an invalid time, please input a valid one", type: "error", author: interaction.user});
@@ -76,9 +73,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason for the suspension").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
-        permissions: config.permissions.group.ranking
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.ranking,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "Ranking"
+    }
 }
 
 export default command;

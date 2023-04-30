@@ -12,17 +12,6 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-            if(robloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, robloxID, "JoinRequests");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -71,9 +60,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're denying the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
-        permissions: config.permissions.group.joinrequests
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.joinrequests,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "JoinRequests"
+    }
 }
 
 export default command;

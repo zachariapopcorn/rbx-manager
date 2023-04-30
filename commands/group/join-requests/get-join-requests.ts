@@ -10,17 +10,6 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-            if(robloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, robloxID, "JoinRequests");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let joinRequests = await roblox.getJoinRequests(groupID, "Asc", 10);
         if(joinRequests.data.length === 0) {
             let embed = client.embedMaker({title: "Join Requests", description: "There are currently no join requests", type: "info", author: interaction.user});
@@ -74,9 +63,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group to get the join requests").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
-        permissions: config.permissions.group.joinrequests
-    },
-    hasCooldown: false
+        permissions: config.permissions.group.joinrequests,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "JoinRequests"
+    }
 }
 
 export default command;

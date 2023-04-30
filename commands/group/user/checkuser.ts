@@ -140,9 +140,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to check").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
-        permissions: config.permissions.group.user
-    },
-    hasCooldown: false
+        permissions: config.permissions.group.user,
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 if(config.groupIds.length !== 0) {

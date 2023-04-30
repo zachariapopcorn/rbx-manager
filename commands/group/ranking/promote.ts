@@ -15,16 +15,6 @@ const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -162,9 +152,11 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the promote(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
-        permissions: config.permissions.group.ranking
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.ranking,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "Ranking"
+    }
 }
 
 export default command;

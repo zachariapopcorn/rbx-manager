@@ -23,6 +23,7 @@ import checkCooldowns from './utils/events/checkCooldowns';
 import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
+import GroupHandler from './utils/classes/GroupHandler';
 
 const client = new BotClient(config);
 
@@ -179,6 +180,19 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             if(commands[i].file.commandData.hasCooldown) {
                 if(client.isUserOnCooldown(commands[i].file.slashData.name, interaction.user.id)) {
                     let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
+                    await interaction.editReply({embeds: [embed]});
+                    return;
+                }
+            }
+            if(commands[i].file.commandData.preformGeneralVerificationChecks) {
+                let groupID = GroupHandler.getIDFromName(args["group"]);
+                let verificationStatus = false;
+                let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+                if(robloxID !== 0) {
+                    verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
+                }
+                if(!verificationStatus) {
+                    let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
                 }
