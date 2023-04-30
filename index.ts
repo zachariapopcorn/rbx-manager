@@ -208,7 +208,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
 
 let oldMethod = console.error
 console.error = function(msg: string) {
-    if(msg.toString().indexOf("The Fetch API is an experimental feature") === -1) oldMethod(msg);
+    if(msg.toString().indexOf("ExperimentalWarning") === -1) oldMethod(msg);
 }
 
 client.login(client.config.DISCORD_TOKEN);
