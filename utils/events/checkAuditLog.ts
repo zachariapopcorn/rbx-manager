@@ -5,17 +5,18 @@ import SuspensionEntry from '../interfaces/SuspensionEntry';
 import fs from "fs/promises"
 import GroupHandler from '../classes/GroupHandler';
 
-let oldDate: Date;
+let oldDates: {id: number, date: Date}[] = [];
 
 export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
     let currentUser = await roblox.getCurrentUser();
     try {
         let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Desc", 100);
-        if(!oldDate) oldDate = auditLog.data[0].created;
-        let index = auditLog.data.findIndex(log => log.created.toISOString() === oldDate.toISOString());
-        if(index === 0 || index === -1) throw("Skip check");
-        for(let i = index - 1; i >= 0; i--) {
+        if(!oldDates.find(v => v.id === groupID)) oldDates.push({id: groupID, date: auditLog.data[0].created});
+        let dateIndex = oldDates.findIndex(v => v.id === groupID);
+        let auditIndex = auditLog.data.findIndex(log => log.created.toISOString() === oldDates[dateIndex].date.toISOString());
+        if(auditIndex === 0 || auditIndex === -1) throw("Skip check");
+        for(let i = auditIndex - 1; i >= 0; i--) {
             let log = auditLog.data[i];
             if(log.actor.user.userId === currentUser.UserID) continue;
             if(log.actionType === "Post Status" && client.config.logging.shout.enabled) {
@@ -97,7 +98,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 }
             }
         }
-        oldDate = auditLog.data[0].created;
+        oldDates[dateIndex].date = auditLog.data[0].created;
     } catch(e) {
         if(e !== "Skip check") {
             console.error(`There was an error while trying to check the audit logs: ${e}`);
