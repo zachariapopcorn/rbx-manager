@@ -36,9 +36,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason of why you want to unlock the supplied server").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Lock",
-        permissions: config.permissions.game.lock
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.lock,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

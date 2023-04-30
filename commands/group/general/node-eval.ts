@@ -58,9 +58,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("code").setDescription("The code to run (can also be a URL to the code to run)").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Group",
-        permissions: config.permissions.game.execution // Counter intuitive but I don't feel like make another permission entry 
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.execution, // Counter intuitive but I don't feel like make another permission entry
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

@@ -104,9 +104,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the bans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ban",
-        permissions: config.permissions.game.ban
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.ban,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

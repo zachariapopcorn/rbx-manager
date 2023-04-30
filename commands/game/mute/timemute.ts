@@ -113,9 +113,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the mute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Mute",
-        permissions: config.permissions.game.mute
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.mute,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

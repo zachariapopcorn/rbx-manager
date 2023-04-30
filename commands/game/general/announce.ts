@@ -33,9 +33,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("message").setDescription("The message that you wish to announce").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",
-        permissions: config.permissions.game.broadcast
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.broadcast,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

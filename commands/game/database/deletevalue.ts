@@ -41,9 +41,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("scope").setDescription("The scope of which the datastore is located at").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Database",
-        permissions: config.permissions.game.datastore
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.datastore,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

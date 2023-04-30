@@ -225,8 +225,9 @@ const command: CommandFile = {
     .setDescription("Logs the bot into the configured bot account"),
     commandData: {
         category: "General Group",
-    },
-    hasCooldown: false
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

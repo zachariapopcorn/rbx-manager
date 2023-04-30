@@ -47,9 +47,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to shutdown (only if you choose so)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",
-        permissions: config.permissions.game.shutdown
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.shutdown,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

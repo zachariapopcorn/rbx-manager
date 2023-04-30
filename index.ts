@@ -176,7 +176,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 return;
             }
-            if(commands[i].file.hasCooldown) {
+            if(commands[i].file.commandData.hasCooldown) {
                 if(client.isUserOnCooldown(commands[i].file.slashData.name, interaction.user.id)) {
                     let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
@@ -191,7 +191,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 console.error(e);
             }
-            if(commands[i].file.hasCooldown) {
+            if(commands[i].file.commandData.hasCooldown) {
                 let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
                 if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});

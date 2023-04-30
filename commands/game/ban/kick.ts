@@ -62,9 +62,10 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the kick(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ban",
-        permissions: config.permissions.game.kick
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.kick,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

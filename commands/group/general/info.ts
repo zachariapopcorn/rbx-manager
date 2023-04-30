@@ -30,8 +30,9 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group to get the info of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Group",
-    },
-    hasCooldown: false
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;
