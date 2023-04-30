@@ -9,15 +9,17 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
-import GroupBanFile from '../../../utils/interfaces/GroupBanFile';
+import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
         if(client.config.verificationChecks) {
             let verificationStatus = false;
             if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Exile");
+                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Exile");
             }
             if(!verificationStatus) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
@@ -46,7 +48,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Exile", victimRobloxID);
+                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Exile", victimRobloxID);
                 if(!verificationStatus) {
                     logs.push({
                         username: username,
@@ -56,8 +58,8 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
-            let index = bannedUsers.userIDs.findIndex(v => v === victimRobloxID);
+            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let index = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === victimRobloxID);
             if(index === -1) {
                 logs.push({
                     username: username,
@@ -66,19 +68,20 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            bannedUsers.userIDs.splice(index, 1);
+            bannedUsers.splice(index, 1);
             await fs.writeFile(`${process.cwd()}/database/groupbans.json`, JSON.stringify(bannedUsers));
             logs.push({
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the group for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has unbanned **${username}** from the group for the reason of **${reason}** from **${GroupHandler.getNameFromID(groupID)}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("ungroupban")
     .setDescription("Unbans the user(s) inputted from the group")
+    .addStringOption(o => o.setName("group").setDescription("The group to do the unbanning in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to unban from the group").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unbans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {

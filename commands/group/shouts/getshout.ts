@@ -3,10 +3,12 @@ import roblox = require('noblox.js');
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let shout = await roblox.getShout(client.config.groupId);
+        let groupID = GroupHandler.getIDFromName(args["group"]);
+        let shout = await roblox.getShout(groupID);
         if(!shout) {
             let embed = client.embedMaker({title: "No Shout", description: "The group linked doesn't have a shout", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -20,7 +22,8 @@ const command: CommandFile = {
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("getshout")
-    .setDescription("Gets the current group shout"),
+    .setDescription("Gets the current group shout")
+    .addStringOption(o => o.setName("group").setDescription("The group get the shout of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Shout"
     },

@@ -11,9 +11,10 @@ import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
 
-import GroupBanFile from '../../../utils/interfaces/GroupBanFile';
-import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
+import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
+import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 import ms = require('ms');
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const database = new RobloxDatastore(config);
 
@@ -87,27 +88,28 @@ const command: CommandFile = {
             .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `Yes\nMute Reason: ${moderationData.muteData.reason}` : "No"))
             gameDataValue = gameDataValue.replace("<warnings>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.warns ? moderationData.warns.length === 0 ? "No warnings present" : warnsString : "No warnings present"))
         }
-        if(client.config.groupId !== 0) {
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanFile;
-            let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
-            let bannedIndex = bannedUsers.userIDs.findIndex(v => v === robloxID);
+        if(client.config.groupIds.length !== 0) {
+            let groupID = GroupHandler.getIDFromName(args["group"]);
+            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let bannedIndex = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === robloxID);
             let isGroupBanned = (bannedIndex !== -1);
-            let suspendedIndex = suspendedUsers.users.findIndex(v => v.userId === robloxID);
+            let suspendedIndex = suspendedUsers.findIndex(v => v.groupID === groupID && v.userId === robloxID);
             let isSuspended = (suspendedIndex !== -1);
             let extraGroupData = "Is User Suspended: No";
             if(isSuspended) {
-                let oldRole = (await roblox.getRoles(client.config.groupId)).find(v => v.id === suspendedUsers.users[suspendedIndex].oldRoleID).name;
-                let time = suspendedUsers.users[suspendedIndex].timeToRelease - Date.now() as any;
+                let oldRole = (await roblox.getRoles(groupID)).find(v => v.id === suspendedUsers[suspendedIndex].oldRoleID).name;
+                let time = suspendedUsers[suspendedIndex].timeToRelease - Date.now() as any;
                 if(time <= 0) {
                     time = "Officially, this user is not suspended anymore, the next suspension check will delete their record from the DB"
                 } else {
                     time = ms(time, {long: true})
                 }
-                extraGroupData = `Is User Suspended: Yes\nSuspension Reason: ${suspendedUsers.users[suspendedIndex].reason}\nSuspended From: ${oldRole}\nSuspended For: ${time}`;
+                extraGroupData = `Is User Suspended: Yes\nSuspension Reason: ${suspendedUsers[suspendedIndex].reason}\nSuspended From: ${oldRole}\nSuspended For: ${time}`;
             }
             groupDataValue = "```\nRank Name: <rank name>\nRank ID: <rank id>\nIs User Group Banned: <ban status>\n<extra>```"
-            .replace("<rank name>", await roblox.getRankNameInGroup(client.config.groupId, robloxID))
-            .replace("<rank id>", (await roblox.getRankInGroup(client.config.groupId, robloxID)).toString())
+            .replace("<rank name>", await roblox.getRankNameInGroup(groupID, robloxID))
+            .replace("<rank id>", (await roblox.getRankInGroup(groupID, robloxID)).toString())
             .replace("<ban status>", isGroupBanned ? "Yes" : "No")
             .replace("<extra>", extraGroupData)
         }
@@ -141,6 +143,10 @@ const command: CommandFile = {
         permissions: config.permissions.group.user
     },
     hasCooldown: false
+}
+
+if(config.groupIds.length !== 0) {
+    command.slashData.addStringOption(o => o.setName("group").setDescription("The group to check the user's group data in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
 }
 
 if(config.universes.length !== 0) {
