@@ -54,7 +54,7 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Processing Join Requests", description: "Currently processing join requests, please be patient. You will be pinged once the process is done", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         let nextCursor = joinRequests.nextPageCursor;
-        await client.logAction(`<@${interaction.user.id}> has started to accept all of the join requests in the group for the reason of **${reason}**`);
+        await client.logAction(`<@${interaction.user.id}> has started to accept all of the join requests in the group for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
         try {
             await batchAccept(groupID, client, parseUsers(joinRequests.data));
         } catch(e) {

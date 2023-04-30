@@ -58,7 +58,7 @@ const command: CommandFile = {
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has accepted the join request of **${username}** for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has accepted the join request of **${username}** for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
