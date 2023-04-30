@@ -3,10 +3,12 @@ import roblox = require('noblox.js');
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let ranks = await roblox.getRoles(client.config.groupId);
+        let groupID = GroupHandler.getIDFromName(args["group"]);
+        let ranks = await roblox.getRoles(groupID);
         let description = "";
         for(let i = 1; i < ranks.length; i++) {
             if(client.isLockedRole(ranks[i])) {
@@ -20,7 +22,8 @@ const command: CommandFile = {
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("getranks")
-    .setDescription("Gets the ranks of the group"),
+    .setDescription("Gets the ranks of the group")
+    .addStringOption(o => o.setName("group").setDescription("The group to get the ranks of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking"
     },

@@ -8,10 +8,23 @@ import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
 import config from '../../../config';
-import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
+import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
+        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+        if(client.config.verificationChecks) {
+            let verificationStatus = false;
+            if(authorRobloxID !== 0) {
+                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking");
+            }
+            if(!verificationStatus) {
+                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
+        }
         let username = args["username"];
         let userID = await roblox.getIdFromUsername(username) as number;
         if(!userID) {
@@ -24,38 +37,40 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Invalid Time Suppiled", description: "You inputted an invalid time, please input a valid one", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let oldRank = await roblox.getRankInGroup(client.config.groupId, userID);
+        let oldRank = await roblox.getRankInGroup(groupID, userID);
         if(oldRank === 0) {
             let embed = client.embedMaker({title: "User Not In Group", description: "This user is currently not in the group", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
-        let index = suspensions.users.findIndex(v => v.userId === userID);
+        let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+        let index = suspensions.findIndex(v => v.userId === userID);
         if(index != -1) {
-            suspensions.users[index].timeToRelease = Date.now() + (time as any);
+            suspensions[index].timeToRelease = Date.now() + (time as any);
         } else {
-            let oldRoleID = (await roblox.getRoles(client.config.groupId)).find(v => v.rank === oldRank).id;
-            suspensions.users.push({
+            let oldRoleID = (await roblox.getRoles(groupID)).find(v => v.rank === oldRank).id;
+            suspensions.push({
+                groupID: groupID,
                 userId: userID,
                 reason: args["reason"],
                 oldRoleID: oldRoleID,
                 timeToRelease: Date.now() + (time as any)
             });
             try {
-                await roblox.setRank(client.config.groupId, userID, client.config.suspensionRank);
+                await roblox.setRank(groupID, userID, client.config.suspensionRank);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to change the rank of this user: ${e}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
         }
         await fs.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
-        await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}**`);
+        await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}** in **${GroupHandler.getNameFromID(groupID)}**`);
         let embed = client.embedMaker({title: "Success", description: `You've successfully suspended this user`, type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("suspend")
     .setDescription("Suspends the given users with the given amount of time")
+    .addStringOption(o => o.setName("group").setDescription("The group to do the suspending in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the person you wish to suspend").setRequired(true))
     .addStringOption(o => o.setName("time").setDescription("The amount of time you wish to suspend the user for").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason for the suspension").setRequired(true)) as Discord.SlashCommandBuilder,

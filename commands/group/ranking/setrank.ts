@@ -8,15 +8,17 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
-import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
+import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
         if(client.config.verificationChecks) {
             let verificationStatus = false;
             if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Ranking");
+                verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking");
             }
             if(!verificationStatus) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
@@ -56,7 +58,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Ranking", victimRobloxID);
+                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", victimRobloxID);
                 if(!verificationStatus) {
                     logs.push({
                         username: username,
@@ -66,8 +68,8 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
-            let index = suspensions.users.findIndex(v => v.userId === victimRobloxID);
+            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let index = suspensions.findIndex(v => v.userId === victimRobloxID);
             if(index != -1) {
                 logs.push({
                     username: username,
@@ -76,7 +78,7 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let rankID = await roblox.getRankInGroup(client.config.groupId, victimRobloxID);
+            let rankID = await roblox.getRankInGroup(groupID, victimRobloxID);
             if(rankID === 0) {
                 logs.push({
                     username: username,
@@ -85,7 +87,7 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let roles = await roblox.getRoles(client.config.groupId);
+            let roles = await roblox.getRoles(groupID);
             let isRankID = Number(rank) == rank;
             try {
                 if(!isRankID) { // If a rank name was inputed
@@ -104,7 +106,7 @@ const command: CommandFile = {
                 continue;
             }
             if(config.verificationChecks) {
-                let authorRank = await roblox.getRankInGroup(client.config.groupId, authorRobloxID);
+                let authorRank = await roblox.getRankInGroup(groupID, authorRobloxID);
                 if(rank >= authorRank) {
                     logs.push({
                         username: username,
@@ -114,7 +116,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let roleObject = await roblox.getRole(client.config.groupId, rank);
+            let roleObject = await roblox.getRole(groupID, rank);
             if(client.isLockedRole(roleObject)) {
                 logs.push({
                     username: username,
@@ -123,9 +125,9 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let oldRank = await roblox.getRankNameInGroup(client.config.groupId, victimRobloxID);
+            let oldRank = await roblox.getRankNameInGroup(groupID, victimRobloxID);
             try {
-                await roblox.setRank(client.config.groupId, victimRobloxID, rank);
+                await roblox.setRank(groupID, victimRobloxID, rank);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -134,18 +136,19 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let newRank = await roblox.getRankNameInGroup(client.config.groupId, victimRobloxID);
+            let newRank = await roblox.getRankNameInGroup(groupID, victimRobloxID);
             logs.push({
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has ranked **${username}** from **${oldRank}** to **${newRank}** for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has ranked **${username}** from **${oldRank}** to **${newRank}** for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("setrank")
     .setDescription("Sets the rank of the inputted user(s) to the inputted rank(s)")
+    .addStringOption(o => o.setName("group").setDescription("The group to do the ranking in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the person/people you wish to rank").setRequired(true))
     .addStringOption(o => o.setName("rank").setDescription("The rank(s) you wish to rank the inputted person/people to").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the ranking(s)").setRequired(false)) as Discord.SlashCommandBuilder,
