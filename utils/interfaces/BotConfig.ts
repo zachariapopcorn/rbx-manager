@@ -80,5 +80,4 @@ export default interface BotConfig {
     maximumNumberOfUsers: number,
     lockedRanks: any[],
     lockedCommands: string[],
-    whitelistedServers: string[]
 }

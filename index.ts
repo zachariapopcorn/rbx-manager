@@ -94,12 +94,8 @@ async function registerSlashCommands() {
         }
     }
     let rest = new REST().setToken(client.config.DISCORD_TOKEN);
-    let whitelistedServers = client.config.whitelistedServers;
     try {
-        for(let i = 0; i < whitelistedServers.length; i++) {
-            let serverID = whitelistedServers[i];
-            await rest.put(Routes.applicationGuildCommands(client.user.id, serverID), {body: slashCommands});
-        }
+        await rest.put(Routes.applicationCommands(client.user.id), {body: slashCommands});
     } catch(e) {
         console.error(`There was an error while registering slash commands: ${e}`);
     }

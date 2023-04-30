@@ -80,7 +80,6 @@ const config: BotConfig = {
     maximumNumberOfUsers: 5,
     lockedRanks: [],
     lockedCommands: [],
-    whitelistedServers: ["658241441234944021"]
 }
 
 export default config;
