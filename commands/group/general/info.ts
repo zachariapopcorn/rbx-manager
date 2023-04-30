@@ -16,7 +16,6 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         let embedDescription = "";
-        embedDescription += `**Group Name**: ${groupInfo.name}\n`;
         embedDescription += `**Group Description**: ${groupInfo.description}\n`;
         embedDescription += `**Group Owner**: ${groupInfo.owner.username}\n`;
         embedDescription += `**Group Membercount**: ${groupInfo.memberCount}\n`;
