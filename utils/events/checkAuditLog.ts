@@ -22,7 +22,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 let channel = await client.channels.fetch(client.config.logging.shout.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
-                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                     embedDescription += `**Shout Poster**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Shout Content**: ${log.description["Text"]}\n`;
