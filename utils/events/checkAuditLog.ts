@@ -11,7 +11,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
     let currentUser = await roblox.getCurrentUser();
     try {
-        let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Asc", 100);
+        let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Desc", 100);
         if(!oldDate) oldDate = auditLog.data[0].created;
         let index = auditLog.data.findIndex(log => log.created.toISOString() === oldDate.toISOString());
         if(index === 0 || index === -1) throw("Skip check");

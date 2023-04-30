@@ -54,9 +54,9 @@ const command: CommandFile = {
                 let embed = client.embedMaker({title: "Invalid Username", description: "The username that you provided is invalid", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
-            logs = await roblox.getAuditLog(groupID, "ChangeRank", userID, "Asc", 100, "");
+            logs = await roblox.getAuditLog(groupID, "ChangeRank", userID, "Desc", 100, "");
         } else {
-            logs = await roblox.getAuditLog(groupID, "ChangeRank", null, "Asc", 100, "");
+            logs = await roblox.getAuditLog(groupID, "ChangeRank", null, "Desc", 100, "");
         }
         if(logs.data.length === 0) {
             let embed = client.embedMaker({title: "No Logs Found", description: "No audit logs have been found with the given settings", type: "error", author: interaction.user});
@@ -65,9 +65,9 @@ const command: CommandFile = {
         while(logs.data.length < limit) {
             let tempLogs: roblox.AuditPage;
             if(userID) {
-                tempLogs = await roblox.getAuditLog(groupID, "ChangeRank", userID, "Asc", 100, logs.nextPageCursor);
+                tempLogs = await roblox.getAuditLog(groupID, "ChangeRank", userID, "Desc", 100, logs.nextPageCursor);
             } else {
-                tempLogs = await roblox.getAuditLog(groupID, "ChangeRank", null, "Asc", 100, logs.nextPageCursor);
+                tempLogs = await roblox.getAuditLog(groupID, "ChangeRank", null, "Desc", 100, logs.nextPageCursor);
             }
             logs.data = logs.data.concat(tempLogs.data);
             logs.previousPageCursor = tempLogs.previousPageCursor;
