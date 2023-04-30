@@ -8,6 +8,7 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const messaging = new MessagingService(config);
 
@@ -22,7 +23,7 @@ const command: CommandFile = {
         }
         let reasons = reasonData.parsedReasons;
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -57,7 +58,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("kick")
     .setDescription("Kicks user(s) from the game")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to kick").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the kick(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {

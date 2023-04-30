@@ -73,7 +73,7 @@ const config: BotConfig = {
     defaultCooldown: 5000,
     cooldownOverrides: {},
     suspensionRank: 1,
-    universes: [{universeID: 3507532981, universeDisplayName: "I test stuff here"}],
+    universes: [3507532981],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,

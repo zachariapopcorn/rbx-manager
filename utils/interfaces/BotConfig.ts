@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import UniverseEntry from './UniverseEntry';
 import AntiAbuseAction from './AntiAbuseAction';
 
 export default interface BotConfig {
@@ -73,7 +72,7 @@ export default interface BotConfig {
     defaultCooldown: number,
     cooldownOverrides: {},
     suspensionRank: number,
-    universes: UniverseEntry[],
+    universes: number[],
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,

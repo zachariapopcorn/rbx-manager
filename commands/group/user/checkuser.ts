@@ -15,6 +15,7 @@ import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 import ms = require('ms');
 import GroupHandler from '../../../utils/classes/GroupHandler';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 
@@ -51,7 +52,7 @@ const command: CommandFile = {
         let gameDataValue;
         if(client.config.universes.length !== 0) {
             let universeName = args["universe"];
-            let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+            let universeID = UniverseHandler.getIDFromName(universeName);
             let moderationData: ModerationData | string = "";
             try {
                 moderationData = await database.getModerationData(universeID, robloxID);
@@ -151,7 +152,7 @@ if(config.groupIds.length !== 0) {
 }
 
 if(config.universes.length !== 0) {
-    command.slashData.addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    command.slashData.addStringOption(o => o.setName("universe").setDescription("The universe to check the user's moderation status on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
 }
 
 export default command;

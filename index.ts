@@ -24,6 +24,7 @@ import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
 import GroupHandler from './utils/classes/GroupHandler';
+import UniverseHandler from './utils/classes/UniverseHandler';
 
 const client = new BotClient(config);
 
@@ -147,6 +148,10 @@ client.once('ready', async() => {
     if(client.config.groupIds.length !== 0) {
         await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
         await loginToRoblox(client.config.ROBLOX_COOKIE);
+        await GroupHandler.loadGroups();
+    }
+    if(client.config.universes.length !== 0) {
+        await UniverseHandler.loadUniverses();
     }
     await readCommands();
     await deleteGuildCommands();

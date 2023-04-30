@@ -7,6 +7,7 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const messaging = new MessagingService(config);
 
@@ -14,7 +15,7 @@ const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         let rbxID;
         try {
             rbxID = await roblox.getIdFromUsername(username);
@@ -39,7 +40,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("getjobid")
     .setDescription("Gets the job ID of the server the inputted user is in")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to get the server job ID of").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "JobID",

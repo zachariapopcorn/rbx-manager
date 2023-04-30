@@ -4,15 +4,12 @@ import roblox = require('noblox.js');
 import config from '../../config';
 
 export default class GroupHandler {
-    private static groupData: {id: number, name: string}[] = this.loadGroupNames();
-    private static loadGroupNames(): {id: number, name: string}[] {
-        let temp = [];
+    private static groupData: {id: number, name: string}[] = [];
+    public static async loadGroups() {
         for(let i = 0; i < config.groupIds.length; i++) {
-            roblox.getGroup(config.groupIds[i]).then((groupInfo) => {
-                temp.push({id: groupInfo.id, name: groupInfo.name});
-            });
+            let groupInfo = await roblox.getGroup(config.groupIds[i]);
+            this.groupData.push({id: groupInfo.id, name: groupInfo.name});
         }
-        return temp;
     }
     public static parseGroups(): Discord.APIApplicationCommandOptionChoice[] {
         let parsed: Discord.APIApplicationCommandOptionChoice[] = [];

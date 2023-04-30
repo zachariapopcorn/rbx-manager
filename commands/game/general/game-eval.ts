@@ -6,6 +6,7 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const messaging = new MessagingService(config);
 
@@ -15,7 +16,7 @@ const command: CommandFile = {
         let code = args["code"];
         let jobID = args["jobid"];
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         if(typeOfOperation === "jobID" && !jobID) {
             let embed = client.embedMaker({title: "Argument Error", description: "You didn't supply a Job ID even though you supplied the jobID execution type", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -44,7 +45,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("game-eval")
     .setDescription("Runs serverside code on either all servers or a specific one")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("type").setDescription("The type of execution to preform").setRequired(true).addChoices({name: "global", value: "global"}, {name: "jobID", value: "jobID"}))
     .addStringOption(o => o.setName("code").setDescription("The code to execute in the game (can also be a URL to the code to run)").setRequired(true))
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to run the code in (only if you choose so)").setRequired(false)) as Discord.SlashCommandBuilder,

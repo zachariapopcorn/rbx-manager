@@ -6,6 +6,7 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const messaging = new MessagingService(config);
 
@@ -14,7 +15,7 @@ const command: CommandFile = {
         let jobID = args["jobid"];
         let reason = args["reason"];
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         try {
             await messaging.sendMessage(universeID, "Lock", {
                 jobID: jobID,
@@ -31,7 +32,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("lock")
     .setDescription("Locks the inputted server")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to lock").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason of why you want to lock the supplied server").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
