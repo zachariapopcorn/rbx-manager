@@ -53,7 +53,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                     let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let embedDescription = "";
-                        embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
+                        embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                         embedDescription += `**Ranker**: ${log.actor.user.username}\n`;
                         embedDescription += `**Role**: ${log.actor.role.name}\n`;
                         embedDescription += `**Target**: ${log.description["TargetName"]}\n`;
@@ -72,7 +72,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
-                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}`;
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                     embedDescription += `**Author**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Action Type**: ${log.actionType}\n`;
