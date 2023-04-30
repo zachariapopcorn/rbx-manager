@@ -101,6 +101,19 @@ async function registerSlashCommands() {
     }
 }
 
+async function deleteGuildCommands() {
+    let rest = new REST().setToken(client.config.DISCORD_TOKEN);
+    let guilds = await client.guilds.fetch({limit: 200});
+    for(let i = 0; i < guilds.size; i++) {
+        let guild = guilds.at(i);
+        try {
+            await rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), {body: []});
+        } catch(e) {
+            console.error(`There was an error while trying to delete guild commmands: ${e}`);
+        }
+    }
+}
+
 export async function loginToRoblox(robloxCookie: string) {
     try {
         await roblox.setCookie(robloxCookie);
@@ -135,6 +148,7 @@ client.once('ready', async() => {
         await loginToRoblox(client.config.ROBLOX_COOKIE);
     }
     await readCommands();
+    await deleteGuildCommands();
     await registerSlashCommands();
 });
 
