@@ -66,7 +66,7 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("accept-join-request")
     .setDescription("Accepts the join request of the user(s) inputted")
-    .addStringOption(o => o.setName("group").setDescription("The group to accept these join requests in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
+    .addStringOption(o => o.setName("group").setDescription("The group to accept join requests in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to accept the join request of").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're accepting the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
