@@ -9,7 +9,7 @@ let oldDates: {id: number, date: Date}[] = [];
 
 export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
-    let currentUser = await roblox.getCurrentUser();
+    let currentUser = client.robloxInfo;
     try {
         let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Desc", 100);
         if(!oldDates.find(v => v.id === groupID)) oldDates.push({id: groupID, date: auditLog.data[0].created});

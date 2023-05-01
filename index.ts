@@ -118,14 +118,14 @@ async function deleteGuildCommands() {
 
 export async function loginToRoblox(robloxCookie: string) {
     try {
-        await roblox.setCookie(robloxCookie);
+        client.robloxInfo = await roblox.setCookie(robloxCookie);
     } catch {
         console.error("Unable to login to Roblox");
         client.user.setActivity("Logged Into Roblox? ❌");
         client.isLoggedIn = false;
         return;
     }
-    console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
+    console.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`);
     client.isLoggedIn = true;
     for(let i = 0; i < client.config.groupIds.length; i++) {
         let groupID = client.config.groupIds[i];

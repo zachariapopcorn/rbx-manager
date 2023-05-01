@@ -59,13 +59,7 @@ async function login(client: BotClient, username: string, password: string, csrf
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        let isLoggedIn = true;
-        try {
-            await roblox.getCurrentUser();
-        } catch {
-            isLoggedIn = false;
-        }
-        if(isLoggedIn) {
+        if(client.isLoggedIn) {
             let embed = client.embedMaker({title: "Already Logged In", description: "The bot is already logged into the bot account, no need to login again", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
