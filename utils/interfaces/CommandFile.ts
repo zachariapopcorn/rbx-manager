@@ -6,5 +6,4 @@ export default interface CommandFile {
     run: (interaction: Discord.CommandInteraction, client: BotClient, args: any) => Promise<any>,
     slashData: Discord.SlashCommandBuilder,
     commandData: CommandData,
-    hasCooldown: boolean
 }

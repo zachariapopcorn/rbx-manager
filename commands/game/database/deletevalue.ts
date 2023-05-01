@@ -7,6 +7,7 @@ import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 
@@ -16,7 +17,7 @@ const command: CommandFile = {
         let key = args["key"] as string;
         let scope = args["scope"] as string || "global";
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         try {
             await roblox.deleteDatastoreEntry(universeID, name, key, scope);
         } catch(e) {
@@ -35,15 +36,16 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("deletevalue")
     .setDescription("Deletes data from the datastores with the given settings")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("name").setDescription("The name of the datastore to delete data from").setRequired(true))
     .addStringOption(o => o.setName("key").setDescription("The entry key of the data to delete from the datastore").setRequired(true))
     .addStringOption(o => o.setName("scope").setDescription("The scope of which the datastore is located at").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Database",
-        permissions: config.permissions.game.datastore
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.datastore,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

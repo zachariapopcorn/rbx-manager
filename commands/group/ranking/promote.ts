@@ -8,21 +8,13 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
-import SuspensionFile from '../../../utils/interfaces/SuspensionFile';
+import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Ranking");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -45,7 +37,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Ranking", victimRobloxID);
+                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", victimRobloxID);
                 if(!verificationStatus) {
                     logs.push({
                         username: username,
@@ -55,8 +47,8 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile;
-            let index = suspensions.users.findIndex(v => v.userId === victimRobloxID);
+            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let index = suspensions.findIndex(v => v.userId === victimRobloxID);
             if(index != -1) {
                 logs.push({
                     username: username,
@@ -65,7 +57,7 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let rankID = await roblox.getRankInGroup(client.config.groupId, victimRobloxID);
+            let rankID = await roblox.getRankInGroup(groupID, victimRobloxID);
             if(rankID === 0) {
                 logs.push({
                     username: username,
@@ -74,11 +66,11 @@ const command: CommandFile = {
                 });
                 continue;
             }
-            let roles = await roblox.getRoles(client.config.groupId);
+            let roles = await roblox.getRoles(groupID);
             let currentRoleIndex = roles.findIndex(role => role.rank === rankID);
             let currentRole = roles[currentRoleIndex];
             let potentialRole = roles[currentRoleIndex + 1];
-            let botRank = await roblox.getRankInGroup(client.config.groupId, await roblox.getCurrentUser("UserID"));
+            let botRank = await roblox.getRankInGroup(groupID, await roblox.getCurrentUser("UserID"));
             if(potentialRole.rank >= botRank) {
                 logs.push({
                     username: username,
@@ -135,7 +127,7 @@ const command: CommandFile = {
                 continue;
             }
             try {
-                await roblox.setRank(client.config.groupId, victimRobloxID, potentialRole.rank);
+                await roblox.setRank(groupID, victimRobloxID, potentialRole.rank);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -148,20 +140,23 @@ const command: CommandFile = {
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has promoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has promoted **${username}** from **${oldRoleName}** to **${potentialRole.name}** for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("promote")
     .setDescription("Promotes the inputted user(s)")
+    .addStringOption(o => o.setName("group").setDescription("The group to do the promoting in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to promote").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the promote(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
-        permissions: config.permissions.group.ranking
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.ranking,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "Ranking"
+    }
 }
 
 export default command;

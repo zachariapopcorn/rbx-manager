@@ -1,9 +1,13 @@
 import Discord from 'discord.js';
 import ms from 'ms';
+
+import { commands } from '../..';
 import config from '../../config';
+import CommandCategory from '../interfaces/CommandCategory';
 import CommandFile from '../interfaces/CommandFile';
 
 export default class CommandHelpers {
+    public static allowedCommands = ["help", "checkuser"];
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};
@@ -72,15 +76,24 @@ export default class CommandHelpers {
             return {parsedTimes: [], didError: true};
         }
     }
-    public static parseUniverses(): Discord.APIApplicationCommandOptionChoice[] {
-        let universes = config.universes;
-        let parsed: Discord.APIApplicationCommandOptionChoice[] = [];
-        for(let i = 0; i < universes.length; i++) {
-            parsed.push({name: universes[i].universeDisplayName, value: universes[i].universeDisplayName});
+    public static getGroupCommands(): string[] {
+        let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User"];
+        let cmds = [];
+        for(let i = 0; i < commands.length; i++) {
+            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+                cmds.push(commands[i].name);
+            }
         }
-        return parsed;
+        return cmds;
     }
-    public static getUniverseIDFromName(name: string): number {
-        return config.universes.find(v => v.universeDisplayName === name).universeID;
+    public static getGameCommands(): string[] {
+        let categories: CommandCategory[] = ["Ban", "Database", "General Game", "JobID", "Lock", "Mute"];
+        let cmds = [];
+        for(let i = 0; i < commands.length; i++) {
+            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+                cmds.push(commands[i].name);
+            }
+        }
+        return cmds;
     }
 }

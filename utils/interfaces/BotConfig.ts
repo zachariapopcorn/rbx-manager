@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import UniverseEntry from './UniverseEntry';
+import AntiAbuseAction from './AntiAbuseAction';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
@@ -9,7 +9,7 @@ export default interface BotConfig {
     ROBLOX_API_KEY: string,
     ROVER_API_KEY: string,
     WEB_API_KEY: string,
-    groupId: number,
+    groupIds: number[],
     permissions: {
         all: string[],
         group: {
@@ -30,6 +30,17 @@ export default interface BotConfig {
             lock: string[],
             mute: string[]
         }
+    },
+    antiAbuse: {
+        enabled: boolean,
+        thresholds: {
+            ranks: number,
+            exiles: number
+        },
+        actions: {
+            ranks: AntiAbuseAction,
+            exiles: AntiAbuseAction
+        }
     }
     logging: {
         audit: {
@@ -43,6 +54,14 @@ export default interface BotConfig {
         command: {
             enabled: boolean,
             loggingChannel: string
+        },
+        antiAbuse: {
+            enabled: boolean,
+            loggingChannel: string
+        },
+        sales: {
+            enabled: boolean,
+            loggingChannel: string
         }
     }
     embedColors: {
@@ -53,12 +72,11 @@ export default interface BotConfig {
     defaultCooldown: number,
     cooldownOverrides: {},
     suspensionRank: number,
-    universes: UniverseEntry[],
+    universes: number[],
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,
     maximumNumberOfUsers: number,
     lockedRanks: any[],
     lockedCommands: string[],
-    whitelistedServers: string[]
 }

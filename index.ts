@@ -20,6 +20,11 @@ import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
 import checkSuspensions from './utils/events/checkSuspensions';
 import checkCooldowns from './utils/events/checkCooldowns';
+import checkAbuse from './utils/events/checkAbuse';
+import checkSales from './utils/events/checkSales';
+import checkLoginStatus from './utils/events/checkLoginStatus';
+import GroupHandler from './utils/classes/GroupHandler';
+import UniverseHandler from './utils/classes/UniverseHandler';
 
 const client = new BotClient(config);
 
@@ -27,6 +32,7 @@ const app = express();
 app.use(bodyParser.json());
 
 export const commands:CommandInstance[] = [];
+export const registeredCommands: CommandInstance[] = [];
 
 app.get("/", async (request, response) => {
     response.status(200).send("OK");
@@ -71,7 +77,16 @@ async function readCommands(path?: string) {
 
 async function registerSlashCommands() {
     let slashCommands = [];
+    if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
+    if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     for(let i = 0; i < commands.length; i++) {
+        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
+            console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
+            continue;
+        }
+        registeredCommands.push(commands[i]);
         let commandData;
         try {
             commandData = commands[i].slashData.toJSON()
@@ -81,14 +96,23 @@ async function registerSlashCommands() {
         }
     }
     let rest = new REST().setToken(client.config.DISCORD_TOKEN);
-    let whitelistedServers = client.config.whitelistedServers;
     try {
-        for(let i = 0; i < whitelistedServers.length; i++) {
-            let serverID = whitelistedServers[i];
-            await rest.put(Routes.applicationGuildCommands(client.user.id, serverID), {body: slashCommands});
-        }
+        await rest.put(Routes.applicationCommands(client.user.id), {body: slashCommands});
     } catch(e) {
         console.error(`There was an error while registering slash commands: ${e}`);
+    }
+}
+
+async function deleteGuildCommands() {
+    let rest = new REST().setToken(client.config.DISCORD_TOKEN);
+    let guilds = await client.guilds.fetch({limit: 200});
+    for(let i = 0; i < guilds.size; i++) {
+        let guild = guilds.at(i);
+        try {
+            await rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), {body: []});
+        } catch(e) {
+            console.error(`There was an error while trying to delete guild commmands: ${e}`);
+        }
     }
 }
 
@@ -97,12 +121,21 @@ export async function loginToRoblox(robloxCookie: string) {
         await roblox.setCookie(robloxCookie);
     } catch {
         console.error("Unable to login to Roblox");
+        client.user.setActivity("Logged Into Roblox? ❌");
+        client.isLoggedIn = false;
         return;
     }
     console.log(`Logged into the Roblox account - ${(await roblox.getCurrentUser()).UserName}`);
-    await checkAudits(client);
+    client.isLoggedIn = true;
+    for(let i = 0; i < client.config.groupIds.length; i++) {
+        let groupID = client.config.groupIds[i];
+        await checkAudits(groupID, client);
+        await checkAbuse(groupID, client);
+        await checkSales(groupID, client);
+    }
     await checkBans(client);
     await checkSuspensions(client);
+    await checkLoginStatus(client);
 }
 
 client.once('ready', async() => {
@@ -112,9 +145,16 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
-    roblox.setAPIKey(client.config.ROBLOX_API_KEY);
-    await loginToRoblox(client.config.ROBLOX_COOKIE);
+    if(client.config.groupIds.length !== 0) {
+        await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
+        await loginToRoblox(client.config.ROBLOX_COOKIE);
+        await GroupHandler.loadGroups();
+    }
+    if(client.config.universes.length !== 0) {
+        await UniverseHandler.loadUniverses();
+    }
     await readCommands();
+    await deleteGuildCommands();
     await registerSlashCommands();
 });
 
@@ -123,12 +163,10 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     let command = interaction.commandName.toLowerCase();
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
-            await interaction.deferReply();
-            let index = config.lockedCommands.findIndex(c => c.toLowerCase() === command);
-            if(index !== -1) {
-                let embed = client.embedMaker({title: "Locked Command", description: "This command is currently locked", type: "error", author: interaction.user});
-                await interaction.editReply({embeds: [embed]});
-                return;
+            if(command === "node-eval") { // Only command that uses ephemeral responses
+                await interaction.deferReply({ephemeral: true});
+            } else {
+                await interaction.deferReply();
             }
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
@@ -144,9 +182,22 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 return;
             }
-            if(commands[i].file.hasCooldown) {
+            if(commands[i].file.commandData.hasCooldown) {
                 if(client.isUserOnCooldown(commands[i].file.slashData.name, interaction.user.id)) {
                     let embed = client.embedMaker({title: "Cooldown", description: "You're currently on cooldown for this command, take a chill pill", type: "error", author: interaction.user});
+                    await interaction.editReply({embeds: [embed]});
+                    return;
+                }
+            }
+            if(commands[i].file.commandData.preformGeneralVerificationChecks) {
+                let groupID = GroupHandler.getIDFromName(args["group"]);
+                let verificationStatus = false;
+                let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+                if(robloxID !== 0) {
+                    verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
+                }
+                if(!verificationStatus) {
+                    let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
                 }
@@ -159,7 +210,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 console.error(e);
             }
-            if(commands[i].file.hasCooldown) {
+            if(commands[i].file.commandData.hasCooldown) {
                 let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
                 if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
@@ -173,5 +224,10 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
         }
     }
 });
+
+let oldMethod = console.error
+console.error = function(msg: string) {
+    if(msg.toString().indexOf("ExperimentalWarning") === -1) oldMethod(msg);
+}
 
 client.login(client.config.DISCORD_TOKEN);

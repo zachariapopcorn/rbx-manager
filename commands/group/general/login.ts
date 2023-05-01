@@ -28,6 +28,15 @@ function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function getENVString(): string {
+    const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY", "WEB_API_KEY"];
+    let formatted = "";
+    for(let i = 0; i < values.length; i++) {
+        formatted += `${values[i]}=${process.env[values[i]]}\n`;
+    }
+    return formatted;
+}
+
 async function login(client: BotClient, username: string, password: string, csrfToken?: string, captchaId?: string, captchaToken?: string) {
     return await client.request({
         url: "https://auth.roblox.com/v2/login",
@@ -64,8 +73,10 @@ const command: CommandFile = {
         let res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
         let csrfToken = res.headers.get("x-csrf-token");
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
-        let fieldData = (await res.json()).errors[0].fieldData;
+        let body = await res.json();
+        let fieldData = body.errors[0].fieldData;
         if(!fieldData) {
+            console.log(body.toString());
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
@@ -136,21 +147,77 @@ const command: CommandFile = {
         }
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
+        await fs.promises.unlink(`${process.cwd()}/Image.gif`);
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, cID, cToken);
         let rawCookie = res.headers.get("set-cookie");
-        if(!rawCookie) {
-            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
+        if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+            let body = await res.json();
+            if(!body.twoStepVerificationData) {
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
+            let userID = body.user.id; 
+            let mediaType = body.twoStepVerificationData.mediaType.toLowerCase();
+            let challengeId = body.twoStepVerificationData.ticket;
+            let embed = client.embedMaker({title: "Two Step Verification", description: `Roblox has prompted a two step verification challenge. Please enter the code from your ${mediaType}`, type: "info", author: interaction.user});
+            await interaction.editReply({embeds: [embed]});
+            let mfaCode = (await interaction.channel.awaitMessages({
+                filter: (message) => {
+                    return message.author.id === interaction.user.id;
+                },
+                max: 1
+            })).at(0).content;
+            console.log(mfaCode);
+            res = await client.request({
+                url: `https://twostepverification.roblox.com/v1/users/${userID}/challenges/${mediaType}/verify`,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "User-Agent": UA,
+                    "X-CSRF-TOKEN": csrfToken
+                },
+                body: {
+                    "actionType": "Login",
+                    "challengeId": challengeId,
+                    "code": mfaCode
+                },
+                robloxRequest: false
+            });
+            body = await res.json();
+            let verificationToken = body.verificationToken;
+            if(!verificationToken) {
+                let embed = client.embedMaker({title: "Invalid Code", description: "You inputted an invalid code, please rerun the command", type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
+            res = await client.request({
+                url: `https://auth.roblox.com/v3/users/${userID}/two-step-verification/login`,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "User-Agent": UA,
+                    "X-CSRF-TOKEN": csrfToken
+                },
+                body: {
+                    "challengeId": challengeId,
+                    "rememberDevice": true,
+                    "verificationToken": verificationToken
+                },
+                robloxRequest: false
+            });
+            rawCookie = res.headers.get("set-cookie");
+            if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
         }
         embed = client.embedMaker({title: "Success", description: "I've successfully logged into the Roblox account", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         let newCookie = rawCookie.split(" ").find(v => v.startsWith(".ROBLOSECURITY=")).replace(".ROBLOSECURITY=", "");
         newCookie = newCookie.substring(0, newCookie.length - 1);
         await loginToRoblox(newCookie);
-        let envContent = await fs.promises.readFile(`${process.cwd()}/.env`, "utf-8");
+        let envContent = getENVString();
         envContent = envContent.replace(`ROBLOX_COOKIE=${client.config.ROBLOX_COOKIE}`, `ROBLOX_COOKIE=${newCookie}`);
         await fs.promises.writeFile(`${process.cwd()}/.env`, envContent);
-        await fs.promises.unlink(`${process.cwd()}/Image.gif`);
         client.config.ROBLOX_COOKIE = newCookie;
     },
     slashData: new Discord.SlashCommandBuilder()
@@ -158,8 +225,9 @@ const command: CommandFile = {
     .setDescription("Logs the bot into the configured bot account"),
     commandData: {
         category: "General Group",
-    },
-    hasCooldown: false
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

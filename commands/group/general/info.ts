@@ -3,12 +3,19 @@ import roblox from 'noblox.js';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        let groupInfo = await roblox.getGroup(client.config.groupId);
+        let groupID = GroupHandler.getIDFromName(args["group"]);
+        let groupInfo: roblox.Group;
+        try {
+            groupInfo = await roblox.getGroup(groupID);
+        } catch(e) {
+            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to get the group information: ${e}`, type: "error", author: interaction.user});
+            return await interaction.editReply({embeds: [embed]});
+        }
         let embedDescription = "";
-        embedDescription += `**Group Name**: ${groupInfo.name}\n`;
         embedDescription += `**Group Description**: ${groupInfo.description}\n`;
         embedDescription += `**Group Owner**: ${groupInfo.owner.username}\n`;
         embedDescription += `**Group Membercount**: ${groupInfo.memberCount}\n`;
@@ -19,11 +26,13 @@ const command: CommandFile = {
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("info")
-    .setDescription("Gets the information of the group"),
+    .setDescription("Gets the information of the group")
+    .addStringOption(o => o.setName("group").setDescription("The group to get the info of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Group",
-    },
-    hasCooldown: false
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

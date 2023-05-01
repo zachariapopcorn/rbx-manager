@@ -1,0 +1,93 @@
+-- CONFIGURATION --
+
+local SERVER = "Where the system is hosted"
+local WEB_API_KEY = "What you put in the env file in Step 5.7"
+local DATASTORE_NAME = "moderations"
+
+-- MAIN CODE --
+
+local httpService = game:GetService("HttpService")
+local scriptEditor = game:GetService("ScriptEditorService")
+
+local SERVER_FILES_URL = "https://api.github.com/repos/zachariapopcorn/rbx-manager/contents/roblox/Server/ServerScriptService/Discord%20to%20Roblox%20Moderation%20System?ref=master"
+local CLIENT_FILES_URL = "https://api.github.com/repos/zachariapopcorn/rbx-manager/contents/roblox/Client/StarterPlayer/StarterPlayerScripts/Discord%20to%20Roblox%20Moderation%20System?ref=master"
+
+local folderName = "Discord to Roblox Moderation System"
+
+local regularScripts = {"Main.lua"}
+
+function hasValue(tab, val)
+	for i,v in ipairs(tab) do
+		if(v == val) then
+			return true
+		end
+	end
+	return false
+end
+
+
+function parseURL(url: string, folder: Folder, isServer: boolean)
+	local res = httpService:JSONDecode(httpService:GetAsync(url))
+	for _,file in pairs(res) do
+		if(string.find(file.name, ".lua")) then
+			local scriptInstance;
+			if(isServer) then
+				if(hasValue(regularScripts, file.name)) then
+					scriptInstance = Instance.new("Script", folder)
+				else
+					scriptInstance = Instance.new("ModuleScript", folder)
+				end
+			else
+				scriptInstance = Instance.new("LocalScript", folder)
+			end
+			scriptInstance.Name = file.name:gsub(".lua", "")
+			scriptEditor:OpenScriptDocumentAsync(scriptInstance)
+			local script = scriptEditor:FindScriptDocument(scriptInstance)
+			local source = httpService:GetAsync(file.download_url)
+			if(file.name == "Config.lua") then
+				local temp = 'SERVER = "con"'
+				source = source:gsub('SERVER = ""', temp:gsub("con", SERVER))
+				temp = 'WEB_API_KEY = "con"'
+				source = source:gsub('WEB_API_KEY = ""', temp:gsub("con", WEB_API_KEY))
+				temp = 'DATASTORE_NAME = "con"'
+				source = source:gsub('DATASTORE_NAME = "moderations"', temp:gsub("con", DATASTORE_NAME))
+			end
+			script:EditTextAsync(source, 1, 1, 1, 1)
+			script:CloseAsync()
+		else
+			Instance.new("Folder", folder).Name = file.name
+			parseURL(file.url, folder[file.name], isServer)
+		end
+	end
+end
+
+pcall(function()
+	local config = require(game:GetService("ServerScriptService")["Discord to Roblox Moderation System"].Config)
+	SERVER = config.SERVER
+	WEB_API_KEY = config.WEB_API_KEY
+	DATASTORE_NAME = DATASTORE_NAME
+end)
+
+pcall(function()
+	game:GetService("ReplicatedStorage")[folderName]:Destroy()
+	game:GetService("ServerScriptService")[folderName]:Destroy()
+	game:GetService("StarterPlayer").StarterPlayerScripts[folderName]:Destroy()
+end)
+
+local replicatedStorageFolder = Instance.new("Folder", game:GetService("ReplicatedStorage"))
+replicatedStorageFolder.Name = folderName
+Instance.new("RemoteEvent", replicatedStorageFolder).Name = "Announcement"
+Instance.new("RemoteEvent", replicatedStorageFolder).Name = "SendMutes"
+
+local model = game:GetService("InsertService"):LoadAsset(13157806758)
+model.Parent = replicatedStorageFolder
+model["Announcement GUI"].Parent = replicatedStorageFolder
+model:Destroy()
+
+local serverFolder = Instance.new("Folder", game:GetService("ServerScriptService"))
+serverFolder.Name = folderName
+parseURL(SERVER_FILES_URL, serverFolder, true)
+
+local clientFolder = Instance.new("Folder", game:GetService("StarterPlayer").StarterPlayerScripts)
+clientFolder.Name = folderName
+parseURL(CLIENT_FILES_URL, clientFolder, false)

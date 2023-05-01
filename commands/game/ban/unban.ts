@@ -9,6 +9,7 @@ import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 
@@ -23,7 +24,7 @@ const command: CommandFile = {
         }
         let reasons = reasonData.parsedReasons;
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let reason = reasons[i];
@@ -58,11 +59,12 @@ const command: CommandFile = {
                             muteData: {
                                 isMuted: false,
                                 reason: ""
-                            }
+                            },
+                            warns: []
                         }
                     }
                 }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: (oldData.warns || [])});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -83,14 +85,15 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("unban")
     .setDescription("Unbans the inputted user(s) from the game")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to unban").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unbans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ban",
-        permissions: config.permissions.game.ban
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.ban,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

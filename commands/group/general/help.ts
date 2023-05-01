@@ -3,13 +3,14 @@ import Discord from 'discord.js';
 import BotClient from '../../../utils/classes/BotClient';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-import { commands } from '../../..';
+import { commands, registeredCommands } from '../../..';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let helpData = {};
         for(let i = 0; i < commands.length; i++) {
             let commandName = commands[i].name;
+            if(registeredCommands.findIndex(c => c.name === commandName) === -1) continue;
             let slashData = commands[i].slashData;
             let commandData = commands[i].commandData;
             if(!helpData[commandData.category]) helpData[commandData.category] = {commandHelpStrings: [], helpEmbed: null};
@@ -58,8 +59,9 @@ const command: CommandFile = {
     .setDescription("Gets a list of commands"),
     commandData: {
         category: "General Group",
-    },
-    hasCooldown: false
+        hasCooldown: false,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

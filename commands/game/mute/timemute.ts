@@ -11,6 +11,7 @@ import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 const messaging = new MessagingService(config);
@@ -32,7 +33,7 @@ const command: CommandFile = {
         }
         let reasons = reasonData.parsedReasons;
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let time = times[i];
@@ -68,11 +69,12 @@ const command: CommandFile = {
                             muteData: {
                                 isMuted: false,
                                 reason: ""
-                            }
+                            },
+                            warns: []
                         }
                     }
                 }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason, releaseTime: oldData.banData.releaseTime}, muteData: {isMuted: true, reason: reason, releaseTime: (Date.now() + time)}});
+                await database.setModerationData(universeID, robloxID, {banData: {isBanned: oldData.banData.isBanned, reason: oldData.banData.reason, releaseTime: oldData.banData.releaseTime}, muteData: {isMuted: true, reason: reason, releaseTime: (Date.now() + time)}, warns: (oldData.warns || [])});
             } catch(e) {
                 logs.push({
                     username: username,
@@ -106,15 +108,16 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("timemute")
     .setDescription("Mutes the inputted user(s) for the given time")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to mute").setRequired(true))
     .addStringOption(o => o.setName("time").setDescription("The duration of the mute(s)").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the mute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Mute",
-        permissions: config.permissions.game.mute
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.mute,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

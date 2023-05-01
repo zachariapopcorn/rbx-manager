@@ -1,27 +1,29 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
-import SuspensionFile from '../interfaces/SuspensionFile';
+import SuspensionEntry from '../interfaces/SuspensionEntry';
 import fs from "fs/promises"
+import GroupHandler from '../classes/GroupHandler';
 
-let oldAuditLogDate;
+let oldDates: {id: number, date: Date}[] = [];
 
-export default async function checkAudits(client: BotClient) {
-    if(client.config.logging.audit.enabled === false && client.config.logging.shout.enabled === false) return;
+export default async function checkAudits(groupID: number, client: BotClient) {
+    if(!client.isLoggedIn) return;
     let currentUser = await roblox.getCurrentUser();
-    let groupID = client.config.groupId;
     try {
-        let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Asc", 100);
-        if(!oldAuditLogDate) oldAuditLogDate = auditLog.data[0].created;
-        let index = auditLog.data.findIndex(log => log.created === oldAuditLogDate);
-        if(index === 0 || index === -1) throw("Skip check");
-        for(let i = index - 1; i >= 0; i--) {
+        let auditLog = await roblox.getAuditLog(groupID, "", undefined, "Desc", 100);
+        if(!oldDates.find(v => v.id === groupID)) oldDates.push({id: groupID, date: auditLog.data[0].created});
+        let dateIndex = oldDates.findIndex(v => v.id === groupID);
+        let auditIndex = auditLog.data.findIndex(log => log.created.toISOString() === oldDates[dateIndex].date.toISOString());
+        if(auditIndex === 0 || auditIndex === -1) throw("Skip check");
+        for(let i = auditIndex - 1; i >= 0; i--) {
             let log = auditLog.data[i];
             if(log.actor.user.userId === currentUser.UserID) continue;
             if(log.actionType === "Post Status" && client.config.logging.shout.enabled) {
                 let channel = await client.channels.fetch(client.config.logging.shout.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                     embedDescription += `**Shout Poster**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Shout Content**: ${log.description["Text"]}\n`;
@@ -29,21 +31,21 @@ export default async function checkAudits(client: BotClient) {
                     let embed = client.embedMaker({title: "New Shout Detected", description: embedDescription, type: "info", author: client.user});
                     await channel.send({embeds: [embed]});
                 }
-            } else if(log.actionType === "Change Rank" && client.config.logging.audit.enabled) {
+            } else if(log.actionType === "Change Rank") {
                 let isUserSuspended = false;
-                let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionFile).users;
-                let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"]);
+                let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[]);
+                let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"] && v.groupID === groupID);
                 if(susIndex !== -1) isUserSuspended = true;
-                let isLockedRank = client.isLockedRole((await roblox.getRoles(client.config.groupId)).find(v => v.name === log.description["NewRoleSetName"]));
-                if(isUserSuspended && await roblox.getRankInGroup(client.config.groupId, log.description["TargetId"]) != client.config.suspensionRank) {
+                let isLockedRank = client.isLockedRole((await roblox.getRoles(groupID)).find(v => v.name === log.description["NewRoleSetName"]));
+                if(isUserSuspended && await roblox.getRankInGroup(groupID, log.description["TargetId"]) != client.config.suspensionRank) {
                     try {
-                        await roblox.setRank(client.config.groupId, log.description["TargetId"], client.config.suspensionRank);
+                        await roblox.setRank(groupID, log.description["TargetId"], client.config.suspensionRank);
                     } catch(e) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to the suspended role: ${e}`);
                     }
                 } else if(isLockedRank) {
                     try {
-                        await roblox.setRank(client.config.groupId, log.description["TargetId"], log.description["OldRoleSetId"]);
+                        await roblox.setRank(groupID, log.description["TargetId"], log.description["OldRoleSetId"]);
                     } catch(e) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to their old role: ${e}`);
                     }
@@ -52,6 +54,7 @@ export default async function checkAudits(client: BotClient) {
                     let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let embedDescription = "";
+                        embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                         embedDescription += `**Ranker**: ${log.actor.user.username}\n`;
                         embedDescription += `**Role**: ${log.actor.role.name}\n`;
                         embedDescription += `**Target**: ${log.description["TargetName"]}\n`;
@@ -70,6 +73,7 @@ export default async function checkAudits(client: BotClient) {
                 let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
+                    embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
                     embedDescription += `**Author**: ${log.actor.user.username}\n`;
                     embedDescription += `**Role**: ${log.actor.role.name}\n`;
                     embedDescription += `**Action Type**: ${log.actionType}\n`;
@@ -78,14 +82,29 @@ export default async function checkAudits(client: BotClient) {
                     await channel.send({embeds: [embed]});
                 }
             }
+            if(log.actionType === "Change Rank") {
+                let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Rank");
+                if(antiAAIndex === -1) {
+                    client.groupLogs.push({groupID: groupID, userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Rank", amount: 1});
+                } else {
+                    client.groupLogs[antiAAIndex].amount += 1;
+                }
+            } else if(log.actionType === "Remove Member") {
+                let antiAAIndex = client.groupLogs.findIndex(v => v.userID === log.actor.user.userId && v.action === "Exile");
+                if(antiAAIndex === -1) {
+                    client.groupLogs.push({groupID: groupID, userID: log.actor.user.userId, cooldownExpires: Date.now() + 60000, action: "Exile", amount: 1});
+                } else {
+                    client.groupLogs[antiAAIndex].amount += 1;
+                }
+            }
         }
-        oldAuditLogDate = auditLog.data[0].created;
+        oldDates[dateIndex].date = auditLog.data[0].created;
     } catch(e) {
         if(e !== "Skip check") {
             console.error(`There was an error while trying to check the audit logs: ${e}`);
         }
     }
     setTimeout(async() => {
-        await checkAudits(client);
-    }, 10000);
+        await checkAudits(groupID, client);
+    }, 5000);
 }
