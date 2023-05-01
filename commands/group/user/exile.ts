@@ -7,20 +7,12 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            if(authorRobloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Exile");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -43,7 +35,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(authorRobloxID, "Exile", victimRobloxID);
+                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Exile", victimRobloxID);
                 if(!verificationStatus) {
                     logs.push({
                         username: username,
@@ -53,7 +45,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let rankID = await roblox.getRankInGroup(client.config.groupId, victimRobloxID);
+            let rankID = await roblox.getRankInGroup(groupID, victimRobloxID);
             if(rankID === 0) {
                 logs.push({
                     username: username,
@@ -63,7 +55,7 @@ const command: CommandFile = {
                 continue;
             }
             try {
-                await roblox.exile(config.groupId, victimRobloxID);
+                await roblox.exile(groupID, victimRobloxID);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -76,20 +68,23 @@ const command: CommandFile = {
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has exiled **${username}** from the group for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
         }
         await client.initiateLogEmbedSystem(interaction, logs);
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("exile")
     .setDescription("Kicks the inputted user(s) from the group")
+    .addStringOption(o => o.setName("group").setDescription("The group to do the exiling in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to exile").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the exile(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "User",
-        permissions: config.permissions.group.user
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.user,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "Exile"
+    }
 }
 
 export default command;

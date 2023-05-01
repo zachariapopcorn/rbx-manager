@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import UniverseEntry from './UniverseEntry';
 import AntiAbuseAction from './AntiAbuseAction';
 
 export default interface BotConfig {
@@ -10,7 +9,7 @@ export default interface BotConfig {
     ROBLOX_API_KEY: string,
     ROVER_API_KEY: string,
     WEB_API_KEY: string,
-    groupId: number,
+    groupIds: number[],
     permissions: {
         all: string[],
         group: {
@@ -73,12 +72,11 @@ export default interface BotConfig {
     defaultCooldown: number,
     cooldownOverrides: {},
     suspensionRank: number,
-    universes: UniverseEntry[],
+    universes: number[],
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,
     maximumNumberOfUsers: number,
     lockedRanks: any[],
     lockedCommands: string[],
-    whitelistedServers: string[]
 }

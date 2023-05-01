@@ -11,6 +11,7 @@ import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 const messaging = new MessagingService(config);
@@ -32,7 +33,7 @@ const command: CommandFile = {
         }
         let reasons = reasonData.parsedReasons;
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
             let time = times[i];
@@ -107,15 +108,16 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("timeban")
     .setDescription("Bans the inputted user(s) from the game for the given time")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to ban").setRequired(true))
     .addStringOption(o => o.setName("time").setDescription("The duration of the ban(s)").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the bans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ban",
-        permissions: config.permissions.game.ban
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.ban,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;

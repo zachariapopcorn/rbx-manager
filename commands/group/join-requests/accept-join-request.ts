@@ -7,20 +7,11 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
 import config from '../../../config';
+import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        if(client.config.verificationChecks) {
-            let verificationStatus = false;
-            let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
-            if(robloxID !== 0) {
-                verificationStatus = await client.preformVerificationChecks(robloxID, "JoinRequests");
-            }
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
-                return await interaction.editReply({embeds: [embed]});
-            }
-        }
+        let groupID = GroupHandler.getIDFromName(args["group"]);
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -43,7 +34,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await roblox.handleJoinRequest(client.config.groupId, robloxID, true);
+                await roblox.handleJoinRequest(groupID, robloxID, true);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -56,7 +47,7 @@ const command: CommandFile = {
                 username: username,
                 status: "Success"
             });
-            await client.logAction(`<@${interaction.user.id}> has accepted the join request of **${username}** for the reason of **${reason}**`);
+            await client.logAction(`<@${interaction.user.id}> has accepted the join request of **${username}** for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
             continue;
         }
         await client.initiateLogEmbedSystem(interaction, logs);
@@ -64,13 +55,16 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("accept-join-request")
     .setDescription("Accepts the join request of the user(s) inputted")
+    .addStringOption(o => o.setName("group").setDescription("The group to accept join requests in").setRequired(true).addChoices(...GroupHandler.parseGroups() as any))
     .addStringOption(o => o.setName("username").setDescription("The username(s) of the user(s) you wish to accept the join request of").setRequired(true))
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're accepting the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
-        permissions: config.permissions.group.joinrequests
-    },
-    hasCooldown: true
+        permissions: config.permissions.group.joinrequests,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: true,
+        permissionToCheck: "JoinRequests"
+    }
 }
 
 export default command;

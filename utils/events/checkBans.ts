@@ -1,6 +1,7 @@
 import roblox = require('noblox.js');
 import * as fs from 'fs/promises';
 import BotClient from '../classes/BotClient';
+import GroupBanEntry from '../interfaces/GroupBanEntry';
 
 async function isUserInGroup(userID: number, groupID: number): Promise<boolean> {
     let res = await fetch(`https://groups.roblox.com/v2/users/${userID}/groups/roles`);
@@ -11,12 +12,14 @@ async function isUserInGroup(userID: number, groupID: number): Promise<boolean> 
 }
 
 export default async function checkBans(client: BotClient) {
+    if(!client.isLoggedIn) return;
     try {
-        let bannedUsers = (JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8"))).userIDs;
+        let bannedUsers = (JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[]);
         for(let i = 0; i < bannedUsers.length; i++) {
-            let userID = bannedUsers[i];
-            if(await isUserInGroup(userID, client.config.groupId)) {
-                await roblox.exile(client.config.groupId, userID);
+            let groupID = bannedUsers[i].groupID;
+            let userID = bannedUsers[i].userID;
+            if(await isUserInGroup(userID, groupID)) {
+                await roblox.exile(groupID, userID);
             }
         }
     } catch(e) {

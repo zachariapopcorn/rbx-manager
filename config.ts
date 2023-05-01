@@ -10,7 +10,7 @@ const config: BotConfig = {
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
     WEB_API_KEY: process.env.WEB_API_KEY,
-    groupId: 0,
+    groupIds: [],
     permissions: {
         all: [""],
         group: {
@@ -72,15 +72,14 @@ const config: BotConfig = {
     },
     defaultCooldown: 5000,
     cooldownOverrides: {},
-    suspensionRank: 0,
+    suspensionRank: 1,
     universes: [],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,
     maximumNumberOfUsers: 5,
-    lockedRanks: [""],
-    lockedCommands: [""],
-    whitelistedServers: [""]
+    lockedRanks: [],
+    lockedCommands: [],
 }
 
 export default config;

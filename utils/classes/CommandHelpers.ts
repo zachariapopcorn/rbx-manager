@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import ms from 'ms';
+
 import { commands } from '../..';
 import config from '../../config';
 import CommandCategory from '../interfaces/CommandCategory';
@@ -74,17 +75,6 @@ export default class CommandHelpers {
         } else {
             return {parsedTimes: [], didError: true};
         }
-    }
-    public static parseUniverses(): Discord.APIApplicationCommandOptionChoice[] {
-        let universes = config.universes;
-        let parsed: Discord.APIApplicationCommandOptionChoice[] = [];
-        for(let i = 0; i < universes.length; i++) {
-            parsed.push({name: universes[i].universeDisplayName, value: universes[i].universeDisplayName});
-        }
-        return parsed;
-    }
-    public static getUniverseIDFromName(name: string): number {
-        return config.universes.find(v => v.universeDisplayName === name).universeID;
     }
     public static getGroupCommands(): string[] {
         let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User"];

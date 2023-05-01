@@ -6,6 +6,7 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 
 import config from '../../../config';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const messaging = new MessagingService(config);
 
@@ -14,7 +15,7 @@ const command: CommandFile = {
         let title = args["title"];
         let message = args["message"];
         let universeName = args["universe"];
-        let universeID = CommandHelpers.getUniverseIDFromName(universeName);
+        let universeID = UniverseHandler.getIDFromName(universeName);
         try {
             await messaging.sendMessage(universeID, "Announce", {title: title, message: message});
         } catch(e) {
@@ -28,14 +29,15 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("announce")
     .setDescription("Announces the inputted message to every game server")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...CommandHelpers.parseUniverses() as any))
+    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
     .addStringOption(o => o.setName("title").setDescription("The title of the announcement").setRequired(true))
     .addStringOption(o => o.setName("message").setDescription("The message that you wish to announce").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",
-        permissions: config.permissions.game.broadcast
-    },
-    hasCooldown: true
+        permissions: config.permissions.game.broadcast,
+        hasCooldown: true,
+        preformGeneralVerificationChecks: false
+    }
 }
 
 export default command;
