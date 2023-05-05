@@ -69,6 +69,7 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
+    debug?: boolean,
     defaultCooldown: number,
     cooldownOverrides: {},
     suspensionRank: number,
