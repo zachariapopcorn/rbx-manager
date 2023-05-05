@@ -83,7 +83,9 @@ async function registerSlashCommands() {
         let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
-            console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
+            if(client.config.debug) {
+                console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
+            }
             continue;
         }
         registeredCommands.push(commands[i]);
