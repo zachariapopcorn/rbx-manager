@@ -11,13 +11,22 @@ import config from '../../../config';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 import GroupHandler from '../../../utils/classes/GroupHandler';
 
+function parseRanks(ranks: string): any[] {
+    let parsed = ranks.split(",");
+    for(let i = 0; i < parsed.length; i++) {
+        parsed[i] = parsed[i].trim();
+    }
+    return parsed;
+}
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
         let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
-        let ranks = args["rank"].replaceAll(" ", "").split(",");
+        let ranks = parseRanks(args["rank"]);
+        console.log(ranks);
         if(ranks.length === 1) {
             while(true) {
                 if(ranks.length === usernames.length) break;
