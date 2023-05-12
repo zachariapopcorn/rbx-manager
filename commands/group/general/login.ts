@@ -39,7 +39,7 @@ function getENVString(): string {
     return formatted;
 }
 
-async function login(client: BotClient, username: string, password: string, csrfToken?: string, challengeId?: string, unifiedCaptchaId?: string, captchaToken?: string) {
+async function login(client: BotClient, username: string, password: string, csrfToken?: string, challengeId?: string, unifiedCaptchaId?: string, captchaToken?: string, challengeType?: string) {
     let metaData = JSON.stringify({
         "unifiedCaptchaId": unifiedCaptchaId,
         "captchaToken": captchaToken,
@@ -53,8 +53,8 @@ async function login(client: BotClient, username: string, password: string, csrf
 			"User-Agent": UA,
 			"X-CSRF-TOKEN": csrfToken || "",
             "rblx-challenge-id": challengeId || "",
-            "rblx-challenge-metadata": Buffer.from(metaData, "utf-8").toString("base64") || "",
-            "rblx-challenge-type": "captcha"
+            "rblx-challenge-metadata": Buffer.from(metaData, "utf-8").toString("base64"),
+            "rblx-challenge-type": challengeType || ""
         },
         body: {
             "ctype": "Username",
@@ -71,7 +71,6 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Already Logged In", description: "The bot is already logged into the bot account, no need to login again", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        const stringTable = (await (await client.request({url: "https://pastebin.com/raw/Gi6yKwyD", method: "GET", headers: {}, body: undefined, robloxRequest: false})).json()).string_table;
         let res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD);
         let csrfToken = res.headers.get("x-csrf-token");
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken);
@@ -84,6 +83,7 @@ const command: CommandFile = {
         }
         let rblxChallengeId = res.headers.get("rblx-challenge-id");
         let rblxChallengeMetadata = JSON.parse(Buffer.from(res.headers.get("rblx-challenge-metadata"), "base64").toString()) as InitialCaptchaMetadata;
+        let rblxChallengeType = res.headers.get("rblx-challenge-type");
         let dataBlob = rblxChallengeMetadata.dataExchangeBlob;
         let captchaToken: string;
         try {
@@ -99,7 +99,7 @@ const command: CommandFile = {
                 },
                 site: "https://www.roblox.com",
                 location: "https://www.roblox.com/login"
-            })
+            });
             if(!captchaData.token) {
                 BetterConsole.log(captchaToken);
                 let embed = client.embedMaker({title: "Captcha Implementation Broken", description: "The captcha implementation is currently broken. Please wait for a fix", type: "error", author: interaction.user});
@@ -112,7 +112,7 @@ const command: CommandFile = {
             if(challenge instanceof Challenge1) throw new Error("Captcha type given not implemented");
             let amountOfWaves = challenge.data.game_data.waves;
             let objective = challenge.data.game_data.game_variant;
-            let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${stringTable[`3.instructions-${objective}`]}\n\nGuide: https://github.com/noahcoolboy/roblox-funcaptcha/raw/master/img.gif\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
+            let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.data.string_table[`3.instructions-${objective}`]}\n\nGuide: https://github.com/noahcoolboy/roblox-funcaptcha/raw/master/img.gif\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
             await interaction.editReply({embeds: [embed]});
             for(let i = 0; i < amountOfWaves; i++) {
                 await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
@@ -150,7 +150,7 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         await fs.promises.unlink(`${process.cwd()}/Image.gif`);
-        res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken);
+        res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
