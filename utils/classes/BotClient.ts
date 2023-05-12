@@ -8,7 +8,6 @@ import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
 import GroupLog from '../interfaces/GroupLog';
-import BetterConsole from './BetterConsole';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;

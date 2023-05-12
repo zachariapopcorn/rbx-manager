@@ -1,14 +1,15 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
+import config from '../../../config';
+
 import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-import CommandLog from '../../../utils/interfaces/CommandLog';
 import MessagingService from '../../../utils/classes/MessagingService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
-
-import config from '../../../config';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
+import CommandLog from '../../../utils/interfaces/CommandLog';
 
 const messaging = new MessagingService(config);
 

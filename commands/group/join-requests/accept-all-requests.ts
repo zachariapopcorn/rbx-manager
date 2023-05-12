@@ -1,11 +1,12 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-
 import config from '../../../config';
+
+import BotClient from '../../../utils/classes/BotClient';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
 
 async function batchAccept(groupID: number, client: BotClient, userIDS: Number[]): Promise<void> {
     let res = await client.request({

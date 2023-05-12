@@ -1,8 +1,9 @@
 import Discord from 'discord.js';
 import ms from 'ms';
 
-import { commands } from '../..';
 import config from '../../config';
+import { commands } from '../..';
+
 import CommandCategory from '../interfaces/CommandCategory';
 import CommandFile from '../interfaces/CommandFile';
 

@@ -1,15 +1,16 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
+import config from '../../../config';
+
 import BotClient from '../../../utils/classes/BotClient';
+import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import CommandHelpers from '../../../utils/classes/CommandHelpers';
+import UniverseHandler from '../../../utils/classes/UniverseHandler';
+
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 import ModerationData from '../../../utils/interfaces/ModerationData';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
-import CommandHelpers from '../../../utils/classes/CommandHelpers';
-
-import config from '../../../config';
-import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 const database = new RobloxDatastore(config);
 

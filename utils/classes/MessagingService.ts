@@ -1,6 +1,7 @@
+import BotClient from "./BotClient";
+
 import BotConfig from "../interfaces/BotConfig";
 import RobloxRequestType from '../interfaces/RobloxRequestType';
-import BotClient from "./BotClient";
 
 export default class MessagingService extends BotClient {
     private API_KEY: string;

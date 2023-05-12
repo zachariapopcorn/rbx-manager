@@ -1,8 +1,5 @@
 import Discord from 'discord.js';
 
-import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-
 import * as funcaptcha from "funcaptcha";
 import { Challenge1 } from 'funcaptcha/lib/challenge';
 
@@ -10,8 +7,11 @@ import fs from "fs";
 
 import { loginToRoblox } from '../../..';
 
-import InitialCaptchaMetadata from '../../../utils/interfaces/InitialCaptchaMetadata';
+import BotClient from '../../../utils/classes/BotClient';
 import BetterConsole from '../../../utils/classes/BetterConsole';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
+import InitialCaptchaMetadata from '../../../utils/interfaces/InitialCaptchaMetadata';
 
 const map = {
     "0️⃣": 0,

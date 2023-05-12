@@ -1,9 +1,10 @@
 import Discord from 'discord.js';
-import roblox from 'noblox.js';
+import roblox = require('noblox.js');
 
 import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {

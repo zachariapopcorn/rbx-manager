@@ -1,7 +1,10 @@
 import roblox = require('noblox.js');
-import BotClient from '../classes/BotClient';
-import SuspensionEntry from '../interfaces/SuspensionEntry';
+
 import fs from "fs/promises";
+
+import BotClient from '../classes/BotClient';
+
+import SuspensionEntry from '../interfaces/SuspensionEntry';
 
 export default async function checkSuspensions(client: BotClient) {
     if(!client.isLoggedIn) return;

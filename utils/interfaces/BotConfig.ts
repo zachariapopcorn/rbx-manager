@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+
 import AntiAbuseAction from './AntiAbuseAction';
 
 export default interface BotConfig {

@@ -3,7 +3,6 @@ import roblox = require('noblox.js');
 import BotConfig from '../interfaces/BotConfig';
 import ModerationData from '../interfaces/ModerationData';
 
-
 export default class RobloxDatastore {
     private config: BotConfig;
     constructor(config: BotConfig) {
