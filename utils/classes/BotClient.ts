@@ -8,6 +8,7 @@ import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
 import GroupLog from '../interfaces/GroupLog';
+import BetterConsole from './BetterConsole';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
@@ -91,12 +92,12 @@ export default class BotClient extends Discord.Client {
         } else {
             let headers = res.headers;
             if(parseInt(headers.get("X-RateLimit-Remaining")) === 0) {
-                console.log("Rover API limit reached");
+                console.error("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
                 }, parseInt(headers.get("X-RateLimit-Reset-After")) * 1000);
             } else if(res.status === 429) {
-                console.log("Rover API limit reached");
+                console.error("Rover API limit reached");
                 setTimeout(async() => {
                     await this.getRobloxUser(guildID, discordID);
                 }, parseInt(headers.get("Retry-After")) * 1000);

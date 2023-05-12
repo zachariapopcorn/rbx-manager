@@ -25,6 +25,7 @@ import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
 import GroupHandler from './utils/classes/GroupHandler';
 import UniverseHandler from './utils/classes/UniverseHandler';
+import BetterConsole from './utils/classes/BetterConsole';
 
 const client = new BotClient(config);
 
@@ -51,7 +52,7 @@ app.post("/get-job-id", async (request, response) => {
 });
 
 let listener = app.listen(process.env.PORT, () => {
-    console.log(`Your app is currently listening on port: ${(listener.address() as any).port}`);
+    BetterConsole.log(`Your app is currently listening on port: ${(listener.address() as any).port}`, true);
 });
 
 async function readCommands(path?: string) {
@@ -83,9 +84,7 @@ async function registerSlashCommands() {
         let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
-            if(client.config.debug) {
-                console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
-            }
+            BetterConsole.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
             continue;
         }
         registeredCommands.push(commands[i]);
@@ -94,7 +93,7 @@ async function registerSlashCommands() {
             commandData = commands[i].slashData.toJSON()
             slashCommands.push(commandData);
         } catch(e) {
-            console.log(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
+            console.error(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
         }
     }
     let rest = new REST().setToken(client.config.DISCORD_TOKEN);
@@ -127,7 +126,7 @@ export async function loginToRoblox(robloxCookie: string) {
         client.isLoggedIn = false;
         return;
     }
-    console.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`);
+    BetterConsole.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`, true);
     client.isLoggedIn = true;
     for(let i = 0; i < client.config.groupIds.length; i++) {
         let groupID = client.config.groupIds[i];
@@ -141,7 +140,7 @@ export async function loginToRoblox(robloxCookie: string) {
 }
 
 client.once('ready', async() => {
-    console.log(`Logged into the Discord account - ${client.user.tag}`);
+    BetterConsole.log(`Logged into the Discord account - ${client.user.tag}`, true);
     if(client.application.botPublic) {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
         return process.exit();

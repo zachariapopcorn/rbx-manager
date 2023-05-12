@@ -11,6 +11,7 @@ import fs from "fs";
 import { loginToRoblox } from '../../..';
 
 import InitialCaptchaMetadata from '../../../utils/interfaces/InitialCaptchaMetadata';
+import BetterConsole from '../../../utils/classes/BetterConsole';
 
 const map = {
     "0️⃣": 0,
@@ -77,7 +78,7 @@ const command: CommandFile = {
         let body = await res.json();
         let error = body.errors[0].message;
         if(error !== "Challenge is required to authorize the request") {
-            console.log(body.toString());
+            BetterConsole.log(body.toString());
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
@@ -100,7 +101,7 @@ const command: CommandFile = {
                 location: "https://www.roblox.com/login"
             })
             if(!captchaData.token) {
-                console.log(captchaToken);
+                BetterConsole.log(captchaToken);
                 let embed = client.embedMaker({title: "Captcha Implementation Broken", description: "The captcha implementation is currently broken. Please wait for a fix", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
@@ -142,7 +143,7 @@ const command: CommandFile = {
             }
             captchaToken = captchaData.token;
         } catch(e) {
-            console.log(e);
+            BetterConsole.log(e);
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to complete the login captcha: ${e}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }

@@ -26,7 +26,6 @@ const command: CommandFile = {
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let ranks = parseRanks(args["rank"]);
-        console.log(ranks);
         if(ranks.length === 1) {
             while(true) {
                 if(ranks.length === usernames.length) break;

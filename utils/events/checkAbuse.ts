@@ -23,7 +23,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         }
                     } catch(e) {
                         didError = true;
-                        console.log(e);
+                        console.error(e);
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
@@ -48,7 +48,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         }
                     } catch(e) {
                         didError = true;
-                        console.log(e);
+                        console.error(e);
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
