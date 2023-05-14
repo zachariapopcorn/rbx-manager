@@ -1,5 +1,7 @@
 import roblox = require('noblox.js');
-import * as fs from 'fs/promises';
+
+import fs from 'fs/promises';
+
 import BotClient from '../classes/BotClient';
 import GroupBanEntry from '../interfaces/GroupBanEntry';
 

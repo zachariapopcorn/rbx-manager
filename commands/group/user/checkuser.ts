@@ -1,21 +1,20 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+import ms = require('ms');
 
-import * as fs from 'fs/promises';
-
-import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-import ModerationData from '../../../utils/interfaces/ModerationData';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
-import CommandHelpers from '../../../utils/classes/CommandHelpers';
+import fs from "fs/promises"
 
 import config from '../../../config';
 
-import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
-import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
-import ms = require('ms');
+import BotClient from '../../../utils/classes/BotClient';
+import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import GroupHandler from '../../../utils/classes/GroupHandler';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
+import ModerationData from '../../../utils/interfaces/ModerationData';
+import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
+import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 
 const database = new RobloxDatastore(config);
 

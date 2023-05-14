@@ -1,9 +1,10 @@
 import Discord from 'discord.js';
 
-import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-
 import config from '../../../config';
+
+import BotClient from '../../../utils/classes/BotClient';
+
+import CommandFile from '../../../utils/interfaces/CommandFile';
 
 function formatLoggedData(data: any[]) {
     let formatted = "";

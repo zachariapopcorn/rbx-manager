@@ -1,15 +1,17 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
-import fs from "fs/promises";
+
+import fs from "fs/promises"
+
+import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
+import GroupHandler from '../../../utils/classes/GroupHandler';
+
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
-
-import config from '../../../config';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
-import GroupHandler from '../../../utils/classes/GroupHandler';
 
 function parseRanks(ranks: string): any[] {
     let parsed = ranks.split(",");
@@ -26,7 +28,6 @@ const command: CommandFile = {
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let ranks = parseRanks(args["rank"]);
-        console.log(ranks);
         if(ranks.length === 1) {
             while(true) {
                 if(ranks.length === usernames.length) break;

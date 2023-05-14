@@ -1,15 +1,17 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
-import fs from "fs/promises";
+
+import fs from "fs/promises"
+
+import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
+import GroupHandler from '../../../utils/classes/GroupHandler';
+
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
-
-import config from '../../../config';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
-import GroupHandler from '../../../utils/classes/GroupHandler';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {

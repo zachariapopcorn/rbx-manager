@@ -1,15 +1,12 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import BotClient from '../../../utils/classes/BotClient';
-import CommandFile from '../../../utils/interfaces/CommandFile';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
-import CommandHelpers from '../../../utils/classes/CommandHelpers';
-
 import config from '../../../config';
+
+import BotClient from '../../../utils/classes/BotClient';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
-const database = new RobloxDatastore(config);
+import CommandFile from '../../../utils/interfaces/CommandFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {

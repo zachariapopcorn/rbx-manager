@@ -1,4 +1,5 @@
 import roblox = require('noblox.js');
+
 import BotClient from '../classes/BotClient';
 
 export default async function checkLoginStatus(client: BotClient) {

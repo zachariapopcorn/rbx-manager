@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
+
 import BotClient from '../classes/BotClient';
 import GroupHandler from '../classes/GroupHandler';
 
@@ -23,7 +24,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         }
                     } catch(e) {
                         didError = true;
-                        console.log(e);
+                        console.error(e);
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
@@ -48,7 +49,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         }
                     } catch(e) {
                         didError = true;
-                        console.log(e);
+                        console.error(e);
                     }
                     let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {

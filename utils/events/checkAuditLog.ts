@@ -1,11 +1,14 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
-import BotClient from '../classes/BotClient';
-import SuspensionEntry from '../interfaces/SuspensionEntry';
+
 import fs from "fs/promises"
+
+import BotClient from '../classes/BotClient';
 import GroupHandler from '../classes/GroupHandler';
 
-let oldDates: {id: number, date: Date}[] = [];
+import SuspensionEntry from '../interfaces/SuspensionEntry';
+
+const oldDates: {id: number, date: Date}[] = [];
 
 export default async function checkAudits(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;

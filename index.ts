@@ -3,17 +3,17 @@ import roblox = require('noblox.js');
 import bodyParser = require('body-parser');
 
 import fs from 'fs/promises';
+import express from 'express';
 
 import config from './config';
 
-import express from 'express';
-
-import { REST } from '@discordjs/rest';
-import { InteractionType, Routes } from 'discord-api-types/v10';
-
 import BotClient from './utils/classes/BotClient';
-import CommandFile from './utils/interfaces/CommandFile';
 import CommandHelpers from './utils/classes/CommandHelpers';
+import GroupHandler from './utils/classes/GroupHandler';
+import UniverseHandler from './utils/classes/UniverseHandler';
+import BetterConsole from './utils/classes/BetterConsole';
+
+import CommandFile from './utils/interfaces/CommandFile';
 import CommandInstance from './utils/interfaces/CommandInstance';
 
 import checkBans from './utils/events/checkBans';
@@ -23,15 +23,13 @@ import checkCooldowns from './utils/events/checkCooldowns';
 import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
-import GroupHandler from './utils/classes/GroupHandler';
-import UniverseHandler from './utils/classes/UniverseHandler';
 
 const client = new BotClient(config);
 
 const app = express();
 app.use(bodyParser.json());
 
-export const commands:CommandInstance[] = [];
+export const commands: CommandInstance[] = [];
 export const registeredCommands: CommandInstance[] = [];
 
 app.get("/", async (request, response) => {
@@ -51,7 +49,7 @@ app.post("/get-job-id", async (request, response) => {
 });
 
 let listener = app.listen(process.env.PORT, () => {
-    console.log(`Your app is currently listening on port: ${(listener.address() as any).port}`);
+    BetterConsole.log(`Your app is currently listening on port: ${(listener.address() as any).port}`, true);
 });
 
 async function readCommands(path?: string) {
@@ -83,9 +81,7 @@ async function registerSlashCommands() {
         let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
-            if(client.config.debug) {
-                console.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
-            }
+            BetterConsole.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
             continue;
         }
         registeredCommands.push(commands[i]);
@@ -94,24 +90,24 @@ async function registerSlashCommands() {
             commandData = commands[i].slashData.toJSON()
             slashCommands.push(commandData);
         } catch(e) {
-            console.log(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
+            console.error(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
         }
     }
-    let rest = new REST().setToken(client.config.DISCORD_TOKEN);
+    let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
     try {
-        await rest.put(Routes.applicationCommands(client.user.id), {body: slashCommands});
+        await rest.put(Discord.Routes.applicationCommands(client.user.id), {body: slashCommands});
     } catch(e) {
         console.error(`There was an error while registering slash commands: ${e}`);
     }
 }
 
 async function deleteGuildCommands() {
-    let rest = new REST().setToken(client.config.DISCORD_TOKEN);
+    let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
     let guilds = await client.guilds.fetch({limit: 200});
     for(let i = 0; i < guilds.size; i++) {
         let guild = guilds.at(i);
         try {
-            await rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), {body: []});
+            await rest.put(Discord.Routes.applicationGuildCommands(client.user.id, guild.id), {body: []});
         } catch(e) {
             console.error(`There was an error while trying to delete guild commmands: ${e}`);
         }
@@ -127,7 +123,7 @@ export async function loginToRoblox(robloxCookie: string) {
         client.isLoggedIn = false;
         return;
     }
-    console.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`);
+    BetterConsole.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`, true);
     client.isLoggedIn = true;
     for(let i = 0; i < client.config.groupIds.length; i++) {
         let groupID = client.config.groupIds[i];
@@ -141,7 +137,7 @@ export async function loginToRoblox(robloxCookie: string) {
 }
 
 client.once('ready', async() => {
-    console.log(`Logged into the Discord account - ${client.user.tag}`);
+    BetterConsole.log(`Logged into the Discord account - ${client.user.tag}`, true);
     if(client.application.botPublic) {
         console.warn("BOT IS PUBLIC | SHUTTING DOWN");
         return process.exit();
@@ -161,7 +157,7 @@ client.once('ready', async() => {
 });
 
 client.on('interactionCreate', async(interaction: Discord.Interaction) => {
-    if(interaction.type !== InteractionType.ApplicationCommand) return;
+    if(interaction.type !== Discord.InteractionType.ApplicationCommand) return;
     let command = interaction.commandName.toLowerCase();
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
