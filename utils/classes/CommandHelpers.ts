@@ -78,7 +78,7 @@ export default class CommandHelpers {
         }
     }
     public static getGroupCommands(): string[] {
-        let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User"];
+        let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User", "XP"];
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
             if(categories.indexOf(commands[i].commandData.category) !== -1) {
@@ -92,6 +92,15 @@ export default class CommandHelpers {
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
             if(categories.indexOf(commands[i].commandData.category) !== -1) {
+                cmds.push(commands[i].name);
+            }
+        }
+        return cmds;
+    }
+    public static getXPCommands(): string[] {
+        let cmds = [];
+        for(let i = 0; i < commands.length; i++) {
+            if(commands[i].commandData.category === "XP") {
                 cmds.push(commands[i].name);
             }
         }
