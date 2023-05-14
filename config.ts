@@ -10,9 +10,9 @@ const config: BotConfig = {
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
     WEB_API_KEY: process.env.WEB_API_KEY,
-    groupIds: [],
+    groupIds: [5242495],
     permissions: {
-        all: [""],
+        all: ["990827999286919218"],
         group: {
             shout: [""],
             ranking: [""],
@@ -43,26 +43,42 @@ const config: BotConfig = {
             exiles: "Exile"
         }
     },
+    xpSystem: {
+        enabled: true,
+        rewards: [{
+            rewardID: "activeMemberReward",
+            rankName: "Developer",
+            xpNeeded: 1000
+        }],
+        earnings: {
+            messages: 2,
+            reactions: 1
+        }
+    },
     logging: {
         audit: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         shout: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         command: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         antiAbuse: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         sales: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
+        },
+        xp: {
+            enabled: true,
+            loggingChannel: "1019800364712734821"
         }
     },
     embedColors: {
@@ -71,15 +87,16 @@ const config: BotConfig = {
         error: "Red"
     },
     defaultCooldown: 5000,
-    cooldownOverrides: {},
+    cooldownOverrides: {}, // Format: {"command name": cooldownInMilliSeconds} ; EX: {"exile": 20000}
     suspensionRank: 1,
-    universes: [],
+    universes: [3507532981],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,
     maximumNumberOfUsers: 5,
-    lockedRanks: [],
-    lockedCommands: [],
+    lockedRanks: ["Administrators/Moderators"],
+    lockedCommands: ["revert-ranks"],
+    debug: true
 }
 
 export default config;

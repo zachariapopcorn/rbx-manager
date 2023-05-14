@@ -15,6 +15,7 @@ import BetterConsole from './utils/classes/BetterConsole';
 
 import CommandFile from './utils/interfaces/CommandFile';
 import CommandInstance from './utils/interfaces/CommandInstance';
+import UserEntry from './utils/interfaces/UserEntry';
 
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
@@ -77,6 +78,7 @@ async function registerSlashCommands() {
     let slashCommands = [];
     if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
     if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
+    if(!client.config.xpSystem.enabled) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getXPCommands());
     for(let i = 0; i < commands.length; i++) {
         let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
@@ -223,7 +225,55 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     }
 });
 
-let oldMethod = console.error
+client.on("messageCreate", async(message: Discord.Message) => {
+    if(!client.config.xpSystem.enabled) return;
+    let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+    let index = xpData.findIndex(v => v.discordID === message.author.id);
+    let userData: UserEntry;
+    if(index !== -1) {
+        userData = xpData[index];
+    } else {
+        userData = {
+            discordID: message.author.id,
+            robloxID: 0,
+            redeemedRewards: [],
+            xp: 0
+        }
+    }
+    userData.xp += client.config.xpSystem.earnings.messages;
+    if(index !== -1) {
+        xpData[index] = userData;
+    } else {
+        xpData.push(userData);
+    }
+    await fs.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
+});
+
+client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: Discord.User) => {
+    if(!client.config.xpSystem.enabled) return;
+    let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+    let index = xpData.findIndex(v => v.discordID === user.id);
+    let userData: UserEntry;
+    if(index !== -1) {
+        userData = xpData[index];
+    } else {
+        userData = {
+            discordID: user.id,
+            robloxID: 0,
+            redeemedRewards: [],
+            xp: 0
+        }
+    }
+    userData.xp += client.config.xpSystem.earnings.reactions;
+    if(index !== -1) {
+        xpData[index] = userData;
+    } else {
+        xpData.push(userData);
+    }
+    await fs.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
+})
+
+let oldMethod = console.error;
 console.error = function(msg: string) {
     if(msg.toString().indexOf("ExperimentalWarning") === -1) oldMethod(msg);
 }
