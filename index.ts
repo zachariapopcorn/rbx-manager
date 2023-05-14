@@ -227,6 +227,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
 
 client.on("messageCreate", async(message: Discord.Message) => {
     if(!client.config.xpSystem.enabled) return;
+    if(message.author.bot) return;
     let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === message.author.id);
     let userData: UserEntry;
@@ -251,6 +252,7 @@ client.on("messageCreate", async(message: Discord.Message) => {
 
 client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: Discord.User) => {
     if(!client.config.xpSystem.enabled) return;
+    if(user.bot) return;
     let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === user.id);
     let userData: UserEntry;
