@@ -20,6 +20,7 @@ export default interface BotConfig {
             ranking: string[],
             joinrequests: string[],
             user: string[],
+            xp: string[]
         },
         game: {
             general: string[]

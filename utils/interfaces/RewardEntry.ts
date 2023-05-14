@@ -1,5 +1,8 @@
 export default interface RewardEntry {
     rewardID: string,
-    rankName: string,
+    rank: {
+        groupId: number,
+        rankName: string
+    },
     xpNeeded: number
 }

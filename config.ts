@@ -18,6 +18,7 @@ const config: BotConfig = {
             ranking: [""],
             joinrequests: [""],
             user: [""],
+            xp: [""]
         },
         game: {
             general: [""],
@@ -47,7 +48,10 @@ const config: BotConfig = {
         enabled: true,
         rewards: [{
             rewardID: "activeMemberReward",
-            rankName: "Developer",
+            rank: {
+                groupId: 5242495,
+                rankName: "Developer"
+            },
             xpNeeded: 1000
         }],
         earnings: {
