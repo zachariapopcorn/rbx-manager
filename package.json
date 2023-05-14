@@ -1,6 +1,6 @@
 {
   "name": "roblox-manager",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "A Discord bot that allos you to manage your Roblox group and game",
   "main": "index.ts",
   "scripts": {
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zachariapopcorn/roblox-manager.git"
+    "url": "git+https://github.com/zachariapopcorn/rbx-manager.git"
   },
   "author": "zachariapopcorn#8105",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zachariapopcorn/roblox-manager/issues"
+    "url": "https://github.com/zachariapopcorn/rbx-manager/issues"
   },
-  "homepage": "https://github.com/zachariapopcorn/roblox-manager#readme",
+  "homepage": "https://github.com/zachariapopcorn/rbx-manager#readme",
   "dependencies": {
     "@types/express": "^4.17.17",
     "body-parser": "^1.20.2",
