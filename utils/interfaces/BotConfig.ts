@@ -54,13 +54,18 @@ export default interface BotConfig {
             reactions: number
         }
     },
+    counting: {
+        enabled: boolean,
+        goal: number
+        loggingChannel: string
+    },
     logging: {
         audit: LoggingConfig,
         shout: LoggingConfig,
         command: LoggingConfig,
         antiAbuse: LoggingConfig,
         sales: LoggingConfig,
-        xp: LoggingConfig
+        xp: LoggingConfig,
     },
     embedColors: {
         info: Discord.ColorResolvable,

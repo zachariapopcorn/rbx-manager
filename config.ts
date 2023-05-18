@@ -46,11 +46,16 @@ const config: BotConfig = {
     },
     xpSystem: {
         enabled: false,
-        rewards: [],
+        rewards: [], // Format is [{rewardID: string, rank: {groupId: number, rankName: string}, xpNeeded: number}] ; EX: [rewardID: "activeMemberReward", rank: {groupId: 253, rankName: "Developer"}, xpNeeded: 1000]
         earnings: {
             messages: 2,
             reactions: 1
         }
+    },
+    counting: {
+        enabled: false,
+        goal: 0,
+        loggingChannel: ""
     },
     logging: {
         audit: {

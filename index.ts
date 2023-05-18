@@ -24,6 +24,7 @@ import checkCooldowns from './utils/events/checkCooldowns';
 import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
+import checkMemberCount from './utils/events/checkMemberCount';
 
 const client = new BotClient(config);
 
@@ -132,6 +133,7 @@ export async function loginToRoblox(robloxCookie: string) {
         await checkAudits(groupID, client);
         await checkAbuse(groupID, client);
         await checkSales(groupID, client);
+        await checkMemberCount(groupID, client);
     }
     await checkBans(client);
     await checkSuspensions(client);
