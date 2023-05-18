@@ -56,7 +56,7 @@ export default interface BotConfig {
     },
     counting: {
         enabled: boolean,
-        goal: number
+        goal: number,
         loggingChannel: string
     },
     logging: {
