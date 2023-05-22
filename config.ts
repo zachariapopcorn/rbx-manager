@@ -18,6 +18,7 @@ const config: BotConfig = {
             ranking: [""],
             joinrequests: [""],
             user: [""],
+            xp: [""]
         },
         game: {
             general: [""],
@@ -43,6 +44,19 @@ const config: BotConfig = {
             exiles: "Exile"
         }
     },
+    xpSystem: {
+        enabled: false,
+        rewards: [], // Format is [{rewardID: string, rank: {groupId: number, rankName: string}, xpNeeded: number}] ; EX: [rewardID: "activeMemberReward", rank: {groupId: 253, rankName: "Developer"}, xpNeeded: 1000]
+        earnings: {
+            messages: 2,
+            reactions: 1
+        }
+    },
+    counting: {
+        enabled: false,
+        goal: 0,
+        loggingChannel: ""
+    },
     logging: {
         audit: {
             enabled: true,
@@ -63,6 +77,10 @@ const config: BotConfig = {
         sales: {
             enabled: true,
             loggingChannel: ""
+        },
+        xp: {
+            enabled: true,
+            loggingChannel: ""
         }
     },
     embedColors: {
@@ -71,8 +89,8 @@ const config: BotConfig = {
         error: "Red"
     },
     defaultCooldown: 5000,
-    cooldownOverrides: {},
-    suspensionRank: 1,
+    cooldownOverrides: {}, // Format: {"command name": cooldownInMilliSeconds} ; EX: {"exile": 20000}
+    suspensionRank: 0,
     universes: [],
     datastoreName: "moderations",
     verificationChecks: true,

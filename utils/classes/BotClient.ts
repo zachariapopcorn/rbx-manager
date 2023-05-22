@@ -144,6 +144,19 @@ export default class BotClient extends Discord.Client {
         }
     }
 
+    public async logXPAction(title: string, logString: string): Promise<void> {
+        if(!this.config.logging.xp.enabled) return;
+        let embed = this.embedMaker({title: title, description: logString, type: "info", author: this.user});
+        let channel = await this.channels.fetch(this.config.logging.xp.loggingChannel) as Discord.TextChannel;
+        if(channel) {
+            try {
+                await channel.send({embeds: [embed]});
+            } catch(e) {
+                console.error(`There was an error while trying to log a XP system operation to the XP system logging channel: ${e}`);
+            }
+        }
+    }
+
     public createLogEmbeds(author: Discord.User, logs: CommandLog[]): Discord.EmbedBuilder[] {
         let embeds = [];
         let masterDescription = "";

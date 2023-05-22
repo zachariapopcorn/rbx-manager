@@ -25,6 +25,12 @@ function hasValue(tab, val)
 	return false
 end
 
+function downloadGUI(folder: Folder)
+	local objects = game:GetObjects("rbxassetid://13157806758")
+	for i,v in pairs(objects) do
+		v.Parent = folder
+	end
+end
 
 function parseURL(url: string, folder: Folder, isServer: boolean)
 	local res = httpService:JSONDecode(httpService:GetAsync(url))
@@ -76,13 +82,9 @@ end)
 
 local replicatedStorageFolder = Instance.new("Folder", game:GetService("ReplicatedStorage"))
 replicatedStorageFolder.Name = folderName
+downloadGUI(replicatedStorageFolder)
 Instance.new("RemoteEvent", replicatedStorageFolder).Name = "Announcement"
 Instance.new("RemoteEvent", replicatedStorageFolder).Name = "SendMutes"
-
-local model = game:GetService("InsertService"):LoadAsset(13157806758)
-model.Parent = replicatedStorageFolder
-model["Announcement GUI"].Parent = replicatedStorageFolder
-model:Destroy()
 
 local serverFolder = Instance.new("Folder", game:GetService("ServerScriptService"))
 serverFolder.Name = folderName

@@ -1,6 +1,8 @@
 import Discord from 'discord.js';
 
 import AntiAbuseAction from './AntiAbuseAction';
+import LoggingConfig from './LoggingConfig';
+import RewardEntry from './RewardEntry';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
@@ -18,6 +20,7 @@ export default interface BotConfig {
             ranking: string[],
             joinrequests: string[],
             user: string[],
+            xp: string[]
         },
         game: {
             general: string[]
@@ -42,29 +45,28 @@ export default interface BotConfig {
             ranks: AntiAbuseAction,
             exiles: AntiAbuseAction
         }
-    }
-    logging: {
-        audit: {
-            enabled: boolean,
-            loggingChannel: string
-        },
-        shout: {
-            enabled: boolean,
-            loggingChannel: string
-        },
-        command: {
-            enabled: boolean,
-            loggingChannel: string
-        },
-        antiAbuse: {
-            enabled: boolean,
-            loggingChannel: string
-        },
-        sales: {
-            enabled: boolean,
-            loggingChannel: string
+    },
+    xpSystem: {
+        enabled: boolean,
+        rewards: RewardEntry[],
+        earnings: {
+            messages: number,
+            reactions: number
         }
-    }
+    },
+    counting: {
+        enabled: boolean,
+        goal: number,
+        loggingChannel: string
+    },
+    logging: {
+        audit: LoggingConfig,
+        shout: LoggingConfig,
+        command: LoggingConfig,
+        antiAbuse: LoggingConfig,
+        sales: LoggingConfig,
+        xp: LoggingConfig,
+    },
     embedColors: {
         info: Discord.ColorResolvable,
         success: Discord.ColorResolvable,
@@ -72,13 +74,13 @@ export default interface BotConfig {
     },
     debug?: boolean,
     defaultCooldown: number,
-    cooldownOverrides: {},
+    cooldownOverrides: {[key: string]: number},
     suspensionRank: number,
     universes: number[],
     datastoreName: string,
     verificationChecks: boolean,
     collectorTime: number,
     maximumNumberOfUsers: number,
-    lockedRanks: any[],
+    lockedRanks: (string | number)[],
     lockedCommands: string[],
 }
