@@ -64,13 +64,17 @@ async function readCommands(path?: string) {
         } else {
             file = file.replace(".ts", ".js"); // This is here because when it compiles to JS, it saves to the build directory, and it starts as build/index.js, so it's reading files in build/commands, hence the string change
             let commandFile = require(`${path}/${file}`).default as CommandFile; // .default cause when you call "export default <x>" it adds a default property to it (idk why)
-            let command = {
-                file: commandFile,
-                name: file.split('.')[0],
-                slashData: commandFile.slashData,
-                commandData: commandFile.commandData
+            try {
+                let command = {
+                    file: commandFile,
+                    name: file.split('.')[0],
+                    slashData: commandFile.slashData,
+                    commandData: commandFile.commandData
+                }
+                commands.push(command);
+            } catch(e) {
+                console.error(`Couldn't load the command data for the ${file.split('.')[0]} command with error: ${e}`);
             }
-            commands.push(command);
         }
     }
 }
@@ -93,7 +97,7 @@ async function registerSlashCommands() {
             commandData = commands[i].slashData.toJSON()
             slashCommands.push(commandData);
         } catch(e) {
-            console.error(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
+            console.error(`Couldn't load the slash command data for the ${commands[i].name} command with error: ${e}`);
         }
     }
     let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
