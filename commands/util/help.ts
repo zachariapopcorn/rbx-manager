@@ -1,10 +1,10 @@
 import Discord from 'discord.js';
 
-import { commands, registeredCommands } from '../../..';
+import { commands, registeredCommands } from '../..';
 
-import BotClient from '../../../utils/classes/BotClient';
+import BotClient from '../../utils/classes/BotClient';
 
-import CommandFile from '../../../utils/interfaces/CommandFile';
+import CommandFile from '../../utils/interfaces/CommandFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
@@ -61,7 +61,7 @@ const command: CommandFile = {
     .setName("help")
     .setDescription("Gets a list of commands"),
     commandData: {
-        category: "General Group",
+        category: "Util",
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }

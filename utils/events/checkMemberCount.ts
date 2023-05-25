@@ -43,5 +43,5 @@ export default async function checkMemberCount(groupID: number, client: BotClien
     }
     setTimeout(async() => {
         await checkMemberCount(groupID, client);
-    }, 5000);
+    }, 15000);
 }
