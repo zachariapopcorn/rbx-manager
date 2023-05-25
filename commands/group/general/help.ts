@@ -52,7 +52,9 @@ const command: CommandFile = {
         });
         collector.on('end', async() => {
             let disabledComponents = client.disableButtons(componentData).components;
-            await msg.edit({components: disabledComponents});
+            try {
+                await msg.edit({components: disabledComponents});
+            } catch {};
         });
     },
     slashData: new Discord.SlashCommandBuilder()
