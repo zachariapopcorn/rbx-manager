@@ -174,7 +174,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
             try {
-                if(command === "node-eval") { // Only command that uses ephemeral responses
+                if(CommandHelpers.ephemeralCommands.indexOf(command) !== -1) { // Only command that uses ephemeral responses
                     await interaction.deferReply({ephemeral: true});
                 } else {
                     await interaction.deferReply();
