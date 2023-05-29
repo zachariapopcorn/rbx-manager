@@ -40,11 +40,13 @@ async function fetchPlugins(): Promise<PluginEntry[]> {
             source = source.substring(index);
             index = source.indexOf('"');
             source = source.substring(0, index);
-            let directory = `${process.cwd()}/commands/${map[source]}`;
+            let normalDirectory = `${process.cwd()}/commands/${map[source]}`;
+            let buildDirectory = `${process.cwd()}/build/commands/${map[source]}`;
             plugins.push({
                 name: res[i].name.split(".")[0],
                 downloadURL: res[i].download_url,
-                installationPath: directory
+                normalInstallationPath: normalDirectory,
+                buildInstallationPath: buildDirectory
             });
         }
     }
@@ -63,8 +65,9 @@ const command: CommandFile = {
         if(mode === "list") {
             let installedPluginString = "";
             for(let i = 0; i < plugins.length; i++) {
-                if(fs.existsSync(`${plugins[i].installationPath}/${plugins[i].name}.ts`)) {
-                    installedPluginString += `${plugins[i].name}\n`;
+                if(fs.existsSync(`${plugins[i].normalInstallationPath}/${plugins[i].name}.ts`)) {
+                    let file = require(`${plugins[i].buildInstallationPath}/${plugins[i].name}.js`).default as CommandFile;
+                    installedPluginString += `**${file.slashData.name}** - ${file.slashData.description}\n`;
                 }
             }
             if(installedPluginString === "") {
@@ -82,7 +85,7 @@ const command: CommandFile = {
                 return await interaction.editReply({embeds: [embed]});
             }
             let source = await(await fetch(`${pluginEntry.downloadURL}`)).text();
-            await fs.promises.writeFile(`${pluginEntry.installationPath}/${pluginEntry.name}.ts`, source);
+            await fs.promises.writeFile(`${pluginEntry.normalInstallationPath}/${pluginEntry.name}.ts`, source);
         }
         if(mode === "uninstall") {
             let pluginEntry = plugins.find(v => v.name.toLowerCase() === name.toLowerCase());
@@ -91,7 +94,7 @@ const command: CommandFile = {
                 return await interaction.editReply({embeds: [embed]});
             }
             try {
-                await fs.promises.unlink(`${pluginEntry.installationPath}/${pluginEntry.name}.ts`);
+                await fs.promises.unlink(`${pluginEntry.normalInstallationPath}/${pluginEntry.name}.ts`);
             } catch {
                 let embed = client.embedMaker({title: "Not Installed", description: "The supplied plugin is not installed", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
