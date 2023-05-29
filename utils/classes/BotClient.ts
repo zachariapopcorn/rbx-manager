@@ -219,7 +219,9 @@ export default class BotClient extends Discord.Client {
             });
             collector.on("end", async() => {
                 let disabledComponents = this.disableButtons(componentData).components;
-                await msg.edit({components: disabledComponents});
+                try {
+                    await msg.edit({components: disabledComponents});
+                } catch {};
             });
         }
     }

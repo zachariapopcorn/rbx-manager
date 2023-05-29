@@ -1,10 +1,8 @@
 import Discord from 'discord.js';
 
-import config from '../../../config';
+import BotClient from '../../utils/classes/BotClient';
 
-import BotClient from '../../../utils/classes/BotClient';
-
-import CommandFile from '../../../utils/interfaces/CommandFile';
+import CommandFile from '../../utils/interfaces/CommandFile';
 
 function formatLoggedData(data: any[]) {
     let formatted = "";
@@ -55,11 +53,12 @@ const command: CommandFile = {
     },
     slashData: new Discord.SlashCommandBuilder()
     .setName("node-eval")
-    .setDescription("Runs Node.js code in the bot environment")
+    .setDescription("Runs Javascript code in the bot environment")
     .addStringOption(o => o.setName("code").setDescription("The code to run (can also be a URL to the code to run)").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
-        category: "General Group",
-        permissions: config.permissions.game.execution, // Counter intuitive but I don't feel like make another permission entry
+        category: "Util",
+        permissions: ["Administrator"],
+        useDiscordPermissionSystem: true,
         hasCooldown: true,
         preformGeneralVerificationChecks: false
     }

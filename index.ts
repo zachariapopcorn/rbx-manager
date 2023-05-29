@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import bodyParser = require('body-parser');
 
-import fs from 'fs/promises';
+import fs from 'fs';
 import express from 'express';
 
 import config from './config';
@@ -56,7 +56,7 @@ let listener = app.listen(process.env.PORT, () => {
 
 async function readCommands(path?: string) {
     if(!path) path = "./commands";
-    let files = await fs.readdir(path);
+    let files = await fs.promises.readdir(path);
     for(let i = 0; i < files.length; i++) {
         let file = files[i];
         if(file.indexOf(".") === -1) {
@@ -64,18 +64,26 @@ async function readCommands(path?: string) {
         } else {
             file = file.replace(".ts", ".js"); // This is here because when it compiles to JS, it saves to the build directory, and it starts as build/index.js, so it's reading files in build/commands, hence the string change
             let commandFile = require(`${path}/${file}`).default as CommandFile; // .default cause when you call "export default <x>" it adds a default property to it (idk why)
-            let command = {
-                file: commandFile,
-                name: file.split('.')[0],
-                slashData: commandFile.slashData,
-                commandData: commandFile.commandData
+            try {
+                let command = {
+                    file: commandFile,
+                    name: file.split('.')[0],
+                    slashData: commandFile.slashData,
+                    commandData: commandFile.commandData
+                }
+                commands.push(command);
+            } catch(e) {
+                console.error(`Couldn't load the command data for the ${file.split('.')[0]} command with error: ${e}`);
             }
-            commands.push(command);
         }
     }
 }
 
-async function registerSlashCommands() {
+export async function registerSlashCommands(reload?: boolean) {
+    if(reload) {
+        commands.length = 0;
+        await readCommands();
+    }
     let slashCommands = [];
     if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
     if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
@@ -93,7 +101,7 @@ async function registerSlashCommands() {
             commandData = commands[i].slashData.toJSON()
             slashCommands.push(commandData);
         } catch(e) {
-            console.error(`Couldn't load slash command data for ${commands[i].name} with error: ${e}`);
+            console.error(`Couldn't load the slash command data for the ${commands[i].name} command with error: ${e}`);
         }
     }
     let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
@@ -165,10 +173,14 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     let command = interaction.commandName.toLowerCase();
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
-            if(command === "node-eval") { // Only command that uses ephemeral responses
-                await interaction.deferReply({ephemeral: true});
-            } else {
-                await interaction.deferReply();
+            try {
+                if(CommandHelpers.ephemeralCommands.indexOf(command) !== -1) { // Only command that uses ephemeral responses
+                    await interaction.deferReply({ephemeral: true});
+                } else {
+                    await interaction.deferReply();
+                }
+            } catch {
+                return; // This error only happens with the plugin command. Idk why
             }
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
@@ -212,7 +224,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 await interaction.editReply({embeds: [embed]});
                 console.error(e);
             }
-            if(commands[i].file.commandData.hasCooldown) {
+            if(commands[i] && commands[i].file.commandData.hasCooldown) {
                 let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
                 if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
@@ -230,7 +242,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
 client.on("messageCreate", async(message: Discord.Message) => {
     if(!client.config.xpSystem.enabled) return;
     if(message.author.bot) return;
-    let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+    let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === message.author.id);
     let userData: UserEntry;
     if(index !== -1) {
@@ -249,13 +261,13 @@ client.on("messageCreate", async(message: Discord.Message) => {
     } else {
         xpData.push(userData);
     }
-    await fs.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
+    await fs.promises.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
 });
 
 client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: Discord.User) => {
     if(!client.config.xpSystem.enabled) return;
     if(user.bot) return;
-    let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+    let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === user.id);
     let userData: UserEntry;
     if(index !== -1) {
@@ -274,7 +286,7 @@ client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: D
     } else {
         xpData.push(userData);
     }
-    await fs.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
+    await fs.promises.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
 })
 
 let oldMethod = console.error;
