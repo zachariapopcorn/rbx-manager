@@ -56,7 +56,7 @@ const command: CommandFile = {
             try {
                 moderationData = await database.getModerationData(universeID, robloxID);
             } catch(e) {
-                if((e.toString() === "Error: 404 NOT_FOUND Entry not found in the datastore.")) {
+                if((e.toString() as string).indexOf("NOT_FOUND") !== -1) {
                     moderationData = {
                         banData: {
                             isBanned: false,
