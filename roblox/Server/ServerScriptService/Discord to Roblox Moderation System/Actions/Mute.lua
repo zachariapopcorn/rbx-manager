@@ -10,7 +10,7 @@ function getPlayer(username: string): Player
 	end
 end
 
-function convertToDN(username: string): stirng
+function convertToDN(username: string): string
 	return getPlayer(username).DisplayName
 end
 

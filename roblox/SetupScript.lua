@@ -68,10 +68,10 @@ function parseURL(url: string, folder: Folder, isServer: boolean)
 end
 
 pcall(function()
-	local config = require(game:GetService("ServerScriptService")["Discord to Roblox Moderation System"].Config)
+	local config = require(game:GetService("ServerScriptService")[folderName].Config)
 	SERVER = config.SERVER
 	WEB_API_KEY = config.WEB_API_KEY
-	DATASTORE_NAME = DATASTORE_NAME
+	DATASTORE_NAME = config.DATASTORE_NAME
 end)
 
 pcall(function()
