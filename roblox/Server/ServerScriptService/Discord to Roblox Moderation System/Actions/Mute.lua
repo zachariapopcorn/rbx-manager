@@ -19,9 +19,15 @@ function module:Run(payload: {username: string, reason: string})
 	if(game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.LegacyChatService) then
 		local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
 		local channel = chatService:GetChannel("All")
-		pcall(function()
+		local s, e = pcall(function()
 			channel:MuteSpeaker(displayName, payload.reason)
 		end)
+		if(e) then
+			local p = getPlayer(payload.username)
+			if(p) then
+				p:Kick("Error while muting")
+			end
+		end
 	else
 		for i,v:TextChannel in pairs(TextChatService.TextChannels:GetChildren()) do
 			v[displayName].CanSend = false

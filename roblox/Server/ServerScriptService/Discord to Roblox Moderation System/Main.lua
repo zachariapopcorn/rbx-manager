@@ -24,7 +24,7 @@ Players.PlayerAdded:Connect(function(plr)
 			Database:UnmutePlayer(plr.UserId, modData)
 		end
 		if(continueOn) then
-			pcall(function()
+			local s, e = pcall(function()
 				if(TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService) then
 					task.wait(1) -- Wait for player speaker object to be created
 					local chatService = require(game:GetService("ServerScriptService"):WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
@@ -37,6 +37,9 @@ Players.PlayerAdded:Connect(function(plr)
 					muteRemote:FireClient(plr, true, modData.muteData.reason)
 				end
 			end)
+			if(e) then
+				plr:Kick("Error while muting") -- Kick player if fail on mute
+			end
 		end
 	end
 end)
