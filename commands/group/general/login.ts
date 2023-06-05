@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 
 import * as funcaptcha from "funcaptcha";
-import { Challenge1 } from 'funcaptcha/lib/challenge';
+import { Challenge1, Challenge3, Challenge4 } from 'funcaptcha/lib/challenge';
 
 import fs from "fs";
 
@@ -13,18 +13,11 @@ import BetterConsole from '../../../utils/classes/BetterConsole';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import InitialCaptchaMetadata from '../../../utils/interfaces/InitialCaptchaMetadata';
 
-const map = {
-    "0️⃣": 0,
-    "1️⃣": 1,
-    "2️⃣": 2,
-    "3️⃣": 3,
-    "4️⃣": 4,
-    "5️⃣": 5
-}
+// Import solving for challenge 1
+import solveChallenge3 from '../../../utils/challenges/Challenge3';
+// Import solving for challenge 4
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
-
-const keys = Object.keys(map);
 
 function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -40,22 +33,27 @@ function getENVString(): string {
 }
 
 async function login(client: BotClient, username: string, password: string, csrfToken?: string, challengeId?: string, unifiedCaptchaId?: string, captchaToken?: string, challengeType?: string) {
-    let metaData = JSON.stringify({
-        "unifiedCaptchaId": unifiedCaptchaId,
-        "captchaToken": captchaToken,
-        "actionType": "Login"
-    });
+    let headers = {
+        "Content-Type": "application/json",
+        "User-Agent": UA,
+    }
+    if(csrfToken) {
+        headers["X-CSRF-TOKEN"] = csrfToken;
+    }
+    if(challengeId) {
+        headers["rblx-challenge-id"] = challengeId;
+        let metaData = JSON.stringify({
+            "unifiedCaptchaId": unifiedCaptchaId,
+            "captchaToken": captchaToken,
+            "actionType": "Login"
+        });
+        headers["rblx-challenge-metadata"] = Buffer.from(metaData, "utf-8").toString("base64");
+        headers["rblx-challenge-type"] = challengeType;
+    }
     return await client.request({
         url: "https://auth.roblox.com/v2/login",
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-			"User-Agent": UA,
-			"X-CSRF-TOKEN": csrfToken || "",
-            "rblx-challenge-id": challengeId || "",
-            "rblx-challenge-metadata": Buffer.from(metaData, "utf-8").toString("base64"),
-            "rblx-challenge-type": challengeType || ""
-        },
+        headers: headers,
         body: {
             "ctype": "Username",
 			"cvalue": username,
@@ -109,39 +107,20 @@ const command: CommandFile = {
                 userAgent: UA
             });
             let challenge = await session.getChallenge();
-            if(challenge instanceof Challenge1) throw new Error("Captcha type given not implemented");
-            let amountOfWaves = challenge.data.game_data.waves;
-            let objective = challenge.data.game_data.game_variant;
-            let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.data.string_table[`3.instructions-${objective}`]}\n\nGuide: https://github.com/noahcoolboy/roblox-funcaptcha/raw/master/img.gif\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
-            await interaction.editReply({embeds: [embed]});
-            for(let i = 0; i < amountOfWaves; i++) {
-                await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
-                let msg = await (interaction.channel as Discord.TextChannel).send({files: [`${process.cwd()}/Image.gif`]});
-                for(let i = 0; i < keys.length; i++) {
-                    await msg.react(keys[i]);
+            if(challenge instanceof Challenge1) {
+                throw new Error("Captcha type given not implemented");
+            } else if(challenge instanceof Challenge3) {
+                let res = await solveChallenge3(interaction, client, challenge);
+                if(res.success) {
+                    captchaToken = captchaData.token;
+                } else {
+                    if(res.error !== "CE" && res.error !== "CF") {
+                        throw new Error(res.error);
+                    }
                 }
-                let collected = await msg.awaitReactions({
-                    filter: (reaction, user) => {
-                        if(interaction.user.id !== user.id) return false;
-                        if(keys.findIndex(key => key === reaction.emoji.name) === -1) return false;
-                        return true;
-                    },
-                    time: client.config.collectorTime,
-                    max: 1
-                });
-                await msg.delete();
-                if(collected.size === 0) {
-                    let embed = client.embedMaker({title: "Captcha Expired", description: "You didn't answer the captcha in time, please rerun the command", type: "error", author: interaction.user});
-                    return await interaction.editReply({embeds: [embed]});
-                }
-                let answer = map[collected.at(0).emoji.name];
-                let answerResponse = await challenge.answer(answer);
-                if(answerResponse.response === "answered" && answerResponse.solved === false) {
-                    let embed = client.embedMaker({title: "Captcha Failed", description: "You've failed the captcha, please rerun the command", type: "error", author: interaction.user});
-                    return await interaction.editReply({embeds: [embed]});
-                }
+            } else if(challenge instanceof Challenge4) {
+                throw new Error("Captcha type given not implemented");
             }
-            captchaToken = captchaData.token;
         } catch(e) {
             BetterConsole.log(e);
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to complete the login captcha: ${e}`, type: "error", author: interaction.user});
