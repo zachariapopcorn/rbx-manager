@@ -12,10 +12,11 @@ import BetterConsole from '../../../utils/classes/BetterConsole';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import InitialCaptchaMetadata from '../../../utils/interfaces/InitialCaptchaMetadata';
+import SolvedCaptchaResult from '../../../utils/interfaces/SolvedCaptchaResult';
 
-// Import solving for challenge 1
+import solveChallenge1 from '../../../utils/challenges/Challenge1';
 import solveChallenge3 from '../../../utils/challenges/Challenge3';
-// Import solving for challenge 4
+import solveChallenge4 from '../../../utils/challenges/Challenge4';
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
@@ -107,24 +108,32 @@ const command: CommandFile = {
                 userAgent: UA
             });
             let challenge = await session.getChallenge();
+            let res: SolvedCaptchaResult;
             if(challenge instanceof Challenge1) {
-                throw new Error("Captcha type given not implemented");
+                BetterConsole.log(`Captcha type given: 1`);
+                res = await solveChallenge1(interaction, client, challenge);
             } else if(challenge instanceof Challenge3) {
-                let res = await solveChallenge3(interaction, client, challenge);
-                if(res.success) {
-                    captchaToken = captchaData.token;
-                } else {
-                    if(res.error !== "CE" && res.error !== "CF") {
-                        throw new Error(res.error);
-                    }
-                }
+                BetterConsole.log(`Captcha type given: 3`);
+                res = await solveChallenge3(interaction, client, challenge);
             } else if(challenge instanceof Challenge4) {
-                throw new Error("Captcha type given not implemented");
+                BetterConsole.log(`Captcha type given: 4`);
+                res = await solveChallenge4(interaction, client, challenge);
+            }
+            if(res.success) {
+                captchaToken = captchaData.token;
+            } else {
+                if(res.error !== "CE" && res.error !== "CF") {
+                    throw new Error(res.error);
+                }
+                return;
             }
         } catch(e) {
             BetterConsole.log(e);
-            let embed = client.embedMaker({title: "Error", description: `There was an error while trying to complete the login captcha: ${e}`, type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
+            if(e.toString() !== "Error: test") {
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to complete the login captcha: ${e}`, type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
+            }
+            return;
         }
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});

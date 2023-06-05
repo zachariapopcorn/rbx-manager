@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 
-import { Challenge3 } from 'funcaptcha/lib/challenge';
+import { Challenge4 } from 'funcaptcha/lib/challenge';
 
 import fs from "fs";
 
@@ -19,10 +19,11 @@ const map = {
 
 const keys = Object.keys(map);
 
-export default async function solveChallenge3(interaction: Discord.CommandInteraction, client: BotClient, challenge: Challenge3): Promise<SolvedCaptchaResult> {
+export default async function solveChallenge4(interaction: Discord.CommandInteraction, client: BotClient, challenge: Challenge4): Promise<SolvedCaptchaResult> {
     try {
         let amountOfWaves = challenge.data.game_data.waves;
-        let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.instruction}\n\nGuide: https://github.com/noahcoolboy/roblox-funcaptcha/raw/master/img.gif\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
+        await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
+        let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.instruction}\n\nGuide: https://i.imgur.com/05OYegq.png\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         for(let i = 0; i < amountOfWaves; i++) {
             await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
