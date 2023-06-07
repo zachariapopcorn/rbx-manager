@@ -1,6 +1,8 @@
 import Discord from 'discord.js';
 import roblox from 'noblox.js';
 
+import BetterConsole from './BetterConsole';
+
 import BotConfig from '../interfaces/BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
@@ -30,6 +32,7 @@ export default class BotClient extends Discord.Client {
                 ...requestOptions.headers
             }
         }
+        BetterConsole.log(requestOptions);
         return await fetch(requestOptions.url, {
             method: requestOptions.method,
             headers: requestOptions.headers,

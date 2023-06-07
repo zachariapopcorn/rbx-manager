@@ -18,7 +18,7 @@ import solveChallenge1 from '../../../utils/challenges/Challenge1';
 import solveChallenge3 from '../../../utils/challenges/Challenge3';
 import solveChallenge4 from '../../../utils/challenges/Challenge4';
 
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
 
 function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -37,6 +37,8 @@ async function login(client: BotClient, username: string, password: string, csrf
     let headers = {
         "Content-Type": "application/json",
         "User-Agent": UA,
+        "origin": "https://www.roblox.com",
+        "referer": "https://www.roblox.com/"
     }
     if(csrfToken) {
         headers["X-CSRF-TOKEN"] = csrfToken;
@@ -89,7 +91,7 @@ const command: CommandFile = {
             await timeout(5000);
             let captchaData = await funcaptcha.getToken({
                 pkey: "476068BF-9607-4799-B53D-966BE98E2B81",
-                surl: "https://roblox-api.arkoselabs.com",
+                surl: "https://client-api.arkoselabs.com",
                 data: {
                     "blob": dataBlob,
                 },
@@ -104,28 +106,32 @@ const command: CommandFile = {
                 let embed = client.embedMaker({title: "Captcha Implementation Broken", description: "The captcha implementation is currently broken. Please wait for a fix", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
-            let session = new funcaptcha.Session(captchaData, {
-                userAgent: UA
-            });
-            let challenge = await session.getChallenge();
-            let res: SolvedCaptchaResult;
-            if(challenge instanceof Challenge1) {
-                BetterConsole.log(`Captcha type given: 1`);
-                res = await solveChallenge1(interaction, client, challenge);
-            } else if(challenge instanceof Challenge3) {
-                BetterConsole.log(`Captcha type given: 3`);
-                res = await solveChallenge3(interaction, client, challenge);
-            } else if(challenge instanceof Challenge4) {
-                BetterConsole.log(`Captcha type given: 4`);
-                res = await solveChallenge4(interaction, client, challenge);
-            }
-            if(res.success) {
-                captchaToken = captchaData.token;
-            } else {
-                if(res.error !== "CE" && res.error !== "CF") {
-                    throw new Error(res.error);
+            if(!captchaData.token.includes("sup=1")) { // If not suppressed captcha
+                let session = new funcaptcha.Session(captchaData, {
+                    userAgent: UA
+                });
+                let challenge = await session.getChallenge();
+                let res: SolvedCaptchaResult;
+                if(challenge instanceof Challenge1) {
+                    BetterConsole.log(`Captcha type given: 1`);
+                    res = await solveChallenge1(interaction, client, challenge);
+                } else if(challenge instanceof Challenge3) {
+                    BetterConsole.log(`Captcha type given: 3`);
+                    res = await solveChallenge3(interaction, client, challenge);
+                } else if(challenge instanceof Challenge4) {
+                    BetterConsole.log(`Captcha type given: 4`);
+                    res = await solveChallenge4(interaction, client, challenge);
                 }
-                return;
+                if(res.success) {
+                    captchaToken = captchaData.token;
+                } else {
+                    if(res.error !== "CE" && res.error !== "CF") {
+                        throw new Error(res.error);
+                    }
+                    return;
+                }
+            } else {
+                captchaToken = captchaData.token;
             }
         } catch(e) {
             BetterConsole.log(e);
@@ -137,7 +143,7 @@ const command: CommandFile = {
         }
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        await fs.promises.unlink(`${process.cwd()}/Image.gif`);
+        try { await fs.promises.unlink(`${process.cwd()}/Image.gif`); } catch {};
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
@@ -150,7 +156,7 @@ const command: CommandFile = {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
-            let userID = body.user.id; 
+            let userID = body.user.id;
             let mediaType = body.twoStepVerificationData.mediaType.toLowerCase();
             let challengeId = body.twoStepVerificationData.ticket;
             let embed = client.embedMaker({title: "Two Step Verification", description: `Roblox has prompted a two step verification challenge. Please enter the code from your ${mediaType}`, type: "info", author: interaction.user});
