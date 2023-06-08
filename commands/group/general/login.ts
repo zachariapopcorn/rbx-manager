@@ -79,7 +79,7 @@ const command: CommandFile = {
         let error = body.errors[0].message;
         if(error !== "Challenge is required to authorize the request") {
             BetterConsole.log(body.toString());
-            let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason. The full body has been logged to the console", type: "error", author: interaction.user});
+            let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         let rblxChallengeId = res.headers.get("rblx-challenge-id");
