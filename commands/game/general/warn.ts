@@ -112,6 +112,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the warn(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",
+        isEphemeral: false,
         permissions: config.permissions.game.general,
         hasCooldown: true,
         preformGeneralVerificationChecks: false

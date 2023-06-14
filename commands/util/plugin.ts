@@ -123,6 +123,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("name").setDescription("The name of the plugin to install/uninstall").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Util",
+        isEphemeral: false,
         permissions: ["Administrator"],
         useDiscordPermissionSystem: true,
         hasCooldown: false,

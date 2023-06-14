@@ -106,6 +106,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unmute(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Mute",
+        isEphemeral: false,
         permissions: config.permissions.game.mute,
         hasCooldown: true,
         preformGeneralVerificationChecks: false

@@ -66,6 +66,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group to get the join requests").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
+        isEphemeral: false,
         permissions: config.permissions.group.joinrequests,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

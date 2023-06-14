@@ -17,6 +17,7 @@ const command: CommandFile = {
     .setDescription("Gets a list of random questions that I think people would ask"),
     commandData: {
         category: "Util",
+        isEphemeral: true,
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }

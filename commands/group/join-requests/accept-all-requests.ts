@@ -71,6 +71,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason for why you are accepting all these requests").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
+        isEphemeral: false,
         permissions: config.permissions.group.joinrequests,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

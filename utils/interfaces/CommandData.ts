@@ -5,6 +5,7 @@ import NeededRobloxPermissions from './NeededRobloxPermissions';
 
 export default interface CommandData {
     category: CommandCategory,
+    isEphemeral: boolean
     permissions?: Discord.PermissionResolvable[] | string[],
     useDiscordPermissionSystem?: boolean
     hasCooldown: boolean

@@ -44,6 +44,7 @@ const command: CommandFile = {
     .addNumberOption(o => o.setName("amount").setDescription("The amount of XP to remove").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "XP",
+        isEphemeral: false,
         permissions: config.permissions.group.xp,
         hasCooldown: true,
         preformGeneralVerificationChecks: false

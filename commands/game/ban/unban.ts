@@ -91,6 +91,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the unbans(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ban",
+        isEphemeral: false,
         permissions: config.permissions.game.ban,
         hasCooldown: true,
         preformGeneralVerificationChecks: false

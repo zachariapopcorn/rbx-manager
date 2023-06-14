@@ -43,6 +43,7 @@ const command: CommandFile = {
     .setDescription("Lists all the awards that you qualify for which you didn't redeem"),
     commandData: {
         category: "XP",
+        isEphemeral: false,
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }

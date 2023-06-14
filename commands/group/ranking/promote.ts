@@ -154,6 +154,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of the promote(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
+        isEphemeral: false,
         permissions: config.permissions.group.ranking,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,
