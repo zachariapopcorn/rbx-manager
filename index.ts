@@ -175,7 +175,8 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
         if(commands[i].name === command) {
             try {
                 await interaction.deferReply({ephemeral: commands[i].commandData.isEphemeral});
-            } catch {
+            } catch(e) {
+                console.error(e);
                 return; // This error only happens with the plugin command. Idk why
             }
             let args = CommandHelpers.loadArguments(interaction);
