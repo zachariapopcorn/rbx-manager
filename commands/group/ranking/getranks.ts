@@ -27,6 +27,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group to get the ranks of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
+        isEphemeral: false,
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }

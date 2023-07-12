@@ -61,6 +61,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("reason").setDescription("The reason(s) of why you're denying the join request(s)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Join Request",
+        isEphemeral: false,
         permissions: config.permissions.group.joinrequests,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

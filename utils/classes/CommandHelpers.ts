@@ -9,7 +9,6 @@ import CommandFile from '../interfaces/CommandFile';
 
 export default class CommandHelpers {
     public static allowedCommands = ["checkuser"];
-    public static ephemeralCommands = ["node-eval", "faq"];
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};

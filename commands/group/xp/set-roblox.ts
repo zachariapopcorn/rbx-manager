@@ -47,6 +47,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("username").setDescription("The username of the account to set").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "XP",
+        isEphemeral: false,
         hasCooldown: true,
         preformGeneralVerificationChecks: false
     }

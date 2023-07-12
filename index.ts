@@ -174,12 +174,9 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
     for(let i = 0; i < commands.length; i++) {
         if(commands[i].name === command) {
             try {
-                if(CommandHelpers.ephemeralCommands.indexOf(command) !== -1) { // Only command that uses ephemeral responses
-                    await interaction.deferReply({ephemeral: true});
-                } else {
-                    await interaction.deferReply();
-                }
-            } catch {
+                await interaction.deferReply({ephemeral: commands[i].commandData.isEphemeral});
+            } catch(e) {
+                console.error(e);
                 return; // This error only happens with the plugin command. Idk why
             }
             let args = CommandHelpers.loadArguments(interaction);

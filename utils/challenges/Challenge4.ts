@@ -22,7 +22,6 @@ const keys = Object.keys(map);
 export default async function solveChallenge4(interaction: Discord.CommandInteraction, client: BotClient, challenge: Challenge4): Promise<SolvedCaptchaResult> {
     try {
         let amountOfWaves = challenge.data.game_data.waves;
-        await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
         let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.instruction}\n\nGuide: https://i.imgur.com/05OYegq.png\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         for(let i = 0; i < amountOfWaves; i++) {

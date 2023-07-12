@@ -57,6 +57,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("code").setDescription("The code to run (can also be a URL to the code to run)").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Util",
+        isEphemeral: true,
         permissions: ["Administrator"],
         useDiscordPermissionSystem: true,
         hasCooldown: true,

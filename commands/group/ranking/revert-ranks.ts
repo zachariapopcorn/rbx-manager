@@ -124,6 +124,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("date").setDescription("The date that you want start from (formatted MM/DD/YYYY)").setRequired(false)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Ranking",
+        isEphemeral: false,
         permissions: config.permissions.group.ranking,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

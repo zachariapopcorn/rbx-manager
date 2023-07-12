@@ -29,6 +29,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("message").setDescription("The message that you wish to shout to the group").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Shout",
+        isEphemeral: false,
         permissions: config.permissions.group.shout,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

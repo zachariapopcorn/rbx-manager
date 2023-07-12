@@ -44,6 +44,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("username").setDescription("The username of the user you wish to get the server job ID of").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "JobID",
+        isEphemeral: false,
         permissions: config.permissions.game.jobIDs,
         hasCooldown: false,
         preformGeneralVerificationChecks: false

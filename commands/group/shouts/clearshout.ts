@@ -27,6 +27,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group to clear the shout of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Shout",
+        isEphemeral: false,
         permissions: config.permissions.group.shout,
         hasCooldown: true,
         preformGeneralVerificationChecks: true,

@@ -27,6 +27,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("group").setDescription("The group get the shout of").setRequired(true).addChoices(...GroupHandler.parseGroups() as any)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Shout",
+        isEphemeral: false,
         hasCooldown: false,
         preformGeneralVerificationChecks: false,
     }

@@ -67,6 +67,7 @@ const command: CommandFile = {
     .addStringOption(o => o.setName("id").setDescription("The ID of the reward you want to redeem").setRequired(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "XP",
+        isEphemeral: false,
         hasCooldown: true,
         preformGeneralVerificationChecks: false
     }

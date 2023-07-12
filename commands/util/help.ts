@@ -62,6 +62,7 @@ const command: CommandFile = {
     .setDescription("Gets a list of commands"),
     commandData: {
         category: "Util",
+        isEphemeral: false,
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }

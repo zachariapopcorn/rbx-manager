@@ -78,7 +78,7 @@ const command: CommandFile = {
         let body = await res.json();
         let error = body.errors[0].message;
         if(error !== "Challenge is required to authorize the request") {
-            BetterConsole.log(body.toString());
+            BetterConsole.log(body);
             let embed = client.embedMaker({title: "Error", description: "A captcha wasn't provided for some reason", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
@@ -224,6 +224,7 @@ const command: CommandFile = {
     .setDescription("Logs the bot into the configured bot account"),
     commandData: {
         category: "General Group",
+        isEphemeral: false,
         hasCooldown: false,
         preformGeneralVerificationChecks: false
     }
