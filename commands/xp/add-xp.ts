@@ -2,12 +2,12 @@ import Discord from 'discord.js';
 
 import fs from "fs/promises"
 
-import config from '../../../config';
+import config from '../../config';
 
-import BotClient from '../../../utils/classes/BotClient';
+import BotClient from '../../utils/classes/BotClient';
 
-import CommandFile from '../../../utils/interfaces/CommandFile';
-import UserEntry from '../../../utils/interfaces/UserEntry';
+import CommandFile from '../../utils/interfaces/CommandFile';
+import UserEntry from '../../utils/interfaces/UserEntry';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {

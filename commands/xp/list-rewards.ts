@@ -3,10 +3,10 @@ import roblox from 'noblox.js';
 
 import fs from "fs/promises"
 
-import BotClient from '../../../utils/classes/BotClient';
+import BotClient from '../../utils/classes/BotClient';
 
-import CommandFile from '../../../utils/interfaces/CommandFile';
-import UserEntry from '../../../utils/interfaces/UserEntry';
+import CommandFile from '../../utils/interfaces/CommandFile';
+import UserEntry from '../../utils/interfaces/UserEntry';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -27,8 +27,15 @@ const command: CommandFile = {
         let availableRewardString = "";
         for(let i = 0; i < rewards.length; i++) {
             if(userData.xp >= rewards[i].xpNeeded && userData.redeemedRewards.indexOf(rewards[i].rewardID) === -1) {
-                let groupName = (await roblox.getGroup(rewards[i].rank.groupId)).name;
-                availableRewardString += `**ID**: ${rewards[i].rewardID} | **Reward**: ${rewards[i].rank.rankName} rank in **${groupName}**\n`;
+                if(rewards[i].type === "RobloxRank") {
+                    let groupName = (await roblox.getGroup(rewards[i].metadata.groupId)).name;
+                    availableRewardString += `**ID**: ${rewards[i].rewardID} | **Reward**: ${rewards[i].metadata.rankName} rank in **${groupName}**\n`;
+                } else if(rewards[i].type === "DiscordRole") {
+                    availableRewardString += `**ID**: ${rewards[i].rewardID} | **Reward**: <@&${rewards[i].metadata.discordRoleId}>\n`;
+                } else {
+                    let willAutomaticallyApply = rewards[i].metadata.willAutomaticallyGiveReward ? "Yes" : "No";
+                    availableRewardString += `**ID**: ${rewards[i].rewardID} | **Reward**: ${rewards[i].metadata.rewardString} | **Reward Applied Automatically?**: ${willAutomaticallyApply}`;
+                }
             }
         }
         if(availableRewardString === "") {
