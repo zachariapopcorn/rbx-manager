@@ -2,6 +2,14 @@ import BotConfig from "./utils/interfaces/BotConfig";
 
 require('dotenv').config();
 
+const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY"];
+for(let i = 0; i < values.length; i++) {
+    if(!process.env[values[i]]) {
+        console.log(`${values[i]} not defined in .env file`);
+        process.exit(1);
+    }
+}
+
 const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
     ROBLOX_USERNAME: process.env.ROBLOX_USERNAME,
@@ -9,7 +17,6 @@ const config: BotConfig = {
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
-    WEB_API_KEY: process.env.WEB_API_KEY,
     groupIds: [],
     permissions: {
         all: [""],
