@@ -47,7 +47,6 @@ If using Repl, go to the secrets tab (Tools > Secrets). Click on "Open raw edito
   "ROBLOX_COOKIE": "",
   "ROBLOX_API_KEY": "",
   "ROVER_API_KEY": "",
-  "WEB_API_KEY": ""
 }
 ```
 Once done that, click the save button. Now configure the env file as shown in the subsets of step 5, but to paste in the value, click on the key and paste it in the value box, then click save on that
@@ -80,9 +79,6 @@ After that, click "SAVE & GENERATE KEY", and then click "COPY KEY TO CLIPBOARD".
 
 # Step 5.6
 The value, ``ROVER_API_KEY``, is your API key for Rover, the verification provider that this bot uses. To get it, go to [the Rover website](https://rover.link/) and login with your Discord account. Once you do that, click on "Manage Servers" and click on the server(s) that you bot is going to be in, and then click "Developer API". Once you're here, type a name for your API key and click "Create" and then click "Copy" on the prompt that came up. Paste what you copied after the equal sign in the .env file
-
-# Step 5.7
-The value, ``WEB_API_KEY``, is your API key for the bot's API. This can be anything that you want, just type it after the equal sign
 
 # Step 6
 Now that you're done configuring the .env file, close it, and open the ``config.ts`` file with your favorite text editor.
@@ -176,7 +172,7 @@ Copy [the following code](https://raw.githubusercontent.com/zachariapopcorn/rbx-
 
 You will see a configuration section. Before pasting this code into the console of the game you want to install this system to, configure it
 
-**The only configuration variables that are required for you to change is the ``SERVER`` and ``WEB_API_KEY`` variables, with the exception of the ``moderations`` field if you modified the `` ``datastoreName`` value in Step 6.12**
+**Unless you configured the datastoreName value in Step 6.12, which would then need to be reflected in the DATASTORE_NAME value, no configuration is needed**
 
 You are now done with setting up this system! Was that hard?
 

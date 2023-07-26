@@ -11,7 +11,6 @@ export default interface BotConfig {
     ROBLOX_COOKIE: string,
     ROBLOX_API_KEY: string,
     ROVER_API_KEY: string,
-    WEB_API_KEY: string,
     groupIds: number[],
     permissions: {
         all: string[],

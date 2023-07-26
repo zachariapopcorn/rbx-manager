@@ -25,7 +25,7 @@ function timeout(ms: number) {
 }
 
 function getENVString(): string {
-    const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY", "WEB_API_KEY"];
+    const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY"];
     let formatted = "";
     for(let i = 0; i < values.length; i++) {
         formatted += `${values[i]}=${process.env[values[i]]}\n`;
