@@ -18,6 +18,7 @@ export default class BotClient extends Discord.Client {
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
     public roverCache: {discordID: string, robloxID: number}[] = [];
+    public jobIdsRequested: {username: string, universeID: number, msgID: string, channelID: string, timeRequested: number}[] = [];
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions, Discord.IntentsBitField.Flags.MessageContent]});

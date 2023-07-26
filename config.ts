@@ -10,9 +10,9 @@ const config: BotConfig = {
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
     WEB_API_KEY: process.env.WEB_API_KEY,
-    groupIds: [],
+    groupIds: [5242495],
     permissions: {
-        all: [""],
+        all: ["759959415708450837"],
         group: {
             shout: [""],
             ranking: [""],
@@ -55,32 +55,32 @@ const config: BotConfig = {
     counting: {
         enabled: false,
         goal: 0,
-        loggingChannel: ""
+        loggingChannel: "1019800364712734821"
     },
     logging: {
         audit: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         shout: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         command: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         antiAbuse: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         sales: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         },
         xp: {
             enabled: true,
-            loggingChannel: ""
+            loggingChannel: "1019800364712734821"
         }
     },
     embedColors: {
@@ -91,7 +91,7 @@ const config: BotConfig = {
     defaultCooldown: 5000,
     cooldownOverrides: {}, // Format: {"command name": cooldownInMilliSeconds} ; EX: {"exile": 20000}
     suspensionRank: 0,
-    universes: [],
+    universes: [3507532981],
     datastoreName: "moderations",
     verificationChecks: true,
     collectorTime: 120000,

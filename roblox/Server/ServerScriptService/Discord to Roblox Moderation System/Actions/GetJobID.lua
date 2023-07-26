@@ -1,21 +1,15 @@
+local DatastoreService = game:GetService("DataStoreService")
+local database = DatastoreService:GetDataStore("GetJobIDRequests")
+
 local module = {}
 
 function module:Run(payload: {msgID: string, channelID: string, username: string})
-	local config = require(script.Parent.Parent.Config)
 	if(game:GetService("Players"):FindFirstChild(payload.username)) then
 		local s,e = pcall(function()
-			game:GetService("HttpService"):RequestAsync({
-				Url = config.SERVER .. "/get-job-id",
-				Method = "POST",
-				Headers = {
-					["Content-Type"] = "application/json",
-					["api-key"] = config.WEB_API_KEY
-				},
-				Body = game:GetService("HttpService"):JSONEncode({channelID = payload.channelID, msgID = payload.msgID, jobID = game.JobId})
-			})
+			database:SetAsync(payload.username, game.JobId .. "|" .. game.PlaceId);
 		end)
 		if(e) then
-			warn("Get Job ID command returned an error: " .. e)
+			warn("GetJobID execution returned an error: " .. e)
 		end
 	end
 end

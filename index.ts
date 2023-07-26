@@ -25,6 +25,7 @@ import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
 import checkMemberCount from './utils/events/checkMemberCount';
+import checkJobIDs from './utils/events/checkJobIDs';
 
 const client = new BotClient(config);
 
@@ -35,18 +36,6 @@ export const commands: CommandInstance[] = [];
 export const registeredCommands: CommandInstance[] = [];
 
 app.get("/", async (request, response) => {
-    response.status(200).send("OK");
-});
-
-app.post("/get-job-id", async (request, response) => {
-    if(request.headers["api-key"] !== config.WEB_API_KEY) return response.status(403).send("Invalid API Key");
-    let channelID = request.body["channelID"];
-    let msgID = request.body["msgID"];
-    let jobID = request.body["jobID"];
-    let msg = await (await client.channels.fetch(channelID) as Discord.TextChannel).messages.fetch(msgID);
-    let embed = client.embedMaker({title: "Job ID Found", description: `The job ID of the supplied user has been found, it is **${jobID}**`, type: "success", author: client.user});
-    embed.setAuthor(msg.embeds[0].author);
-    await msg.edit({embeds: [embed]});
     response.status(200).send("OK");
 });
 
@@ -155,13 +144,14 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
+    await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
     if(client.config.groupIds.length !== 0) {
-        await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
         await loginToRoblox(client.config.ROBLOX_COOKIE);
         await GroupHandler.loadGroups();
     }
     if(client.config.universes.length !== 0) {
         await UniverseHandler.loadUniverses();
+        await checkJobIDs(client);
     }
     await readCommands();
     await deleteGuildCommands();
