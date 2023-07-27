@@ -12,15 +12,11 @@ const messaging = new MessagingService(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let typeOfOperation = args["type"];
+        let typeOfOperation = args["subcommand"];
         let jobID = args["jobid"];
         let reason = args["reason"];
         let universeName = args["universe"];
         let universeID = UniverseHandler.getIDFromName(universeName);
-        if(typeOfOperation === "jobID" && !jobID) {
-            let embed = client.embedMaker({title: "Argument Error", description: "You didn't supply a Job ID even though you supplied the jobID shutdown type", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         try {
             await messaging.sendMessage(universeID, "Shutdown", {
                 isGlobal: (typeOfOperation === "global"),
@@ -42,10 +38,21 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("shutdown")
     .setDescription("Shutdowns all servers or shuts down a specific server")
-    .addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
-    .addStringOption(o => o.setName("type").setDescription("The type of shutdown to preform").setRequired(true).addChoices({name: "global", value: "global"}, {name: "jobID", value: "jobID"}))
-    .addStringOption(o => o.setName("reason").setDescription("The reason of the shutdown").setRequired(true))
-    .addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to shutdown (only if you choose so)").setRequired(false)) as Discord.SlashCommandBuilder,
+    .addSubcommand(sc => {
+        sc.setName("global")
+        sc.setDescription("Shuts down all of the running servers")
+        sc.addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
+        sc.addStringOption(o => o.setName("reason").setDescription("The reason of the shutdown").setRequired(true))
+        return sc;
+    })
+    .addSubcommand(sc => {
+        sc.setName("jobid")
+        sc.setDescription("Shuts down one specific server")
+        sc.addStringOption(o => o.setName("universe").setDescription("The universe to perform this action on").setRequired(true).addChoices(...UniverseHandler.parseUniverses() as any))
+        sc.addStringOption(o => o.setName("reason").setDescription("The reason of the shutdown").setRequired(true))
+        sc.addStringOption(o => o.setName("jobid").setDescription("The job ID of the server you wish to shutdown (only if you choose so)").setRequired(true))
+        return sc;
+    }) as Discord.SlashCommandBuilder,
     commandData: {
         category: "General Game",
         isEphemeral: false,

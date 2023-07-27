@@ -13,8 +13,15 @@ export default class CommandHelpers {
         let options = interaction.options.data;
         let args = {};
         for(let i = 0; i < options.length; i++) {
-            args[options[i].name] = options[i].value;
+            if(options[i].options) {
+                for(let x = 0; x < options[i].options.length; x++) {
+                    args[options[i].options[x].name] = options[i].options[x].value;
+                }
+            } else {
+                args[options[i].name] = options[i].value;
+            }
         }
+        args["subcommand"] = options[0].name;
         return args;
     }
     public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {
