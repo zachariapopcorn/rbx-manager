@@ -12,6 +12,7 @@ export default class CommandHelpers {
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};
+        if(options.length === 0) return args;
         for(let i = 0; i < options.length; i++) {
             if(options[i].options) {
                 for(let x = 0; x < options[i].options.length; x++) {
@@ -21,7 +22,9 @@ export default class CommandHelpers {
                 args[options[i].name] = options[i].value;
             }
         }
-        args["subcommand"] = options[0].name;
+        if(options[0].options) {
+            args["subcommand"] = options[0].name; // Expose the subcommand used if available because the documented way doesn't fucking exist
+        }
         return args;
     }
     public static checkPermissions(command: CommandFile, user: Discord.GuildMember): boolean {

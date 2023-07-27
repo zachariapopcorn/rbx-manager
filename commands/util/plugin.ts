@@ -55,12 +55,8 @@ async function fetchPlugins(): Promise<PluginEntry[]> {
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let mode = args["mode"];
+        let mode = args["subcommand"];
         let name = args["name"];
-        if(mode !== "list" && !name) {
-            let embed = client.embedMaker({title: "No Plugin Name Supplied", description: "You didn't supply a plugin name to install/uninstall", type: "error", author: interaction.user});
-            return await interaction.editReply({embeds: [embed]});
-        }
         let plugins = await fetchPlugins();
         if(mode === "list") {
             let installedPluginString = "";
@@ -119,8 +115,23 @@ const command: CommandFile = {
     slashData: new Discord.SlashCommandBuilder()
     .setName("plugin")
     .setDescription("Manages installed plugins")
-    .addStringOption(o => o.setName("mode").setDescription("The operation to do").setRequired(true).addChoices({name: "install", value: "install"}, {name: "list", value: "list"}, {name: "uninstall", value: "uninstall"}))
-    .addStringOption(o => o.setName("name").setDescription("The name of the plugin to install/uninstall").setRequired(false)) as Discord.SlashCommandBuilder,
+    .addSubcommand(sc => {
+        sc.setName("install")
+        sc.setDescription("Installs a plugin")
+        sc.addStringOption(o => o.setName("name").setDescription("The name of the plugin to install").setRequired(true))
+        return sc;
+    })
+    .addSubcommand(sc => {
+        sc.setName("list")
+        sc.setDescription("Lists installed plugins")
+        return sc;
+    })
+    .addSubcommand(sc => {
+        sc.setName("uninstall")
+        sc.setDescription("Uninstalls a plugin")
+        sc.addStringOption(o => o.setName("name").setDescription("The name of the plugin to uninstall").setRequired(true))
+        return sc;
+    }) as Discord.SlashCommandBuilder,
     commandData: {
         category: "Util",
         isEphemeral: false,
