@@ -8,32 +8,25 @@ import BotClient from '../../utils/classes/BotClient';
 
 import SolvedCaptchaResult from '../interfaces/SolvedCaptchaResult';
 
-const map = {
-    "0️⃣": 0,
-    "1️⃣": 1,
-    "2️⃣": 2,
-    "3️⃣": 3,
-    "4️⃣": 4,
-    "5️⃣": 5
+function getInstruction(challenge: Challenge4) {
+    let instructionString = (challenge.data.game_data as any).instruction_string;
+    let instruction = challenge.data.string_table[`4.instructions-${instructionString}`];
+    instruction = instruction.replaceAll("<strong>", "");
+    instruction = instruction.replaceAll("</strong>", "");
+    return instruction;
 }
-
-const keys = Object.keys(map);
 
 export default async function solveChallenge4(interaction: Discord.CommandInteraction, client: BotClient, challenge: Challenge4): Promise<SolvedCaptchaResult> {
     try {
         let amountOfWaves = challenge.data.game_data.waves;
-        let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${challenge.instruction}\n\nGuide: https://i.imgur.com/05OYegq.png\n\nAmount of Waves: ${amountOfWaves}`, type: "info", author: interaction.user});
+        let embed = client.embedMaker({title: "Captcha Required", description: `Logins require a captcha to be completed, please complete the captcha below\n\nObjective: ${getInstruction(challenge)}\n\nGuide: https://i.imgur.com/05OYegq.png\n\nAmount of Waves: ${amountOfWaves}\n\nTo answer, type the # tile that the answer is in`, type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         for(let i = 0; i < amountOfWaves; i++) {
             await fs.promises.writeFile(`${process.cwd()}/Image.gif`, await challenge.getImage());
             let msg = await (interaction.channel as Discord.TextChannel).send({files: [`${process.cwd()}/Image.gif`]});
-            for(let i = 0; i < keys.length; i++) {
-                await msg.react(keys[i]);
-            }
-            let collected = await msg.awaitReactions({
-                filter: (reaction: Discord.MessageReaction, user: Discord.User) => {
-                    if(interaction.user.id !== user.id) return false;
-                    if(keys.findIndex(key => key === reaction.emoji.name) === -1) return false;
+            let collected = await interaction.channel.awaitMessages({
+                filter: (message: Discord.Message) => {
+                    if(message.author.id !== interaction.user.id) return false;
                     return true;
                 },
                 time: client.config.collectorTime,
@@ -45,7 +38,13 @@ export default async function solveChallenge4(interaction: Discord.CommandIntera
                 await interaction.editReply({embeds: [embed]});
                 return {success: false, error: "CE"};
             }
-            let answer = map[collected.at(0).emoji.name];
+            try {
+                await collected.at(0).delete();
+            } catch {}
+            let answer = Number(collected.at(0).content);
+            if(!answer) {
+                return {success: false, error: "Invalid answer received"};
+            }
             let answerResponse = await challenge.answer(answer);
             if(answerResponse.response === "answered" && answerResponse.solved === false) {
                 let embed = client.embedMaker({title: "Captcha Failed", description: "You've failed the captcha, please rerun the command", type: "error", author: interaction.user});
