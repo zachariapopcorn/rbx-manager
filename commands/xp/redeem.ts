@@ -35,7 +35,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Not Enough XP", description: "You don't have enough XP to redeem this reward", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        if(userData.redeemedRewards.indexOf(reward.rewardID) !== -1) {
+        if(userData.redeemedRewards.includes(reward.rewardID)) {
             let embed = client.embedMaker({title: "Already Redeemed", description: "You already redeemed this reward", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }

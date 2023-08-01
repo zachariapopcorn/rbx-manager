@@ -34,7 +34,7 @@ async function fetchPlugins(): Promise<PluginEntry[]> {
     let res = await(await fetch(pluginAPIURL)).json() as GithubPluginAPIResponse[];
     let plugins: PluginEntry[] = [];
     for(let i = 0; i < res.length; i++) {
-        if(res[i].name.indexOf(".ts") !== -1) {
+        if(res[i].name.includes(".ts")) {
             let source = await(await fetch(`${res[i].download_url}`)).text();
             let index = source.indexOf("category: ") + 11;
             source = source.substring(index);

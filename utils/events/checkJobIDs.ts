@@ -29,7 +29,8 @@ export default async function checkJobIDs(client: BotClient) {
             await roblox.deleteDatastoreEntry(entry.universeID, "GetJobIDRequests", entry.username);
             client.jobIdsRequested.splice(i, 1);
         } catch(e) {
-            if((e.toString() as string).indexOf("NOT_FOUND") === -1) {
+            let err = e.toString() as string;
+            if(!err.includes("NOT_FOUND")) {
                 console.error(e);
             }
         }

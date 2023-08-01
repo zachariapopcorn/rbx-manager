@@ -56,7 +56,8 @@ const command: CommandFile = {
             try {
                 moderationData = await database.getModerationData(universeID, robloxID);
             } catch(e) {
-                if((e.toString() as string).indexOf("NOT_FOUND") !== -1) {
+                let err = e.toString() as string;
+                if(err.includes("NOT_FOUND")) {
                     moderationData = {
                         banData: {
                             isBanned: false,
@@ -68,6 +69,9 @@ const command: CommandFile = {
                         },
                         warns: []
                     }
+                } else {
+                    let embed = client.embedMaker({title: "Error", description: `There was an error while trying to pull this user's moderation status: ${e}`, type: "error", author: interaction.user});
+                    return await interaction.editReply({embeds: [embed]});
                 }
             }
             let warnsString = "There were len warnings found for this user\n\n";

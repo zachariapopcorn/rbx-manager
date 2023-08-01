@@ -48,7 +48,7 @@ async function readCommands(path?: string) {
     let files = await fs.promises.readdir(path);
     for(let i = 0; i < files.length; i++) {
         let file = files[i];
-        if(file.indexOf(".") === -1) {
+        if(!file.includes(".")) {
             await readCommands(`${path}/${file}`);
         } else {
             file = file.replace(".ts", ".js"); // This is here because when it compiles to JS, it saves to the build directory, and it starts as build/index.js, so it's reading files in build/commands, hence the string change
@@ -278,7 +278,7 @@ client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: D
 
 let oldMethod = console.error;
 console.error = function(msg: string) {
-    if(msg.toString().indexOf("ExperimentalWarning") === -1) oldMethod(msg);
+    if(!msg.toString().includes("ExperimentalWarning")) oldMethod(msg);
 }
 
 client.login(client.config.DISCORD_TOKEN);

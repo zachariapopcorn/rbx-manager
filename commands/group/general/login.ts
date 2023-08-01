@@ -150,7 +150,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+        if(!rawCookie.includes("ROBLOSECURITY")) {
             let body = await res.json();
             if(!body.twoStepVerificationData) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
@@ -204,7 +204,7 @@ const command: CommandFile = {
                 robloxRequest: false
             });
             rawCookie = res.headers.get("set-cookie");
-            if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+            if(!rawCookie.includes("ROBLOSECURITY")) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }

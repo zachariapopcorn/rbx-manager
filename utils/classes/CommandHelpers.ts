@@ -91,7 +91,7 @@ export default class CommandHelpers {
         let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User", "XP"];
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
-            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+            if(categories.includes(commands[i].commandData.category)) {
                 cmds.push(commands[i].name);
             }
         }
@@ -101,7 +101,7 @@ export default class CommandHelpers {
         let categories: CommandCategory[] = ["Ban", "Database", "General Game", "JobID", "Lock", "Mute"];
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
-            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+            if(categories.includes(commands[i].commandData.category)) {
                 cmds.push(commands[i].name);
             }
         }

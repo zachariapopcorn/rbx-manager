@@ -42,7 +42,7 @@ export default async function solveChallenge4(interaction: Discord.CommandIntera
                 await collected.at(0).delete();
             } catch {}
             let answer = Number(collected.at(0).content);
-            if(!answer) {
+            if(isNaN(answer)) {
                 return {success: false, error: "Invalid answer received"};
             }
             let answerResponse = await challenge.answer(answer);

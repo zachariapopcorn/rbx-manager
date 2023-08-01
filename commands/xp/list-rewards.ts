@@ -26,7 +26,7 @@ const command: CommandFile = {
         let rewards = client.config.xpSystem.rewards;
         let availableRewardString = "";
         for(let i = 0; i < rewards.length; i++) {
-            if(userData.xp >= rewards[i].xpNeeded && userData.redeemedRewards.indexOf(rewards[i].rewardID) === -1) {
+            if(userData.xp >= rewards[i].xpNeeded && !userData.redeemedRewards.includes(rewards[i].rewardID)) {
                 if(rewards[i].type === "RobloxRank") {
                     let groupName = (await roblox.getGroup(rewards[i].metadata.groupId)).name;
                     availableRewardString += `**ID**: ${rewards[i].rewardID} | **Reward**: ${rewards[i].metadata.rankName} rank in **${groupName}**\n`;
