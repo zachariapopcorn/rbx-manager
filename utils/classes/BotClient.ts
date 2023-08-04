@@ -13,6 +13,7 @@ import GroupLog from '../interfaces/GroupLog';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
+    public originalLockedCommands: string[] = [];
     public isLoggedIn: boolean;
     public robloxInfo: roblox.LoggedInUserData;
     public commandCooldowns: CooldownEntry[] = [];
@@ -23,6 +24,7 @@ export default class BotClient extends Discord.Client {
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions, Discord.IntentsBitField.Flags.MessageContent]});
         this.config = config;
+        this.originalLockedCommands = config.lockedCommands;
     }
 
     public async request(requestOptions: RequestOptions) : Promise<Response> {

@@ -78,7 +78,7 @@ export async function registerSlashCommands(reload?: boolean) {
     if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     if(!client.config.xpSystem.enabled) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getXPCommands());
     for(let i = 0; i < commands.length; i++) {
-        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let lockedCommandsIndex = client.config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
             BetterConsole.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
@@ -172,7 +172,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
-                if(usernames.length > config.maximumNumberOfUsers) {
+                if(usernames.length > client.config.maximumNumberOfUsers) {
                     let embed = client.embedMaker({title: "Maximum Number of Users Exceeded", description: "You've inputted more users than the currently allowed maximum, please lower the amount of users in your command and try again", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
@@ -221,6 +221,20 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 } else {
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + commandCooldown});
                 }
+            }
+        }
+    }
+});
+
+client.on("interactionCreate", async(interaction: Discord.Interaction) => {
+    if(interaction.type !== Discord.InteractionType.ApplicationCommandAutocomplete) return;
+    let command = interaction.commandName.toLowerCase();
+    for(let i = 0; i < commands.length; i++) {
+        if(commands[i].name === command) {
+            try {
+                await commands[i].file.autocomplete(interaction, client);
+            } catch(e) {
+                console.error(e);
             }
         }
     }
