@@ -99,8 +99,8 @@ const command: CommandFile = {
                 }
                 if(shouldBreakAfterForLoop) continue; // If I call continue in the nested for loop (the one right above this line), it won't cause the main username for loop to skip over the rest of the code
             }
-            let shouldContinue = false;
             if(lockedRank) {
+                let shouldContinue = false;
                 let embed = client.embedMaker({title: "Role Locked", description: `The role(s) below **${username}** is locked, would you like to demote **${username}** to **${potentialRole.name}**?`, type: "info", author: interaction.user});
                 let componentData = client.createButtons([
                     {customID: "yesButton", label: "Yes", style: Discord.ButtonStyle.Success},
@@ -119,13 +119,13 @@ const command: CommandFile = {
                     let disabledComponents = client.disableButtons(componentData).components;
                     await msg.edit({components: disabledComponents});
                 }
-            }
-            if(!shouldContinue) {
-                logs.push({
-                    username: username,
-                    status: "Cancelled",
-                });
-                continue;
+                if(!shouldContinue) {
+                    logs.push({
+                        username: username,
+                        status: "Cancelled",
+                    });
+                    continue;
+                }
             }
             try {
                 await roblox.setRank(groupID, victimRobloxID, potentialRole.rank);
