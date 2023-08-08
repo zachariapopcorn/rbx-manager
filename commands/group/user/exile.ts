@@ -37,11 +37,11 @@ const command: CommandFile = {
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
                 let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Exile", victimRobloxID);
-                if(!verificationStatus) {
+                if(!verificationStatus.success) {
                     logs.push({
                         username: username,
                         status: "Error",
-                        message: "Verification checks have failed"
+                        message: `Verification checks have failed, reason: ${verificationStatus.err}`
                     });
                     continue;
                 }

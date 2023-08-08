@@ -10,6 +10,7 @@ import CommandLog from '../interfaces/CommandLog';
 import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
 import GroupLog from '../interfaces/GroupLog';
+import VerificationResult from '../interfaces/VerificationResult';
 
 export default class BotClient extends Discord.Client {
     public config: BotConfig;
@@ -18,7 +19,7 @@ export default class BotClient extends Discord.Client {
     public robloxInfo: roblox.LoggedInUserData;
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
-    public roverCache: {discordID: string, robloxID: number}[] = [];
+    public roverCache: {discordID: string, robloxID: number, timeAdded: number}[] = [];
     public jobIdsRequested: {username: string, universeID: number, msgID: string, channelID: string, timeRequested: number}[] = [];
 
     constructor(config: BotConfig) {
@@ -78,7 +79,11 @@ export default class BotClient extends Discord.Client {
     public async getRobloxUser(guildID: string, discordID: string): Promise<number> {
         let index = this.roverCache.findIndex(v => v.discordID === discordID);
         if(index != -1) {
-            return this.roverCache[index].robloxID;
+            if(Date.now() - this.roverCache[index].timeAdded >= 300_000) { // Remove cache items if older than 5 minutes
+                this.roverCache.splice(index, 1);
+            } else {
+                return this.roverCache[index].robloxID;
+            }
         }
         let res = await this.request({
             url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
@@ -92,7 +97,7 @@ export default class BotClient extends Discord.Client {
         });
         if(res.status === 200) {
             let rbxID = (await res.json()).robloxId;
-            this.roverCache.push({discordID: discordID, robloxID: rbxID});
+            this.roverCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
             return rbxID;
         } else {
             let headers = res.headers;
@@ -125,16 +130,16 @@ export default class BotClient extends Discord.Client {
         return permissionData;
     }
 
-    public async preformVerificationChecks(groupID: number, robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<boolean> {
+    public async preformVerificationChecks(groupID: number, robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<VerificationResult> {
         let authorGroupRole = await roblox.getRankInGroup(groupID, robloxID);
-        if(authorGroupRole === 0) return false;
+        if(authorGroupRole === 0) return {success: false, err: "User is not in group"};
         let permissions = await this.getPermissions(groupID, robloxID);
-        if(!permissions[permissionNeeded]) return false;
+        if(!permissions[permissionNeeded]) return {success: false, err: "User does not have required permission"};
         if(victimUserID) {
             let victimGroupRole = await roblox.getRankInGroup(groupID, victimUserID);
-            if(victimGroupRole >= authorGroupRole) return false;
+            if(victimGroupRole >= authorGroupRole) return {success: false, err: "User does not have permission to manage other user"};
         }
-        return true;
+        return {success: true};
     }
 
     public async logAction(logString: string): Promise<void> {

@@ -16,6 +16,7 @@ import BetterConsole from './utils/classes/BetterConsole';
 import CommandFile from './utils/interfaces/CommandFile';
 import CommandInstance from './utils/interfaces/CommandInstance';
 import UserEntry from './utils/interfaces/UserEntry';
+import VerificationResult from './utils/interfaces/VerificationResult';
 
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
@@ -192,13 +193,15 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             }
             if(commands[i].file.commandData.preformGeneralVerificationChecks) {
                 let groupID = GroupHandler.getIDFromName(args["group"]);
-                let verificationStatus = false;
                 let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+                let verificationStatus: VerificationResult;
                 if(robloxID !== 0) {
                     verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
+                } else {
+                    verificationStatus = {success: false, err: "User is not verified with Rover"};
                 }
-                if(!verificationStatus) {
-                    let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
+                if(!verificationStatus.success) {
+                    let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
                 }

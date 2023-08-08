@@ -25,8 +25,8 @@ const command: CommandFile = {
         username = await roblox.getUsernameFromId(userID);
         if(config.verificationChecks) {
             let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
-            if(!verificationStatus) {
-                let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
+            if(!verificationStatus.success) {
+                let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
         }
