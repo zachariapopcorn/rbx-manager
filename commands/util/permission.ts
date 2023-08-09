@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import fs from 'fs';
 
 import BotClient from '../../utils/classes/BotClient';
 import ConfigHelpers from '../../utils/classes/ConfigHelpers';

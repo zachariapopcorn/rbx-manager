@@ -92,10 +92,34 @@ const command: CommandFile = {
         await interaction.editReply({embeds: [embed]});
         await client.logXPAction("Redeemed Reward", `<@${interaction.user.id}> has redeemed the reward with the ID of ${reward.rewardID}`);
     },
+    autocomplete: async(interaction: Discord.AutocompleteInteraction, client: BotClient): Promise<any> => {
+        let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+        let index = xpData.findIndex(v => v.discordID === interaction.user.id);
+        let userData: UserEntry;
+        if(index !== -1) {
+            userData = xpData[index];
+        } else {
+            userData = {
+                discordID: interaction.user.id,
+                robloxID: 0,
+                redeemedRewards: [],
+                xp: 0
+            }
+        }
+        let rewards = client.config.xpSystem.rewards;
+        let availableRewards:string[] = [];
+        for(let i = 0; i < rewards.length; i++) {
+            if(userData.xp >= rewards[i].xpNeeded && !userData.redeemedRewards.includes(rewards[i].rewardID)) {
+                availableRewards.push(rewards[i].rewardID);
+            }
+        }
+        availableRewards = availableRewards.filter(r => r.startsWith(interaction.options.getFocused()));
+        return await interaction.respond(availableRewards.map(r => ({name: r, value: r})));
+    },
     slashData: new Discord.SlashCommandBuilder()
     .setName("redeem")
     .setDescription("Redeems a reward given an ID")
-    .addStringOption(o => o.setName("id").setDescription("The ID of the reward you want to redeem").setRequired(true)) as Discord.SlashCommandBuilder,
+    .addStringOption(o => o.setName("id").setDescription("The ID of the reward you want to redeem").setRequired(true).setAutocomplete(true)) as Discord.SlashCommandBuilder,
     commandData: {
         category: "XP",
         isEphemeral: false,
