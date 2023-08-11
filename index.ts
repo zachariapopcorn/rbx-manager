@@ -217,7 +217,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             }
             if(commands[i] && commands[i].file.commandData.hasCooldown) {
                 let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
-                if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
+                if(typeof(res) === "number") { // If we return a number, it means the cooldown multipler got calculated
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
                 } else if(args["username"]) {
                     let usernames = args["username"].replaceAll(" ", "").split(",") as string[];

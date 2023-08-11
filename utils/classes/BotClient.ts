@@ -125,7 +125,8 @@ export default class BotClient extends Discord.Client {
             "JoinRequests": permissions.groupMembershipPermissions.inviteMembers,
             "Ranking": permissions.groupMembershipPermissions.changeRank,
             "Shouts": permissions.groupPostsPermissions.postToStatus,
-            "Exile": permissions.groupMembershipPermissions.removeMembers
+            "Exile": permissions.groupMembershipPermissions.removeMembers,
+            "Wall": permissions.groupPostsPermissions.deleteFromWall
         }
         return permissionData;
     }

@@ -90,7 +90,7 @@ const command: CommandFile = {
         await fs.promises.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
         let embed = client.embedMaker({title: "Success", description: "You've successfully redeemed this reward", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        await client.logXPAction("Redeemed Reward", `<@${interaction.user.id}> has redeemed the reward with the ID of ${reward.rewardID}`);
+        await client.logXPAction("Redeemed Reward", `<@${interaction.user.id}> has redeemed the reward with the ID of **${reward.rewardID}**`);
     },
     autocomplete: async(interaction: Discord.AutocompleteInteraction, client: BotClient): Promise<any> => {
         let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];

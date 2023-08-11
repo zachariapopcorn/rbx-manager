@@ -25,7 +25,8 @@ const config: BotConfig = {
             ranking: [""],
             joinrequests: [""],
             user: [""],
-            xp: [""]
+            xp: [""],
+            wall: [""]
         },
         game: {
             general: [""],
