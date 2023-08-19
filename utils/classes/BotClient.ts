@@ -132,6 +132,7 @@ export default class BotClient extends Discord.Client {
     }
 
     public async preformVerificationChecks(groupID: number, robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<VerificationResult> {
+        if(!this.config.verificationChecks) return {success: true};
         let authorGroupRole = await roblox.getRankInGroup(groupID, robloxID);
         if(authorGroupRole === 0) return {success: false, err: "User is not in group"};
         let permissions = await this.getPermissions(groupID, robloxID);

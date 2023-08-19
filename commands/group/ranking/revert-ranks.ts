@@ -94,7 +94,12 @@ const command: CommandFile = {
         let failedAmount = 0;
         for(let i = 0; i < logs.data.length; i++) {
             let des = logs.data[i].description as any;
-            let oldRankName = await roblox.getRankNameInGroup(groupID, des.TargetId);
+            let oldRankName: string;
+            try {
+                oldRankName = await roblox.getRankNameInGroup(groupID, des.TargetId);
+            } catch {
+                oldRankName = "Failed to get rank name";
+            }
             let didSuc = true;
             try {
                 await roblox.setRank(groupID, des.TargetId, des.OldRoleSetId);
