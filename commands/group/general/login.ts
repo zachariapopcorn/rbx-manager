@@ -6,6 +6,7 @@ import { Challenge1, Challenge3, Challenge4 } from 'funcaptcha/lib/challenge';
 import fs from "fs";
 
 import { loginToRoblox } from '../../..';
+import { envValues } from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import BetterConsole from '../../../utils/classes/BetterConsole';
@@ -25,10 +26,9 @@ function timeout(ms: number) {
 }
 
 function getENVString(): string {
-    const values = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY", "WEB_API_KEY"];
     let formatted = "";
-    for(let i = 0; i < values.length; i++) {
-        formatted += `${values[i]}=${process.env[values[i]]}\n`;
+    for(let i = 0; i < envValues.length; i++) {
+        formatted += `${envValues[i]}=${process.env[envValues[i]]}\n`;
     }
     return formatted;
 }
@@ -150,7 +150,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+        if(!rawCookie.includes("ROBLOSECURITY")) {
             let body = await res.json();
             if(!body.twoStepVerificationData) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
@@ -204,7 +204,7 @@ const command: CommandFile = {
                 robloxRequest: false
             });
             rawCookie = res.headers.get("set-cookie");
-            if(rawCookie.indexOf("ROBLOSECURITY") === -1) {
+            if(!rawCookie.includes("ROBLOSECURITY")) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }

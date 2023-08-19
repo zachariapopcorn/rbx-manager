@@ -11,7 +11,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let joinRequests = await roblox.getJoinRequests(groupID, "Asc", 10);
+        let joinRequests = await roblox.getJoinRequests(groupID, "Desc", 10);
         if(joinRequests.data.length === 0) {
             let embed = client.embedMaker({title: "Join Requests", description: "There are currently no join requests", type: "info", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -37,9 +37,9 @@ const command: CommandFile = {
         let collector = msg.createMessageComponentCollector({filter: filter, time: client.config.collectorTime});
         collector.on('collect', async(button: Discord.ButtonInteraction) => {
             if(button.customId === "previousPage") {
-                joinRequests = await roblox.getJoinRequests(groupID, "Asc", 10, previousPageCursor);
+                joinRequests = await roblox.getJoinRequests(groupID, "Desc", 10, previousPageCursor);
             } else {
-                joinRequests = await roblox.getJoinRequests(groupID, "Asc", 10, nextPageCursor);
+                joinRequests = await roblox.getJoinRequests(groupID, "Desc", 10, nextPageCursor);
             }
             previousPageCursor = joinRequests.previousPageCursor;
             nextPageCursor = joinRequests.nextPageCursor;

@@ -8,10 +8,8 @@ const oldMemberCounts: {id: number, count: number}[] = [];
 export default async function checkMemberCount(groupID: number, client: BotClient) {
     if(!client.config.counting.enabled) return;
     try {
-        let groupInfo = undefined;
-        let index = undefined;
-        groupInfo = (await roblox.getGroup(groupID));
-        index = oldMemberCounts.findIndex(v => v.id === groupID);
+        let groupInfo = await roblox.getGroup(groupID);
+        let index = oldMemberCounts.findIndex(v => v.id === groupID);
         if(index === -1) {
             oldMemberCounts.push({id: groupID, count: groupInfo.memberCount});
             throw("Skip check");

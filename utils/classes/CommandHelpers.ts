@@ -12,8 +12,18 @@ export default class CommandHelpers {
     public static loadArguments(interaction: Discord.CommandInteraction): any {
         let options = interaction.options.data;
         let args = {};
+        if(options.length === 0) return args;
         for(let i = 0; i < options.length; i++) {
-            args[options[i].name] = options[i].value;
+            if(options[i].options) {
+                for(let x = 0; x < options[i].options.length; x++) {
+                    args[options[i].options[x].name] = options[i].options[x].value;
+                }
+            } else {
+                args[options[i].name] = options[i].value;
+            }
+        }
+        if(options[0].options) {
+            args["subcommand"] = options[0].name; // Expose the subcommand used if available because the documented way doesn't fucking exist
         }
         return args;
     }
@@ -81,7 +91,7 @@ export default class CommandHelpers {
         let categories: CommandCategory[] = ["General Group", "Join Request", "Ranking", "Shout", "User", "XP"];
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
-            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+            if(categories.includes(commands[i].commandData.category)) {
                 cmds.push(commands[i].name);
             }
         }
@@ -91,7 +101,7 @@ export default class CommandHelpers {
         let categories: CommandCategory[] = ["Ban", "Database", "General Game", "JobID", "Lock", "Mute"];
         let cmds = [];
         for(let i = 0; i < commands.length; i++) {
-            if(categories.indexOf(commands[i].commandData.category) !== -1) {
+            if(categories.includes(commands[i].commandData.category)) {
                 cmds.push(commands[i].name);
             }
         }

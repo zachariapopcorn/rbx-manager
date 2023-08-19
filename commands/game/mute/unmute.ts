@@ -46,7 +46,8 @@ const command: CommandFile = {
                 try {
                     oldData = await database.getModerationData(universeID, robloxID);
                 } catch(e) {
-                    if((e.toString() as string).indexOf("NOT_FOUND") === -1) {
+                    let err = e.toString() as string;
+                    if(!err.includes("NOT_FOUND")) {
                         logs.push({
                             username: username,
                             status: "Error",

@@ -47,10 +47,9 @@ If using Repl, go to the secrets tab (Tools > Secrets). Click on "Open raw edito
   "ROBLOX_COOKIE": "",
   "ROBLOX_API_KEY": "",
   "ROVER_API_KEY": "",
-  "WEB_API_KEY": ""
 }
 ```
-Once done that, click the save button. Now configure the env file as shown in the subsets of step 5, but to paste in the value, click on the key and paste it in the value box, then click save on that
+Once you've done that, click the save button. Now configure the env file as shown in the subsets of step 5, but to paste in the value, click on the key and paste it in the value box, then click save on that
 
 # Step 5
 Configure the env file. All of these values are very sensitive information, so don't leak them!
@@ -72,17 +71,14 @@ The value, ``ROBLOX_COOKIE``, is your bot's Roblox cookie. To get it, log in to 
 Once you found the ``.ROBLOSECURITY`` cookie, copy it and paste it after the equal sign in the .env file
 
 # Step 5.5
-The value, ``ROBLOX_API_KEY`` , is your API key for the Open cloud endpoints. To get it, go to [your API keys](https://create.roblox.com/credentials) and click "Create API Key". Once you do so, name it whatever you want and give it the Datastore and Messaging Service API systems and add your desired experience to it and for the scopes, give Datastore [these scopes](https://i.imgur.com/5w8Qw2I.png) and Messaging Service the Publish scope. Once done, go to section 3: Security, and input the IP address of the machine you want to host the bot on.
+The value, ``ROBLOX_API_KEY``, is your API key for the Open Cloud endpoints. To get it, go to [your API keys](https://create.roblox.com/credentials) and click "Create API Key". Once you do so, name it whatever you want and give it the Datastore and Messaging Service API systems and add your desired experience to it and for the scopes, give Datastore [these scopes](https://i.imgur.com/5w8Qw2I.png) and Messaging Service the Publish scope. Once done, go to section 3: Security, and input the IP address of the machine you want to host the bot on.
 
-If you want to allow all requests regardless of IP address, type ``0.0.0.0`` and ``0.0.0.0/0`` (very insecure)
+If you want to allow all requests regardless of IP address, type ``0.0.0.0`` and ``0.0.0.0/0`` (If hosting on Repl or a similar service with dynamic IPs, this is required)
 
 After that, click "SAVE & GENERATE KEY", and then click "COPY KEY TO CLIPBOARD". Paste the API key after the equal sign in the .env file
 
 # Step 5.6
 The value, ``ROVER_API_KEY``, is your API key for Rover, the verification provider that this bot uses. To get it, go to [the Rover website](https://rover.link/) and login with your Discord account. Once you do that, click on "Manage Servers" and click on the server(s) that you bot is going to be in, and then click "Developer API". Once you're here, type a name for your API key and click "Create" and then click "Copy" on the prompt that came up. Paste what you copied after the equal sign in the .env file
-
-# Step 5.7
-The value, ``WEB_API_KEY``, is your API key for the bot's API. This can be anything that you want, just type it after the equal sign
 
 # Step 6
 Now that you're done configuring the .env file, close it, and open the ``config.ts`` file with your favorite text editor.
@@ -125,7 +121,7 @@ The value, ``embedColors``, is an object setting the colors of different types o
 The value, ``defaultCooldown``, is the default command cooldown in milliseconds. The default is 5000 milliseconds (5 seconds)
 
 # Step 6.9
-The value, ``cooldownOverrides``, are exceptions to the default cooldown set in step 6.5. The takes properties of ``commandName: new_cooldown``. For example, if I wanted to set the cooldown of the exile command to 20 seconds (20000 milliseconds), the value would be `cooldownOverrides: {"exile": 20000}`
+The value, ``cooldownOverrides``, are exceptions to the default cooldown set in step 6.8. The takes properties of ``commandName: new_cooldown``. For example, if I wanted to set the cooldown of the exile command to 20 seconds (20000 milliseconds), the value would be `cooldownOverrides: {"exile": 20000}`
 
 # Step 6.10
 The value, ``suspensionRank``, is the rank ID of the suspended rank in your group. This is the rank that people get set to when suspended
@@ -176,7 +172,7 @@ Copy [the following code](https://raw.githubusercontent.com/zachariapopcorn/rbx-
 
 You will see a configuration section. Before pasting this code into the console of the game you want to install this system to, configure it
 
-**The only configuration variables that are required for you to change is the ``SERVER`` and ``WEB_API_KEY`` variables, with the exception of the ``moderations`` field if you modified the `` ``datastoreName`` value in Step 6.12**
+**Unless you configured the datastoreName value in Step 6.12, which would then need to be reflected in the DATASTORE_NAME value, no configuration is needed**
 
 You are now done with setting up this system! Was that hard?
 

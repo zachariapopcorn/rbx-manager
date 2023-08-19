@@ -16,6 +16,7 @@ import BetterConsole from './utils/classes/BetterConsole';
 import CommandFile from './utils/interfaces/CommandFile';
 import CommandInstance from './utils/interfaces/CommandInstance';
 import UserEntry from './utils/interfaces/UserEntry';
+import VerificationResult from './utils/interfaces/VerificationResult';
 
 import checkBans from './utils/events/checkBans';
 import checkAudits from './utils/events/checkAuditLog';
@@ -25,6 +26,7 @@ import checkAbuse from './utils/events/checkAbuse';
 import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
 import checkMemberCount from './utils/events/checkMemberCount';
+import checkJobIDs from './utils/events/checkJobIDs';
 
 const client = new BotClient(config);
 
@@ -38,18 +40,6 @@ app.get("/", async (request, response) => {
     response.status(200).send("OK");
 });
 
-app.post("/get-job-id", async (request, response) => {
-    if(request.headers["api-key"] !== config.WEB_API_KEY) return response.status(403).send("Invalid API Key");
-    let channelID = request.body["channelID"];
-    let msgID = request.body["msgID"];
-    let jobID = request.body["jobID"];
-    let msg = await (await client.channels.fetch(channelID) as Discord.TextChannel).messages.fetch(msgID);
-    let embed = client.embedMaker({title: "Job ID Found", description: `The job ID of the supplied user has been found, it is **${jobID}**`, type: "success", author: client.user});
-    embed.setAuthor(msg.embeds[0].author);
-    await msg.edit({embeds: [embed]});
-    response.status(200).send("OK");
-});
-
 let listener = app.listen(process.env.PORT, () => {
     BetterConsole.log(`Your app is currently listening on port: ${(listener.address() as any).port}`, true);
 });
@@ -59,7 +49,7 @@ async function readCommands(path?: string) {
     let files = await fs.promises.readdir(path);
     for(let i = 0; i < files.length; i++) {
         let file = files[i];
-        if(file.indexOf(".") === -1) {
+        if(!file.includes(".")) {
             await readCommands(`${path}/${file}`);
         } else {
             file = file.replace(".ts", ".js"); // This is here because when it compiles to JS, it saves to the build directory, and it starts as build/index.js, so it's reading files in build/commands, hence the string change
@@ -88,8 +78,9 @@ export async function registerSlashCommands(reload?: boolean) {
     if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
     if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
     if(!client.config.xpSystem.enabled) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getXPCommands());
+    if(!client.config.counting.enabled) client.config.lockedCommands.push("setgoal");
     for(let i = 0; i < commands.length; i++) {
-        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let lockedCommandsIndex = client.config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
             BetterConsole.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
@@ -155,13 +146,14 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
+    await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
     if(client.config.groupIds.length !== 0) {
-        await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
         await loginToRoblox(client.config.ROBLOX_COOKIE);
         await GroupHandler.loadGroups();
     }
     if(client.config.universes.length !== 0) {
         await UniverseHandler.loadUniverses();
+        await checkJobIDs(client);
     }
     await readCommands();
     await deleteGuildCommands();
@@ -182,7 +174,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
-                if(usernames.length > config.maximumNumberOfUsers) {
+                if(usernames.length > client.config.maximumNumberOfUsers) {
                     let embed = client.embedMaker({title: "Maximum Number of Users Exceeded", description: "You've inputted more users than the currently allowed maximum, please lower the amount of users in your command and try again", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
@@ -202,13 +194,15 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             }
             if(commands[i].file.commandData.preformGeneralVerificationChecks) {
                 let groupID = GroupHandler.getIDFromName(args["group"]);
-                let verificationStatus = false;
                 let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+                let verificationStatus: VerificationResult;
                 if(robloxID !== 0) {
                     verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
+                } else {
+                    verificationStatus = {success: false, err: "User is not verified with Rover"};
                 }
-                if(!verificationStatus) {
-                    let embed = client.embedMaker({title: "Verification Checks Failed", description: "You've failed the verification checks", type: "error", author: interaction.user});
+                if(!verificationStatus.success) {
+                    let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
                 }
@@ -223,7 +217,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             }
             if(commands[i] && commands[i].file.commandData.hasCooldown) {
                 let commandCooldown = client.getCooldownForCommand(commands[i].file.slashData.name);
-                if(typeof(res) === "number") { // The revert-ranks command is the only command that does this
+                if(typeof(res) === "number") { // If we return a number, it means the cooldown multipler got calculated
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + (commandCooldown * res)});
                 } else if(args["username"]) {
                     let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
@@ -231,6 +225,20 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 } else {
                     client.commandCooldowns.push({commandName: commands[i].file.slashData.name, userID: interaction.user.id, cooldownExpires: Date.now() + commandCooldown});
                 }
+            }
+        }
+    }
+});
+
+client.on("interactionCreate", async(interaction: Discord.Interaction) => {
+    if(interaction.type !== Discord.InteractionType.ApplicationCommandAutocomplete) return;
+    let command = interaction.commandName.toLowerCase();
+    for(let i = 0; i < commands.length; i++) {
+        if(commands[i].name === command) {
+            try {
+                await commands[i].file.autocomplete(interaction, client);
+            } catch(e) {
+                console.error(e);
             }
         }
     }
@@ -288,7 +296,7 @@ client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: D
 
 let oldMethod = console.error;
 console.error = function(msg: string) {
-    if(msg.toString().indexOf("ExperimentalWarning") === -1) oldMethod(msg);
+    if(!msg.toString().includes("ExperimentalWarning")) oldMethod(msg);
 }
 
 client.login(client.config.DISCORD_TOKEN);

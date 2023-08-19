@@ -20,7 +20,8 @@ const command: CommandFile = {
             returnedData = await (await roblox.getDatastoreEntry(universeID, name, key, scope));
         } catch(e) {
             let embed: Discord.EmbedBuilder;
-            if((e.toString() as string).indexOf("NOT_FOUND") !== -1) {
+            let err = e.toString() as string;
+            if(err.includes("NOT_FOUND")) {
                 embed = client.embedMaker({title: "Error", description: "The supplied data doesn't return any data, please try a different combination", type: "error", author: interaction.user});
             } else {
                 embed = client.embedMaker({title: "Error", description: `There was an error while trying to fetch data: ${e}`, type: "error", author: interaction.user});

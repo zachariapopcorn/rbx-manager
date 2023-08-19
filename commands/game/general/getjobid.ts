@@ -16,21 +16,24 @@ const command: CommandFile = {
         let username = args["username"];
         let universeName = args["universe"];
         let universeID = UniverseHandler.getIDFromName(universeName);
-        let rbxID;
-        try {
-            rbxID = await roblox.getIdFromUsername(username);
-        } catch {
+        let rbxID = await roblox.getIdFromUsername(username) as number;
+        if(!rbxID) {
             let embed = client.embedMaker({title: "Invalid Username", description: "The username that you provided is invalid", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
         username = await roblox.getUsernameFromId(rbxID);
-        let embed = client.embedMaker({title: "Awaiting...", description: "Because this function requires a message from the Roblox game, you'll have to wait for it to get your response. This message will be edited with the job id if it's found, and it'll stay the same if it wasn't found", type: "info", author: interaction.user});
+        let embed = client.embedMaker({title: "Awaiting...", description: "This function requires a message from the Roblox game, meaning that you'll have to wait for it to get your response", type: "info", author: interaction.user});
         let msg = await interaction.editReply({embeds: [embed]});
         try {
             await messaging.sendMessage(universeID, "GetJobID", {
-                msgID: msg.id,
-                channelID: msg.channel.id,
                 username: username
+            });
+            client.jobIdsRequested.push({
+                msgID: msg.id,
+                universeID: universeID,
+                channelID: msg.channel.id,
+                username: username,
+                timeRequested: Date.now()
             });
         } catch(e) {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to send out the request to the Roblox game server for the user's job id: ${e}`, type: "error", author: interaction.user});

@@ -36,7 +36,7 @@ const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
         let reason = args["reason"];
-        let joinRequests = await roblox.getJoinRequests(groupID, "Asc", 100);
+        let joinRequests = await roblox.getJoinRequests(groupID, "Desc", 100);
         if(joinRequests.data.length === 0) {
             let embed = client.embedMaker({title: "No Join Requests", description: "There are currently no pending join requests", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -52,7 +52,7 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         while(nextCursor) {
-            joinRequests = await roblox.getJoinRequests(groupID, "Asc", 100, nextCursor);
+            joinRequests = await roblox.getJoinRequests(groupID, "Desc", 100, nextCursor);
             nextCursor = joinRequests.nextPageCursor;
             try {
                 await batchAccept(groupID, client, parseUsers(joinRequests.data));

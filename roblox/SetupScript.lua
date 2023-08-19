@@ -1,8 +1,6 @@
 -- CONFIGURATION --
 
-local SERVER = "Where the system is hosted"
-local WEB_API_KEY = "What you put in the env file in Step 5.7"
-local DATASTORE_NAME = "moderations"
+local DATASTORE_NAME = "moderations" -- Change this if you changed the datastore name
 
 -- MAIN CODE --
 
@@ -51,11 +49,7 @@ function parseURL(url: string, folder: Folder, isServer: boolean)
 			local script = scriptEditor:FindScriptDocument(scriptInstance)
 			local source = httpService:GetAsync(file.download_url)
 			if(file.name == "Config.lua") then
-				local temp = 'SERVER = "con"'
-				source = source:gsub('SERVER = ""', temp:gsub("con", SERVER))
-				temp = 'WEB_API_KEY = "con"'
-				source = source:gsub('WEB_API_KEY = ""', temp:gsub("con", WEB_API_KEY))
-				temp = 'DATASTORE_NAME = "con"'
+				local temp = 'DATASTORE_NAME = "con"'
 				source = source:gsub('DATASTORE_NAME = "moderations"', temp:gsub("con", DATASTORE_NAME))
 			end
 			script:EditTextAsync(source, 1, 1, 1, 1)
@@ -69,8 +63,6 @@ end
 
 pcall(function()
 	local config = require(game:GetService("ServerScriptService")[folderName].Config)
-	SERVER = config.SERVER
-	WEB_API_KEY = config.WEB_API_KEY
 	DATASTORE_NAME = config.DATASTORE_NAME
 end)
 
