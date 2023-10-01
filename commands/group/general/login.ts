@@ -19,7 +19,7 @@ import solveChallenge1 from '../../../utils/challenges/Challenge1';
 import solveChallenge3 from '../../../utils/challenges/Challenge3';
 import solveChallenge4 from '../../../utils/challenges/Challenge4';
 
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0";
 
 function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -37,8 +37,9 @@ async function login(client: BotClient, username: string, password: string, csrf
     let headers = {
         "Content-Type": "application/json",
         "User-Agent": UA,
-        "origin": "https://www.roblox.com",
-        "referer": "https://www.roblox.com/"
+        "Origin": "https://www.roblox.com",
+        "Referer": "https://www.roblox.com/",
+        "Host": "auth.roblox.com"
     }
     if(csrfToken) {
         headers["X-CSRF-TOKEN"] = csrfToken;
@@ -144,6 +145,26 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         try { await fs.promises.unlink(`${process.cwd()}/Image.gif`); } catch {};
+        res = await client.request({
+            url: "https://apis.roblox.com/challenge/v1/continue",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "User-Agent": UA,
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: {
+                challengeId: rblxChallengeId,
+                challengeMetadata: JSON.stringify({
+                    "unifiedCaptchaId": rblxChallengeMetadata.unifiedCaptchaId,
+                    "captchaToken": captchaToken,
+                    "actionType": "Login"
+                }),
+                challengeType: "captcha"
+            },
+            robloxRequest: false
+        });
+        console.log(await res.text());
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
@@ -161,7 +182,7 @@ const command: CommandFile = {
             let challengeId = body.twoStepVerificationData.ticket;
             let embed = client.embedMaker({title: "Two Step Verification", description: `Roblox has prompted a two step verification challenge. Please enter the code from your ${mediaType}`, type: "info", author: interaction.user});
             await interaction.editReply({embeds: [embed]});
-            let mfaCode = (await interaction.channel.awaitMessages({
+            let mfaCode = (await (interaction.channel as Discord.TextChannel).awaitMessages({
                 filter: (message) => {
                     return message.author.id === interaction.user.id;
                 },
@@ -205,7 +226,7 @@ const command: CommandFile = {
             });
             rawCookie = res.headers.get("set-cookie");
             if(!rawCookie.includes("ROBLOSECURITY")) {
-                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${body.errors[0].message}`, type: "error", author: interaction.user});
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to login to the Roblox account: ${(await res.json()).errors[0].message}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
         }
