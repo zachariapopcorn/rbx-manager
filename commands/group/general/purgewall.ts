@@ -32,6 +32,7 @@ async function deletePosts(client: BotClient, groupID: number, amount: number, u
     } catch(e) {
         return {success: success, failed: failed, err: e};
     }
+    let cursor = page.nextPageCursor;
     while(success + failed < amount) {
         let shouldBreakWhileLoop = false;
         for(let i = 0; i < page.data.length; i++) {
@@ -55,12 +56,17 @@ async function deletePosts(client: BotClient, groupID: number, amount: number, u
                     failed++;
                 }
             }
+            if(success + failed >= amount) {
+                shouldBreakWhileLoop = true;
+                break; // Break out of this for loop
+            }
         }
-        if(!page.nextPageCursor) shouldBreakWhileLoop = true;
+        if(!cursor) shouldBreakWhileLoop = true;
         if(shouldBreakWhileLoop) break;
         try {
-            page = await roblox.getWall(groupID, "Desc");
+            page = await roblox.getWall(groupID, "Desc", 100, cursor);
             page.data = page.data.filter(p => p.poster);
+            cursor = page.nextPageCursor;
         } catch(e) {
             return {success: success, failed: failed, err: e};
         }
