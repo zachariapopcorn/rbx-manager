@@ -36,10 +36,6 @@ async function deletePosts(client: BotClient, groupID: number, amount: number, u
     while(success + failed < amount) {
         let shouldBreakWhileLoop = false;
         for(let i = 0; i < page.data.length; i++) {
-            if(success + failed === amount) {
-                shouldBreakWhileLoop = true;
-                break;
-            }
             let post = page.data[i];
             let shouldDelete = false;
             if(userID) {

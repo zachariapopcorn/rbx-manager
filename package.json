@@ -25,7 +25,7 @@
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "funcaptcha": "^1.1.5",
+    "funcaptcha": "^1.1.7",
     "ms": "^2.1.3",
     "noblox.js": "^4.14.1",
     "typescript": "^4.9.5"
