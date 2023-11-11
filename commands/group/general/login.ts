@@ -169,7 +169,6 @@ const command: CommandFile = {
             },
             robloxRequest: false
         });
-        console.log(await res.text());
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
