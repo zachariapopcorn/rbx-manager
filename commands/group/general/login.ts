@@ -67,6 +67,11 @@ async function login(client: BotClient, username: string, password: string, csrf
     });
 }
 
+export const captchaModal = new Discord.ModalBuilder().setCustomId("captchaModal").setTitle("Answer Prompt")
+.addComponents(new Discord.ActionRowBuilder<Discord.ModalActionRowComponentBuilder>().addComponents(
+    new Discord.TextInputBuilder().setCustomId("answer").setLabel("Answer").setStyle(Discord.TextInputStyle.Short)
+))
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         if(client.isLoggedIn) {
@@ -164,7 +169,6 @@ const command: CommandFile = {
             },
             robloxRequest: false
         });
-        console.log(await res.text());
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
