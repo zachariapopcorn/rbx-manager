@@ -20,8 +20,10 @@ Players.PlayerAdded:Connect(function(plr)
 		local continueOn = true
 		if(modData.muteData.releaseTime) then
 			local currentTime = os.time() * 1000
-			if(currentTime >= modData.muteData.releaseTime) then continueOn = false end
-			Database:UnmutePlayer(plr.UserId, modData)
+			if(currentTime >= modData.muteData.releaseTime) then
+				continueOn = false
+				Database:UnmutePlayer(plr.UserId, modData)
+			end
 		end
 		if(continueOn) then
 			local s, e = pcall(function()
