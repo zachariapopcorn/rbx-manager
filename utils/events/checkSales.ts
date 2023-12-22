@@ -28,6 +28,7 @@ export default async function checkSales(groupID: number, client: BotClient) {
     if(client.config.logging.sales.enabled === false) return;
     try {
         let sales = await getSales(client, groupID);
+        if(!sales) throw("Skip check");
         if(!oldDates.find(v => v.id === groupID)) oldDates.push({id: groupID, date: sales[0].created});
         let dateIndex = oldDates.findIndex(v => v.id === groupID);
         let saleIndex = sales.findIndex(log => log.created.toISOString() === oldDates[dateIndex].date.toISOString());

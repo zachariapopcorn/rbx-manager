@@ -19,7 +19,7 @@ import solveChallenge1 from '../../../utils/challenges/Challenge1';
 import solveChallenge3 from '../../../utils/challenges/Challenge3';
 import solveChallenge4 from '../../../utils/challenges/Challenge4';
 
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0";
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0";
 
 function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -150,25 +150,43 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Captcha Completed", description: "You've successfully completed the captcha, I am now attempting to login to the Roblox account", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         try { await fs.promises.unlink(`${process.cwd()}/Image.gif`); } catch {};
+        let continueBody = {
+            challengeId: rblxChallengeId,
+            challengeMetadata: JSON.stringify({
+                "unifiedCaptchaId": rblxChallengeMetadata.unifiedCaptchaId,
+                "captchaToken": captchaToken,
+                "actionType": "Login"
+            }),
+            challengeType: "captcha"
+        }
         res = await client.request({
             url: "https://apis.roblox.com/challenge/v1/continue",
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Content-Length": JSON.stringify(continueBody).length,
+                "Content-Type": "application/json;charset=utf-8",
+                "DNT": 1,
+                "Host": "apis.roblox.com",
+                "Origin": "https://www.roblox.com",
+                "Pragma": "no-cache",
+                "Referer": "https://www.roblox.com/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-site",
+                "Sec-GPC": 1,
+                "TE": "trailers",
                 "User-Agent": UA,
                 "X-CSRF-TOKEN": csrfToken
             },
-            body: {
-                challengeId: rblxChallengeId,
-                challengeMetadata: JSON.stringify({
-                    "unifiedCaptchaId": rblxChallengeMetadata.unifiedCaptchaId,
-                    "captchaToken": captchaToken,
-                    "actionType": "Login"
-                }),
-                challengeType: "captcha"
-            },
+            body: continueBody,
             robloxRequest: false
         });
+        BetterConsole.log(await res.json());
         res = await login(client, client.config.ROBLOX_USERNAME, client.config.ROBLOX_PASSWORD, csrfToken, rblxChallengeId, rblxChallengeMetadata.unifiedCaptchaId, captchaToken, rblxChallengeType);
         let rawCookie = res.headers.get("set-cookie");
         if(!rawCookie) {
