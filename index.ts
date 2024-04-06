@@ -1,9 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
-import bodyParser = require('body-parser');
 
 import fs from 'fs';
-import express from 'express';
 
 import config from './config';
 
@@ -30,19 +28,8 @@ import checkJobIDs from './utils/events/checkJobIDs';
 
 const client = new BotClient(config);
 
-const app = express();
-app.use(bodyParser.json());
-
 export const commands: CommandInstance[] = [];
 export const registeredCommands: CommandInstance[] = [];
-
-app.get("/", async (request, response) => {
-    response.status(200).send("OK");
-});
-
-let listener = app.listen(process.env.PORT, () => {
-    BetterConsole.log(`Your app is currently listening on port: ${(listener.address() as any).port}`, true);
-});
 
 async function readCommands(path?: string) {
     if(!path) path = "./commands";

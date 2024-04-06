@@ -2,7 +2,7 @@ import BotConfig from "./utils/interfaces/BotConfig";
 
 require('dotenv').config();
 
-export const envValues = ["DISCORD_TOKEN", "ROBLOX_USERNAME", "ROBLOX_PASSWORD", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY"];
+export const envValues = ["DISCORD_TOKEN", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY"];
 for(let i = 0; i < envValues.length; i++) {
     if(!process.env[envValues[i]]) {
         console.log(`${envValues[i]} not defined in .env file`);
@@ -12,8 +12,6 @@ for(let i = 0; i < envValues.length; i++) {
 
 const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
-    ROBLOX_USERNAME: process.env.ROBLOX_USERNAME,
-    ROBLOX_PASSWORD: process.env.ROBLOX_PASSWORD,
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
     ROVER_API_KEY: process.env.ROVER_API_KEY,
@@ -54,7 +52,7 @@ const config: BotConfig = {
     },
     xpSystem: {
         enabled: false,
-        rewards: [], // Format is [{rewardID: string, rank: {groupId: number, rankName: string}, xpNeeded: number}] ; EX: [rewardID: "activeMemberReward", rank: {groupId: 253, rankName: "Developer"}, xpNeeded: 1000]
+        rewards: [],
         earnings: {
             messages: 2,
             reactions: 1

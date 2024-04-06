@@ -1,4 +1,0 @@
-run = "npm run linuxStart"
-
-[nix]
-channel = "stable-22_11"
