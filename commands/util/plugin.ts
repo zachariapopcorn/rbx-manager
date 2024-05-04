@@ -12,7 +12,7 @@ import GithubPluginAPIResponse from '../../utils/interfaces/GithubPluginAPIRespo
 
 const exe = require('util').promisify(require('child_process').exec);
 
-const pluginAPIURL = "https://api.github.com/repos/zachariapopcorn/rbx-manager-plugins/contents/";
+const pluginAPIURL = "https://api.github.com/repos/sv-du/rbx-manager-plugins/contents/";
 
 const map = {
     "Ban": `game/ban`,
@@ -77,7 +77,7 @@ const command: CommandFile = {
         if(mode === "install") {
             let pluginEntry = plugins.find(v => v.name.toLowerCase() === name.toLowerCase());
             if(!pluginEntry) {
-                let embed = client.embedMaker({title: "Invalid Plugin Name", description: "You inputted an invalid plugin name, please find valid ones [here](https://github.com/zachariapopcorn/rbx-manager-plugins)", type: "error", author: interaction.user});
+                let embed = client.embedMaker({title: "Invalid Plugin Name", description: "You inputted an invalid plugin name, please find valid ones [here](https://github.com/sv-du/rbx-manager-plugins)", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
             let source = await(await fetch(`${pluginEntry.downloadURL}`)).text();
@@ -86,7 +86,7 @@ const command: CommandFile = {
         if(mode === "uninstall") {
             let pluginEntry = plugins.find(v => v.name.toLowerCase() === name.toLowerCase());
             if(!pluginEntry) {
-                let embed = client.embedMaker({title: "Invalid Plugin Name", description: "You inputted an invalid plugin name, please find valid ones [here](https://github.com/zachariapopcorn/rbx-manager-plugins)", type: "error", author: interaction.user});
+                let embed = client.embedMaker({title: "Invalid Plugin Name", description: "You inputted an invalid plugin name, please find valid ones [here](https://github.com/sv-du/rbx-manager-plugins)", type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
             try {

@@ -1,9 +1,5 @@
 ## Introduction
-Hello Roblox Community! I'm here today releasing a project that I thought could be pretty helpful to yall. It's a roblox group and game management tool designed to be as simple as possible. This is a combination of my [ranking bot](https://devforum.roblox.com/t/roblox-group-managerranking-bot/934111) and my [moderation bot](https://devforum.roblox.com/t/discord-to-roblox-moderation-bot/989798) all updated into one package
-
-(This post is under a different account as @zachariapopcorn got unfairly terminated)
-
-This tool has almost all of the features from these two projects, but I didn't implement features that are either now blocked by a captcha or unrealistic to have in an automated environment
+Hello Roblox Community! I'm here today releasing a project that I thought could be pretty helpful to yall. It's a roblox group and game management tool designed to be as simple as possible. 
 
 # Showcase
 As this bot has multiple things to showcase, I'm going to showcase a bit of the main things
@@ -21,7 +17,7 @@ Install Node.js on your system. For Windows, go to [here](https://nodejs.org/en/
 If you are using Windows, it is recommended that you also install the [Git CLI](https://git-scm.com/download/win)
 
 # Step 2
-Go to the [Github repository](https://github.com/zachariapopcorn/rbx-manager) and download the code by clicking Code > Download ZIP and then extracting the zip. If you have Git installed, run ``git clone https://github.com/zachariapopcorn/rbx-manager``
+Go to the [Github repository](https://github.com/sv-du/rbx-manager) and download the code by clicking Code > Download ZIP and then extracting the zip. If you have Git installed, run ``git clone https://github.com/sv-du/rbx-manager``
 
 # Step 3
 Once you have the unextracted folder, open it, its contents should look something like [this](https://i.imgur.com/30bzkeA.png)
@@ -132,7 +128,7 @@ Once you've added the bot into your server, go back to your bot file and open a 
 # Step 9
 Now that you're done with the Node.js portion, it's time to move onto your Roblox portion
 
-Copy [the following code](https://raw.githubusercontent.com/zachariapopcorn/rbx-manager/master/roblox/SetupScript.lua)
+Copy [the following code](https://raw.githubusercontent.com/sv-du/rbx-manager/master/roblox/SetupScript.lua)
 
 You will see a configuration section. Before pasting this code into the console of the game you want to install this system to, configure it
 

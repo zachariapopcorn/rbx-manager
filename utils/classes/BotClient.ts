@@ -51,7 +51,7 @@ export default class BotClient extends Discord.Client {
         if(embedOptions.description.length > 0) {
             embed.setDescription(embedOptions.description);
         }
-        embed.setFooter({text: "Created by zachariapopcorn#8105 - https://discord.gg/XGGpf3q"});
+        embed.setFooter({text: "Created by sv_du - https://discord.gg/XGGpf3q"});
         embed.setTitle(embedOptions.title);
         return embed;
     }

@@ -7,8 +7,8 @@ local DATASTORE_NAME = "moderations" -- Change this if you changed the datastore
 local httpService = game:GetService("HttpService")
 local scriptEditor = game:GetService("ScriptEditorService")
 
-local SERVER_FILES_URL = "https://api.github.com/repos/zachariapopcorn/rbx-manager/contents/roblox/Server/ServerScriptService/Discord%20to%20Roblox%20Moderation%20System?ref=master"
-local CLIENT_FILES_URL = "https://api.github.com/repos/zachariapopcorn/rbx-manager/contents/roblox/Client/StarterPlayer/StarterPlayerScripts/Discord%20to%20Roblox%20Moderation%20System?ref=master"
+local SERVER_FILES_URL = "https://api.github.com/repos/sv-du/rbx-manager/contents/roblox/Server/ServerScriptService/Discord%20to%20Roblox%20Moderation%20System?ref=master"
+local CLIENT_FILES_URL = "https://api.github.com/repos/sv-du/rbx-manager/contents/roblox/Client/StarterPlayer/StarterPlayerScripts/Discord%20to%20Roblox%20Moderation%20System?ref=master"
 
 local folderName = "Discord to Roblox Moderation System"
 

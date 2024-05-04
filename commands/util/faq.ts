@@ -6,7 +6,7 @@ import CommandFile from '../../utils/interfaces/CommandFile';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
-        let description = "Here's an FAQ of questions that I think people would ask me\n\nhttps://github.com/zachariapopcorn/rbx-manager/wiki/FAQ";
+        let description = "Here's an FAQ of questions that I think people would ask me\n\nhttps://github.com/sv-du/rbx-manager/wiki/FAQ";
         let embed = client.embedMaker({title: "FAQ", description: description, type: "info", author: interaction.user});
         return await interaction.editReply({embeds: [embed]});
     },

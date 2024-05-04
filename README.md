@@ -2,4 +2,4 @@
 
 Post Link: https://devforum.roblox.com/t/rbxmanager-simple-roblox-group-and-game-management-bot-ranking-and-moderation-bot/2170984
 
-Plugin Repo: https://github.com/zachariapopcorn/rbx-manager-plugins
+Plugin Repo: https://github.com/sv-du/rbx-manager-plugins

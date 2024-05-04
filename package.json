@@ -12,14 +12,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zachariapopcorn/rbx-manager.git"
+    "url": "git+https://github.com/sv-du/rbx-manager.git"
   },
-  "author": "zachariapopcorn#8105",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zachariapopcorn/rbx-manager/issues"
+    "url": "https://github.com/sv-du/rbx-manager/issues"
   },
-  "homepage": "https://github.com/zachariapopcorn/rbx-manager#readme",
+  "homepage": "https://github.com/sv-du/rbx-manager#readme",
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
