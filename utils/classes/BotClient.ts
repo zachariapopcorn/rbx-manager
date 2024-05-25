@@ -19,7 +19,7 @@ export default class BotClient extends Discord.Client {
     public robloxInfo: roblox.LoggedInUserData;
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
-    public roverCache: {discordID: string, robloxID: number, timeAdded: number}[] = [];
+    public verificationCache: {discordID: string, robloxID: number, timeAdded: number}[] = [];
     public jobIdsRequested: {username: string, universeID: number, msgID: string, channelID: string, timeRequested: number}[] = [];
 
     constructor(config: BotConfig) {
@@ -76,13 +76,19 @@ export default class BotClient extends Discord.Client {
         return {components: components}
     }
 
-    public async getRobloxUser(guildID: string, discordID: string): Promise<number> {
-        let index = this.roverCache.findIndex(v => v.discordID === discordID);
+    public async getRobloxUser(guildID: string, discordID: string) {
+        if(this.config.verificationProvider === "rover") {
+            return this.getRobloxUserUsingRover(guildID, discordID);
+        }
+    }
+
+    public async getRobloxUserUsingRover(guildID: string, discordID: string): Promise<number> {
+        let index = this.verificationCache.findIndex(v => v.discordID === discordID);
         if(index != -1) {
-            if(Date.now() - this.roverCache[index].timeAdded >= 300_000) { // Remove cache items if older than 5 minutes
-                this.roverCache.splice(index, 1);
+            if(Date.now() - this.verificationCache[index].timeAdded >= 300_000) { // Remove cache items if older than 5 minutes
+                this.verificationCache.splice(index, 1);
             } else {
-                return this.roverCache[index].robloxID;
+                return this.verificationCache[index].robloxID;
             }
         }
         let res = await this.request({
@@ -90,14 +96,14 @@ export default class BotClient extends Discord.Client {
             method: "GET",
             headers: {
                 "Content-Type": "application/json;charset=UTF-8",
-                "Authorization": `Bearer ${this.config.ROVER_API_KEY}`
+                "Authorization": `Bearer ${this.config.VERIFICATION_PROVIDER_API_KEY}`
             },
             body: undefined,
             robloxRequest: false
         });
         if(res.status === 200) {
             let rbxID = (await res.json()).robloxId;
-            this.roverCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
+            this.verificationCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
             return rbxID;
         } else {
             let headers = res.headers;
