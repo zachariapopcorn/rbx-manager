@@ -77,12 +77,6 @@ export default class BotClient extends Discord.Client {
     }
 
     public async getRobloxUser(guildID: string, discordID: string) {
-        if(this.config.verificationProvider === "rover") {
-            return this.getRobloxUserUsingRover(guildID, discordID);
-        }
-    }
-
-    public async getRobloxUserUsingRover(guildID: string, discordID: string): Promise<number> {
         let index = this.verificationCache.findIndex(v => v.discordID === discordID);
         if(index != -1) {
             if(Date.now() - this.verificationCache[index].timeAdded >= 300_000) { // Remove cache items if older than 5 minutes
@@ -91,6 +85,21 @@ export default class BotClient extends Discord.Client {
                 return this.verificationCache[index].robloxID;
             }
         }
+        try {
+            if(this.config.verificationProvider === "rover") {
+                return this.getRobloxUserUsingRover(guildID, discordID);
+            } else if(this.config.verificationProvider === "rowifi") {
+                return this.getRobloxUserUsingRowifi(guildID, discordID);
+            } else {
+                return this.getRobloxUserUsingBloxlink(guildID, discordID);
+            }
+        } catch(e) {
+            BetterConsole.log(`Error while trying to fetch a Roblox ID: ${e}`, true);
+            return 0;
+        }
+    }
+
+    private async getRobloxUserUsingRover(guildID: string, discordID: string): Promise<number> {
         let res = await this.request({
             url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
             method: "GET",
@@ -121,6 +130,44 @@ export default class BotClient extends Discord.Client {
                 return 0;
             }
         }
+    }
+
+    private async getRobloxUserUsingRowifi(guildID: string, discordID: string): Promise<number> {
+        let res = await this.request({
+            url: `https://api.rowifi.xyz/v2/guilds/${guildID}/members/${discordID}`,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bot ${this.config.VERIFICATION_PROVIDER_API_KEY}`
+            },
+            body: undefined,
+            robloxRequest: false
+        });
+        if(res.status === 200) {
+            let rbxID = (await res.json()).roblox_id;
+            this.verificationCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
+            return rbxID;
+        }
+        return 0;
+    }
+
+    private async getRobloxUserUsingBloxlink(guildID: string, discordID: string): Promise<number> {
+        let res = await this.request({
+            url: `https://api.blox.link/v4/public/guilds/${guildID}/discord-to-roblox/${discordID}`,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.config.VERIFICATION_PROVIDER_API_KEY
+            },
+            body: undefined,
+            robloxRequest: false
+        });
+        if(res.status === 200) {
+            let rbxID = (await res.json()).robloxID;
+            this.verificationCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
+            return rbxID;
+        }
+        return 0;
     }
 
     private async getPermissions(groupID: number, rbxID: number) {
