@@ -5,10 +5,13 @@ import config from '../../config';
 export default class UniverseHandler {
     private static universeData: {id: number, name: string}[] = [];
     public static async loadUniverses() {
-        for(let i = 0; i < config.universes.length; i++) {
-            let res = await fetch(`https://develop.roblox.com/v1/universes/${config.universes[i]}`);
-            let body = await res.json();
-            this.universeData.push({id: body.id, name: body.name});
+        let universeString = "";
+        config.universes.map((e) => {universeString += `${e},`});
+        universeString.substring(0, universeString.length - 1);
+        let res = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeString}`);
+        let body = (await res.json()).data;
+        for(let i = 0; i < body.length; i++) {
+            this.universeData.push({id: body[i].id, name: body[i].name});
         }
     }
     public static parseUniverses(): Discord.APIApplicationCommandOptionChoice[] {
