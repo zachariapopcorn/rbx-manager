@@ -186,7 +186,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
                 if(robloxID !== 0) {
                     verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
                 } else {
-                    verificationStatus = {success: false, err: "User is not verified with Rover"};
+                    verificationStatus = {success: false, err: `User is not verified with the configured verification provider (${config.verificationProvider})`};
                 }
                 if(!verificationStatus.success) {
                     let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
