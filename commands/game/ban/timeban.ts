@@ -9,6 +9,8 @@ import MessagingService from '../../../utils/classes/MessagingService';
 import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
+import BetterConsole from '../../../utils/classes/BetterConsole';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
@@ -96,7 +98,22 @@ const command: CommandFile = {
                     message: `Although this user is now banned, I couldn't kick them from the game because of the following error: ${e}`
                 });
             }
-            if(!didKickError) {
+            let discordIDs = await VerificationHelpers.getDiscordUsers(interaction.guild.id, robloxID);
+            BetterConsole.log(`Fetected Discord IDs for Roblox ID ${robloxID}: ${discordIDs}`);
+            let didDiscordBanError = false;
+            for(let i = 0; i < discordIDs.length; i++) {
+                try {
+                    await interaction.guild.members.ban(discordIDs[i], {reason: reason});
+                } catch(e) {
+                    didDiscordBanError = true;
+                    logs.push({
+                        username: `<@${discordIDs[i]}>`,
+                        status: "Error",
+                        message: `Although this user is now banned from the game, they are not banned from the Discord due to the following error: ${e}`
+                    });
+                }
+            }
+            if(!didKickError && !didDiscordBanError) {
                 logs.push({
                     username: username,
                     status: "Success"

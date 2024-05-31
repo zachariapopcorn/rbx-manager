@@ -9,6 +9,7 @@ import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import GroupHandler from '../../../utils/classes/GroupHandler';
 import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
+import BetterConsole from '../../../utils/classes/BetterConsole';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
@@ -74,10 +75,27 @@ const command: CommandFile = {
                     });
                 }
             } else {
-                logs.push({
-                    username: username,
-                    status: "Success"
-                });
+                let discordIDs = await VerificationHelpers.getDiscordUsers(interaction.guild.id, victimRobloxID);
+                BetterConsole.log(`Fetected Discord IDs for Roblox ID ${victimRobloxID}: ${discordIDs}`);
+                let didDiscordBanError = false;
+                for(let i = 0; i < discordIDs.length; i++) {
+                    try {
+                        await interaction.guild.members.ban(discordIDs[i], {reason: reason});
+                    } catch(e) {
+                        didDiscordBanError = true;
+                        logs.push({
+                            username: `<@${discordIDs[i]}>`,
+                            status: "Error",
+                            message: `Although this user is now group banned, they are not banned from the Discord due to the following error: ${e}`
+                        });
+                    }
+                }
+                if(!didDiscordBanError) {
+                    logs.push({
+                        username: username,
+                        status: "Success"
+                    });
+                }
             }
             await client.logAction(`<@${interaction.user.id}> has banned **${username}** from the group for the reason of **${reason}** from **${GroupHandler.getNameFromID(groupID)}**`);
         }
