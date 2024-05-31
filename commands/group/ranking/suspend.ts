@@ -8,6 +8,7 @@ import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
@@ -15,7 +16,7 @@ import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+        let authorRobloxID = await VerificationHelpers.getRobloxUser(interaction.guild.id, interaction.user.id);
         let username = args["username"];
         let userID = await roblox.getIdFromUsername(username) as number;
         if(!userID) {
@@ -24,7 +25,7 @@ const command: CommandFile = {
         }
         username = await roblox.getUsernameFromId(userID);
         if(config.verificationChecks) {
-            let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
+            let verificationStatus = await VerificationHelpers.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
             if(!verificationStatus.success) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});

@@ -10,6 +10,7 @@ import CommandHelpers from './utils/classes/CommandHelpers';
 import GroupHandler from './utils/classes/GroupHandler';
 import UniverseHandler from './utils/classes/UniverseHandler';
 import BetterConsole from './utils/classes/BetterConsole';
+import VerificationHelpers from './utils/classes/VerificationHelpers';
 
 import CommandFile from './utils/interfaces/CommandFile';
 import CommandInstance from './utils/interfaces/CommandInstance';
@@ -181,10 +182,10 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             }
             if(commands[i].file.commandData.preformGeneralVerificationChecks) {
                 let groupID = GroupHandler.getIDFromName(args["group"]);
-                let robloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+                let robloxID = await VerificationHelpers.getRobloxUser(interaction.guild.id, interaction.user.id);
                 let verificationStatus: VerificationResult;
                 if(robloxID !== 0) {
-                    verificationStatus = await client.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
+                    verificationStatus = await VerificationHelpers.preformVerificationChecks(groupID, robloxID, commands[i].commandData.permissionToCheck);
                 } else {
                     verificationStatus = {success: false, err: `User is not verified with the configured verification provider (${config.verificationProvider})`};
                 }
