@@ -63,12 +63,12 @@ export async function registerSlashCommands(reload?: boolean) {
         await readCommands();
     }
     let slashCommands = [];
-    if(client.config.groupIds.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGroupCommands());
-    if(client.config.universes.length === 0) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getGameCommands());
-    if(!client.config.xpSystem.enabled) client.config.lockedCommands = client.config.lockedCommands.concat(CommandHelpers.getXPCommands());
-    if(!client.config.counting.enabled) client.config.lockedCommands.push("setgoal");
+    if(config.groupIds.length === 0) config.lockedCommands = config.lockedCommands.concat(CommandHelpers.getGroupCommands());
+    if(config.universes.length === 0) config.lockedCommands = config.lockedCommands.concat(CommandHelpers.getGameCommands());
+    if(!config.xpSystem.enabled) config.lockedCommands = config.lockedCommands.concat(CommandHelpers.getXPCommands());
+    if(!config.counting.enabled) config.lockedCommands.push("setgoal");
     for(let i = 0; i < commands.length; i++) {
-        let lockedCommandsIndex = client.config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
+        let lockedCommandsIndex = config.lockedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         let allowedCommandsIndex = CommandHelpers.allowedCommands.findIndex(c => c.toLowerCase() === commands[i].name);
         if(lockedCommandsIndex !== -1 && allowedCommandsIndex === -1) {
             BetterConsole.log(`Skipped registering the ${commands[i].name} command because it's locked and not part of the default allowed commands list`);
@@ -83,7 +83,7 @@ export async function registerSlashCommands(reload?: boolean) {
             console.error(`Couldn't load the slash command data for the ${commands[i].name} command with error: ${e}`);
         }
     }
-    let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
+    let rest = new Discord.REST().setToken(config.DISCORD_TOKEN);
     try {
         await rest.put(Discord.Routes.applicationCommands(client.user.id), {body: slashCommands});
     } catch(e) {
@@ -92,7 +92,7 @@ export async function registerSlashCommands(reload?: boolean) {
 }
 
 async function deleteGuildCommands() {
-    let rest = new Discord.REST().setToken(client.config.DISCORD_TOKEN);
+    let rest = new Discord.REST().setToken(config.DISCORD_TOKEN);
     let guilds = await client.guilds.fetch({limit: 200});
     for(let i = 0; i < guilds.size; i++) {
         let guild = guilds.at(i);
@@ -115,8 +115,8 @@ export async function loginToRoblox(robloxCookie: string) {
     }
     BetterConsole.log(`Logged into the Roblox account - ${client.robloxInfo.UserName}`, true);
     client.isLoggedIn = true;
-    for(let i = 0; i < client.config.groupIds.length; i++) {
-        let groupID = client.config.groupIds[i];
+    for(let i = 0; i < config.groupIds.length; i++) {
+        let groupID = config.groupIds[i];
         await checkAudits(groupID, client);
         await checkAbuse(groupID, client);
         await checkSales(groupID, client);
@@ -134,12 +134,12 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
-    await roblox.setAPIKey(client.config.ROBLOX_API_KEY);
-    if(client.config.groupIds.length !== 0) {
-        await loginToRoblox(client.config.ROBLOX_COOKIE);
+    await roblox.setAPIKey(config.ROBLOX_API_KEY);
+    if(config.groupIds.length !== 0) {
+        await loginToRoblox(config.ROBLOX_COOKIE);
         await GroupHandler.loadGroups();
     }
-    if(client.config.universes.length !== 0) {
+    if(config.universes.length !== 0) {
         await UniverseHandler.loadUniverses();
         await checkJobIDs(client);
     }
@@ -162,7 +162,7 @@ client.on('interactionCreate', async(interaction: Discord.Interaction) => {
             let args = CommandHelpers.loadArguments(interaction);
             if(args["username"]) {
                 let usernames = args["username"].replaceAll(" ", "").split(",") as string[];
-                if(usernames.length > client.config.maximumNumberOfUsers) {
+                if(usernames.length > config.maximumNumberOfUsers) {
                     let embed = client.embedMaker({title: "Maximum Number of Users Exceeded", description: "You've inputted more users than the currently allowed maximum, please lower the amount of users in your command and try again", type: "error", author: interaction.user});
                     await interaction.editReply({embeds: [embed]});
                     return;
@@ -233,7 +233,7 @@ client.on("interactionCreate", async(interaction: Discord.Interaction) => {
 });
 
 client.on("messageCreate", async(message: Discord.Message) => {
-    if(!client.config.xpSystem.enabled) return;
+    if(!config.xpSystem.enabled) return;
     if(message.author.bot) return;
     let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === message.author.id);
@@ -248,7 +248,7 @@ client.on("messageCreate", async(message: Discord.Message) => {
             xp: 0
         }
     }
-    userData.xp += client.config.xpSystem.earnings.messages;
+    userData.xp += config.xpSystem.earnings.messages;
     if(index !== -1) {
         xpData[index] = userData;
     } else {
@@ -258,7 +258,7 @@ client.on("messageCreate", async(message: Discord.Message) => {
 });
 
 client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: Discord.User) => {
-    if(!client.config.xpSystem.enabled) return;
+    if(!config.xpSystem.enabled) return;
     if(user.bot) return;
     let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
     let index = xpData.findIndex(v => v.discordID === user.id);
@@ -273,7 +273,7 @@ client.on('messageReactionAdd', async(reaction: Discord.MessageReaction, user: D
             xp: 0
         }
     }
-    userData.xp += client.config.xpSystem.earnings.reactions;
+    userData.xp += config.xpSystem.earnings.reactions;
     if(index !== -1) {
         xpData[index] = userData;
     } else {
@@ -287,4 +287,4 @@ console.error = function(msg: string) {
     if(!msg.toString().includes("ExperimentalWarning")) oldMethod(msg);
 }
 
-client.login(client.config.DISCORD_TOKEN);
+client.login(config.DISCORD_TOKEN);

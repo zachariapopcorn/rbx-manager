@@ -12,7 +12,7 @@ const command: CommandFile = {
         let permissionNode = args["permission"];
         let role = args["role"];
         let subcommand = args["subcommand"];
-        let permissionArray = ConfigHelpers.getPropertyFromString(client.config.permissions, permissionNode) as string[];
+        let permissionArray = ConfigHelpers.getPropertyFromString(config.permissions, permissionNode) as string[];
         if(!permissionArray) {
             let embed = client.embedMaker({title: "Invalid Permission", description: "You supplied an invalid permission", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -43,13 +43,13 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         ConfigHelpers.setPropertyFromString(config, permissionNode, permissionArray);
-        ConfigHelpers.setPropertyFromString(client.config, permissionNode, permissionArray);
+        ConfigHelpers.setPropertyFromString(config, permissionNode, permissionArray);
         ConfigHelpers.writeToConfigFile(client);
         let embed = client.embedMaker({title: "Successfully Modified Permissions", description: `You've successfully modified this permission to ${subcommand} the role supplied`, type: "success", author: interaction.user});
         return await interaction.editReply({embeds: [embed]});
     },
     autocomplete: async(interaction: Discord.AutocompleteInteraction, client: BotClient): Promise<any> => {
-        let strings = ConfigHelpers.getObjectStrings(client.config.permissions);
+        let strings = ConfigHelpers.getObjectStrings(config.permissions);
         let focused = interaction.options.getFocused();
         let filtered = strings.filter(choice => choice.startsWith(focused));
         return await interaction.respond(filtered.map(choice => ({name: choice, value: choice})));

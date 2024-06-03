@@ -8,6 +8,8 @@ import BotClient from '../../utils/classes/BotClient';
 import CommandFile from '../../utils/interfaces/CommandFile';
 import UserEntry from '../../utils/interfaces/UserEntry';
 
+import config from '../../config';
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
@@ -23,7 +25,7 @@ const command: CommandFile = {
                 xp: 0
             }
         }
-        let rewards = client.config.xpSystem.rewards;
+        let rewards = config.xpSystem.rewards;
         let availableRewardString = "";
         for(let i = 0; i < rewards.length; i++) {
             if(userData.xp >= rewards[i].xpNeeded && !userData.redeemedRewards.includes(rewards[i].rewardID)) {

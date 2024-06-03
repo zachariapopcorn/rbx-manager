@@ -8,8 +8,8 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-async function batchAccept(groupID: number, client: BotClient, userIDS: Number[]): Promise<void> {
-    let res = await client.request({
+async function batchAccept(groupID: number, userIDS: Number[]): Promise<void> {
+    let res = await BotClient.request({
         url: `https://groups.roblox.com/v1/groups/${groupID}/join-requests`,
         method: "POST",
         headers: {},
@@ -46,7 +46,7 @@ const command: CommandFile = {
         let nextCursor = joinRequests.nextPageCursor;
         await client.logAction(`<@${interaction.user.id}> has started to accept all of the join requests in the group for the reason of **${reason}** in **${GroupHandler.getNameFromID(groupID)}**`);
         try {
-            await batchAccept(groupID, client, parseUsers(joinRequests.data));
+            await batchAccept(groupID, parseUsers(joinRequests.data));
         } catch(e) {
             let embed = client.embedMaker({title: "Error", description: `There was an error while trying to accept the join requests: ${e}`, type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
@@ -55,7 +55,7 @@ const command: CommandFile = {
             joinRequests = await roblox.getJoinRequests(groupID, "Desc", 100, nextCursor);
             nextCursor = joinRequests.nextPageCursor;
             try {
-                await batchAccept(groupID, client, parseUsers(joinRequests.data));
+                await batchAccept(groupID, parseUsers(joinRequests.data));
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to accept the join requests: ${e}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});

@@ -8,6 +8,8 @@ import GroupHandler from '../classes/GroupHandler';
 
 import SuspensionEntry from '../interfaces/SuspensionEntry';
 
+import config from '../../config';
+
 const oldDates: {id: number, date: Date}[] = [];
 
 export default async function checkAudits(groupID: number, client: BotClient) {
@@ -22,8 +24,8 @@ export default async function checkAudits(groupID: number, client: BotClient) {
         for(let i = auditIndex - 1; i >= 0; i--) {
             let log = auditLog.data[i];
             if(log.actor.user.userId === currentUser.UserID) continue;
-            if(log.actionType === "Post Status" && client.config.logging.shout.enabled) {
-                let channel = await client.channels.fetch(client.config.logging.shout.loggingChannel) as Discord.TextChannel;
+            if(log.actionType === "Post Status" && config.logging.shout.enabled) {
+                let channel = await client.channels.fetch(config.logging.shout.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
                     embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
@@ -40,9 +42,9 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"] && v.groupID === groupID);
                 if(susIndex !== -1) isUserSuspended = true;
                 let isLockedRank = client.isLockedRole((await roblox.getRoles(groupID)).find(v => v.name === log.description["NewRoleSetName"]));
-                if(isUserSuspended && await roblox.getRankInGroup(groupID, log.description["TargetId"]) != client.config.suspensionRank) {
+                if(isUserSuspended && await roblox.getRankInGroup(groupID, log.description["TargetId"]) != config.suspensionRank) {
                     try {
-                        await roblox.setRank(groupID, log.description["TargetId"], client.config.suspensionRank);
+                        await roblox.setRank(groupID, log.description["TargetId"], config.suspensionRank);
                     } catch(e) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to the suspended role: ${e}`);
                     }
@@ -53,8 +55,8 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                         console.error(`There was an error re-ranking ${log.description["TargetName"]} to their old role: ${e}`);
                     }
                 }
-                if(client.config.logging.audit.enabled) {
-                    let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
+                if(config.logging.audit.enabled) {
+                    let channel = await client.channels.fetch(config.logging.audit.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let embedDescription = "";
                         embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;
@@ -72,8 +74,8 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                         await channel.send({embeds: [embed]});
                     }
                 }
-            } else if(client.config.logging.audit.enabled) {
-                let channel = await client.channels.fetch(client.config.logging.audit.loggingChannel) as Discord.TextChannel;
+            } else if(config.logging.audit.enabled) {
+                let channel = await client.channels.fetch(config.logging.audit.loggingChannel) as Discord.TextChannel;
                 if(channel) {
                     let embedDescription = "";
                     embedDescription += `**Group**: ${GroupHandler.getNameFromID(groupID)}\n`;

@@ -55,7 +55,7 @@ const command: CommandFile = {
                 timeToRelease: Date.now() + (time as any)
             });
             try {
-                await roblox.setRank(groupID, userID, client.config.suspensionRank);
+                await roblox.setRank(groupID, userID, config.suspensionRank);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to change the rank of this user: ${e}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});

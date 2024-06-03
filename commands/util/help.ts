@@ -6,6 +6,8 @@ import BotClient from '../../utils/classes/BotClient';
 
 import CommandFile from '../../utils/interfaces/CommandFile';
 
+import config from '../../config';
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction, client: BotClient, args: any): Promise<any> => {
         let helpData = {};
@@ -36,7 +38,7 @@ const command: CommandFile = {
         ]);
         let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
         let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
-        let collector = msg.createMessageComponentCollector({filter: filter, time: client.config.collectorTime});
+        let collector = msg.createMessageComponentCollector({filter: filter, time: config.collectorTime});
         collector.on('collect', async(button: Discord.ButtonInteraction) => {
             if(button.customId === "previousPage") {
                 helpPageIndex -= 1;

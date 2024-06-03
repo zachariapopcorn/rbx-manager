@@ -4,6 +4,8 @@ import roblox = require('noblox.js');
 import BotClient from '../classes/BotClient';
 import GroupHandler from '../classes/GroupHandler';
 
+import config from '../../config';
+
 export default async function checkAbuse(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
     for(let i = client.groupLogs.length - 1; i >= 0; i--) {
@@ -14,11 +16,11 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
             let exileIndex = client.groupLogs.findIndex(v => v.userID === client.groupLogs[i].userID && client.groupLogs[i].groupID === groupID && v.action === "Exile");
             if(rankIndex != -1) {
                 let amount = client.groupLogs[rankIndex].amount;
-                if(amount > client.config.antiAbuse.thresholds.ranks) {
+                if(amount > config.antiAbuse.thresholds.ranks) {
                     let didError = false;
                     try {
-                        if(client.config.antiAbuse.actions.ranks === "Suspend") {
-                            await roblox.setRank(groupID, client.groupLogs[i].userID, client.config.suspensionRank);
+                        if(config.antiAbuse.actions.ranks === "Suspend") {
+                            await roblox.setRank(groupID, client.groupLogs[i].userID, config.suspensionRank);
                         } else {
                             await roblox.exile(groupID, client.groupLogs[i].userID);
                         }
@@ -26,7 +28,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         didError = true;
                         console.error(e);
                     }
-                    let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
+                    let channel = await client.channels.fetch(config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let description = `A rank abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing rank changing privileges in **${GroupHandler.getNameFromID(groupID)}**`;
                         if(didError) {
@@ -39,11 +41,11 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
             }
             if(exileIndex != -1) {
                 let amount = client.groupLogs[exileIndex].amount;
-                if(amount > client.config.antiAbuse.thresholds.exiles) {
+                if(amount > config.antiAbuse.thresholds.exiles) {
                     let didError = false;
                     try {
-                        if(client.config.antiAbuse.actions.exiles === "Suspend") {
-                            await roblox.setRank(groupID, client.groupLogs[i].userID, client.config.suspensionRank);
+                        if(config.antiAbuse.actions.exiles === "Suspend") {
+                            await roblox.setRank(groupID, client.groupLogs[i].userID, config.suspensionRank);
                         } else {
                             await roblox.exile(groupID, client.groupLogs[i].userID);
                         }
@@ -51,7 +53,7 @@ export default async function checkAbuse(groupID: number, client: BotClient) {
                         didError = true;
                         console.error(e);
                     }
-                    let channel = await client.channels.fetch(client.config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
+                    let channel = await client.channels.fetch(config.logging.antiAbuse.loggingChannel) as Discord.TextChannel;
                     if(channel) {
                         let description = `An exile abuser, **${await roblox.getUsernameFromId(client.groupLogs[i].userID)}**, has been detected abusing exile privileges in **${GroupHandler.getNameFromID(groupID)}**`;
                         if(didError) {

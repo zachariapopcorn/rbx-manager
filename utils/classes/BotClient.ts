@@ -7,13 +7,12 @@ import BotConfig from '../interfaces/BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
-import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
 import GroupLog from '../interfaces/GroupLog';
-import VerificationResult from '../interfaces/VerificationResult';
+
+import config from '../../config';
 
 export default class BotClient extends Discord.Client {
-    public config: BotConfig;
     public originalLockedCommands: string[] = [];
     public isLoggedIn: boolean;
     public robloxInfo: roblox.LoggedInUserData;
@@ -24,15 +23,14 @@ export default class BotClient extends Discord.Client {
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions, Discord.IntentsBitField.Flags.MessageContent]});
-        this.config = config;
         this.originalLockedCommands = config.lockedCommands;
     }
 
-    public async request(requestOptions: RequestOptions) : Promise<Response> {
+    public static async request(requestOptions: RequestOptions) : Promise<Response> {
         if(requestOptions.robloxRequest) {
             requestOptions.headers = {
                 "X-CSRF-TOKEN": await roblox.getGeneralToken(),
-                "Cookie": `.ROBLOSECURITY=${this.config.ROBLOX_COOKIE}`,
+                "Cookie": `.ROBLOSECURITY=${config.ROBLOX_COOKIE}`,
                 ...requestOptions.headers
             }
         }
@@ -47,7 +45,7 @@ export default class BotClient extends Discord.Client {
     public embedMaker(embedOptions: EmbedMakerOptions): Discord.EmbedBuilder {
         let embed = new Discord.EmbedBuilder();
         embed.setAuthor({name: embedOptions.author.tag, iconURL: embedOptions.author.displayAvatarURL()});
-        embed.setColor(this.config.embedColors[embedOptions.type]);
+        embed.setColor(config.embedColors[embedOptions.type]);
         if(embedOptions.description.length > 0) {
             embed.setDescription(embedOptions.description);
         }
@@ -77,9 +75,9 @@ export default class BotClient extends Discord.Client {
     }
 
     public async logAction(logString: string): Promise<void> {
-        if(!this.config.logging.command.enabled) return;
+        if(!config.logging.command.enabled) return;
         let embed = this.embedMaker({title: "Command Executed", description: logString, type: "info", author: this.user});
-        let channel = await this.channels.fetch(this.config.logging.command.loggingChannel) as Discord.TextChannel;
+        let channel = await this.channels.fetch(config.logging.command.loggingChannel) as Discord.TextChannel;
         if(channel) {
             try {
                 await channel.send({embeds: [embed]});
@@ -90,9 +88,9 @@ export default class BotClient extends Discord.Client {
     }
 
     public async logXPAction(title: string, logString: string): Promise<void> {
-        if(!this.config.logging.xp.enabled) return;
+        if(!config.logging.xp.enabled) return;
         let embed = this.embedMaker({title: title, description: logString, type: "info", author: this.user});
-        let channel = await this.channels.fetch(this.config.logging.xp.loggingChannel) as Discord.TextChannel;
+        let channel = await this.channels.fetch(config.logging.xp.loggingChannel) as Discord.TextChannel;
         if(channel) {
             try {
                 await channel.send({embeds: [embed]});
@@ -146,7 +144,7 @@ export default class BotClient extends Discord.Client {
             ]);
             let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
             let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
-            let collector = msg.createMessageComponentCollector({filter: filter, time: this.config.collectorTime});
+            let collector = msg.createMessageComponentCollector({filter: filter, time: config.collectorTime});
             collector.on("collect", async(button) => {
                 if(button.customId === "backButton") {
                     index -= 1;
@@ -173,8 +171,8 @@ export default class BotClient extends Discord.Client {
 
     public isLockedRole(role: roblox.Role): boolean {
         let isLocked = false;
-        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
-        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
+        if(config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
+        if(config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
         return isLocked;
     }
 
@@ -183,6 +181,6 @@ export default class BotClient extends Discord.Client {
     }
 
     public getCooldownForCommand(commandName: string): number {
-        return this.config.cooldownOverrides[commandName] || this.config.defaultCooldown;
+        return config.cooldownOverrides[commandName] || config.defaultCooldown;
     }
 }

@@ -9,6 +9,8 @@ import CommandFile from '../../utils/interfaces/CommandFile';
 import UserEntry from '../../utils/interfaces/UserEntry';
 import XPRewardFile from '../../utils/interfaces/XPRewardFile';
 
+import config from '../../config';
+
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let rewardID = args["id"];
@@ -25,7 +27,7 @@ const command: CommandFile = {
                 xp: 0
             }
         }
-        let rewards = client.config.xpSystem.rewards;
+        let rewards = config.xpSystem.rewards;
         let reward = rewards.find(r => r.rewardID.toLowerCase() === rewardID.toLowerCase());
         if(!reward) {
             let embed = client.embedMaker({title: "Invalid Reward ID", description: "You inputted an invalid reward ID. How can I reward you something that doesn't exist?", type: "error", author: interaction.user});
@@ -106,7 +108,7 @@ const command: CommandFile = {
                 xp: 0
             }
         }
-        let rewards = client.config.xpSystem.rewards;
+        let rewards = config.xpSystem.rewards;
         let availableRewards:string[] = [];
         for(let i = 0; i < rewards.length; i++) {
             if(userData.xp >= rewards[i].xpNeeded && !userData.redeemedRewards.includes(rewards[i].rewardID)) {

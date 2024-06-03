@@ -109,7 +109,7 @@ const command: CommandFile = {
                 ]);
                 let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
                 let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
-                let button = (await msg.awaitMessageComponent({filter: filter, time: client.config.collectorTime}))
+                let button = (await msg.awaitMessageComponent({filter: filter, time: config.collectorTime}))
                 if(button) {
                     if(button.customId === "yesButton") {
                         shouldContinue = true;

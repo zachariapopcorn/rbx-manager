@@ -11,8 +11,6 @@ import UniverseHandler from '../../../utils/classes/UniverseHandler';
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
 
-const messaging = new MessagingService(config);
-
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let logs: CommandLog[] = [];
@@ -39,7 +37,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(robloxID);
             try {
-                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
+                await MessagingService.sendMessage(universeID, "Kick", {username: username, reason: reason});
             } catch(e) {
                 logs.push({
                     username: username,

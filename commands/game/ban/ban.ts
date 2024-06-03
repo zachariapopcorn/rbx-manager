@@ -13,10 +13,6 @@ import BetterConsole from '../../../utils/classes/BetterConsole';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
-import ModerationData from '../../../utils/interfaces/ModerationData';
-
-const database = new RobloxDatastore(config);
-const messaging = new MessagingService(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -43,34 +39,20 @@ const command: CommandFile = {
                 continue;
             }
             username = await roblox.getUsernameFromId(robloxID);
+            let res = await RobloxDatastore.getModerationData(universeID, robloxID);
+            if(res.err) {
+                logs.push({
+                    username: username,
+                    status: "Error",
+                    message: res.err
+                });
+                continue;
+            }
+            let data = res.data;
+            data.banData.isBanned = true;
+            data.banData.reason = reason;
             try {
-                let oldData: ModerationData;
-                try {
-                    oldData = await database.getModerationData(universeID, robloxID);
-                } catch(e) {
-                    let err = e.toString() as string;
-                    if(!err.includes("NOT_FOUND")) {
-                        logs.push({
-                            username: username,
-                            status: "Error",
-                            message: e
-                        });
-                        continue;
-                    } else {
-                        oldData = {
-                            banData: { // Gets overridden in the setModerationData call
-                                isBanned: false,
-                                reason: ""
-                            },
-                            muteData: {
-                                isMuted: false,
-                                reason: ""
-                            },
-                            warns: []
-                        }
-                    }
-                }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: true, reason: reason}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: (oldData.warns || [])});
+                await RobloxDatastore.setModerationData(universeID, robloxID, data);
             } catch(e) {
                 logs.push({
                     username: username,
@@ -81,7 +63,7 @@ const command: CommandFile = {
             }
             let didKickError = false;
             try {
-                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
+                await MessagingService.sendMessage(universeID, "Kick", {username: username, reason: reason});
             } catch(e) {
                 didKickError = true;
                 logs.push({
