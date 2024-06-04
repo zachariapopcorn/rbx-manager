@@ -28,6 +28,7 @@ const command: CommandFile = {
         }
         if(!res.data.warns) res.data.warns = [];
         let reason = args["reason"];
+        if(!reason) reason = "No reason provided";
         if(mode === "add") {
             res.data.warns.push({
                 author: interaction.user.tag,
@@ -56,11 +57,11 @@ const command: CommandFile = {
         }
         if(mode === "add") {
             let embed = client.embedMaker({title: "Success", description: "You've successfully warned this user and have notified them in game", type: "success", author: interaction.user});
-            await interaction.channel.send({embeds: [embed]});
+            await interaction.editReply({embeds: [embed]});
             await client.logAction(`<@${interaction.user.id}> has warned **${username}** in **${universeName}** for the reason of **${reason}**`);
         } else {
             let embed = client.embedMaker({title: "Success", description: "You've successfully deleted this warning", type: "success", author: interaction.user});
-            await interaction.channel.send({embeds: [embed]});
+            await interaction.editReply({embeds: [embed]});
             await client.logAction(`<@${interaction.user.id}> has deleted a warning from **${username}** in **${universeName}** that had the reason of **${reason}**`);
         }
     },

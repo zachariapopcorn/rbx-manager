@@ -12,7 +12,6 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
-import ModerationData from '../../../utils/interfaces/ModerationData';
 import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 
@@ -61,6 +60,7 @@ const command: CommandFile = {
                 if(moderationData.warns.length === 0) {
                     warnsString = "No warnings present";
                 } else {
+                    if(moderationData.warns.length === 1) warnsString = "There was 1 warning found for this user\n\n";
                     for(let i = 0; i < moderationData.warns.length; i++) {
                         warnsString += `Author: ${moderationData.warns[i].author} | Reason: ${moderationData.warns[i].reason} | Date Assigned: ${formatWarnDate(new Date(moderationData.warns[i].dateAssigned))}\n`;
                     }
