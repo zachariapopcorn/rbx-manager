@@ -15,6 +15,7 @@ import config from '../../config';
 export default class BotClient extends Discord.Client {
     public originalLockedCommands: string[] = [];
     public isLoggedIn: boolean;
+    public onLatestVersion: boolean;
     public robloxInfo: roblox.LoggedInUserData;
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
@@ -52,6 +53,18 @@ export default class BotClient extends Discord.Client {
         embed.setFooter({text: "Created by sv_du - https://discord.gg/XGGpf3q"});
         embed.setTitle(embedOptions.title);
         return embed;
+    }
+
+    public setStatusActivity() {
+        let version = "On Latest Version? ❌";
+        let roblox = "Logged Into Roblox? ❌";
+        if(this.onLatestVersion) {
+            version = "On Latest Version? ✅";
+        }
+        if(this.isLoggedIn) {
+            roblox = "Logged Into Roblox? ✅";
+        }
+        this.user.setActivity(version + "\n" + roblox);
     }
 
     public createButtons(buttonData: {customID: string, label: string, style: Discord.ButtonStyle}[]): Discord.MessageReplyOptions {

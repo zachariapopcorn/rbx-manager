@@ -26,6 +26,7 @@ import checkSales from './utils/events/checkSales';
 import checkLoginStatus from './utils/events/checkLoginStatus';
 import checkMemberCount from './utils/events/checkMemberCount';
 import checkJobIDs from './utils/events/checkJobIDs';
+import checkUpdates from './utils/events/checkUpdates';
 
 const client = new BotClient(config);
 
@@ -109,7 +110,7 @@ export async function loginToRoblox(robloxCookie: string) {
         client.robloxInfo = await roblox.setCookie(robloxCookie);
     } catch {
         console.error("Unable to login to Roblox");
-        client.user.setActivity("Logged Into Roblox? ❌");
+        client.setStatusActivity();
         client.isLoggedIn = false;
         return;
     }
@@ -134,6 +135,7 @@ client.once('ready', async() => {
         return process.exit();
     }
     checkCooldowns(client);
+    await checkUpdates(client);
     await roblox.setAPIKey(config.ROBLOX_API_KEY);
     if(config.groupIds.length !== 0) {
         await loginToRoblox(config.ROBLOX_COOKIE);
