@@ -71,6 +71,12 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
+    ban: {
+        banDiscordAccounts: boolean,
+        useSamePrivateReasonForDisplay: boolean,
+        displayReason: string,
+        excludeAlts: boolean
+    }
     defaultCooldown: number,
     cooldownOverrides: {[key: string]: number},
     suspensionRank: number,

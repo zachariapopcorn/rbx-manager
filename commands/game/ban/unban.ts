@@ -4,7 +4,7 @@ import roblox = require('noblox.js');
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import BanService from '../../../utils/classes/BanService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
@@ -36,28 +36,7 @@ const command: CommandFile = {
                 continue;
             }
             username = await roblox.getUsernameFromId(robloxID);
-            let res = await RobloxDatastore.getModerationData(universeID, robloxID);
-            if(res.err) {
-                logs.push({
-                    username: username,
-                    status: "Error",
-                    message: res.err
-                });
-                continue;
-            }
-            let data = res.data;
-            data.banData.isBanned = false;
-            data.banData.reason = "";
-            try {
-                await RobloxDatastore.setModerationData(universeID, robloxID, data);
-            } catch(e) {
-                logs.push({
-                    username: username,
-                    status: "Error",
-                    message: e
-                });
-                continue;
-            }
+            await BanService.unban(universeID, robloxID);
             logs.push({
                 username: username,
                 status: "Success"

@@ -94,6 +94,12 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
+    ban: {
+        banDiscordAccounts: true,
+        useSamePrivateReasonForDisplay: false,
+        displayReason: "You've been banned from this game",
+        excludeAlts: false,
+    },
     defaultCooldown: 5000,
     cooldownOverrides: {}, // Format: {"command name": cooldownInMilliSeconds} ; EX: {"exile": 20000}
     suspensionRank: 0,

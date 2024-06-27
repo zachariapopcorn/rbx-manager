@@ -75,26 +75,28 @@ const command: CommandFile = {
                     });
                 }
             } else {
-                let discordIDs = await VerificationHelpers.getDiscordUsers(interaction.guild.id, victimRobloxID);
-                BetterConsole.log(`Fetected Discord IDs for Roblox ID ${victimRobloxID}: ${discordIDs}`);
-                let didDiscordBanError = false;
-                for(let i = 0; i < discordIDs.length; i++) {
-                    try {
-                        await interaction.guild.members.ban(discordIDs[i], {reason: reason});
-                    } catch(e) {
-                        didDiscordBanError = true;
+                if(config.ban.banDiscordAccounts) {
+                    let discordIDs = await VerificationHelpers.getDiscordUsers(interaction.guild.id, victimRobloxID);
+                    BetterConsole.log(`Fetected Discord IDs for Roblox ID ${victimRobloxID}: ${discordIDs}`);
+                    let didDiscordBanError = false;
+                    for(let i = 0; i < discordIDs.length; i++) {
+                        try {
+                            await interaction.guild.members.ban(discordIDs[i], {reason: reason});
+                        } catch(e) {
+                            didDiscordBanError = true;
+                            logs.push({
+                                username: `<@${discordIDs[i]}>`,
+                                status: "Error",
+                                message: `Although this user is now group banned, they are not banned from the Discord due to the following error: ${e}`
+                            });
+                        }
+                    }
+                    if(!didDiscordBanError) {
                         logs.push({
-                            username: `<@${discordIDs[i]}>`,
-                            status: "Error",
-                            message: `Although this user is now group banned, they are not banned from the Discord due to the following error: ${e}`
+                            username: username,
+                            status: "Success"
                         });
                     }
-                }
-                if(!didDiscordBanError) {
-                    logs.push({
-                        username: username,
-                        status: "Success"
-                    });
                 }
             }
             await client.logAction(`<@${interaction.user.id}> has banned **${username}** from the group for the reason of **${reason}** from **${GroupHandler.getNameFromID(groupID)}**`);
