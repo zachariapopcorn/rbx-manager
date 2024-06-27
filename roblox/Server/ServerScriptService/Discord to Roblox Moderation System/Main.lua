@@ -11,10 +11,42 @@ Players.PlayerAdded:Connect(function(plr)
 	if(modData == nil) then return plr:Kick("Error loading moderation data, please rejoin") end
 	if(modData.banData.releaseTime) then
 		local currentTime = os.time() * 1000
-		if(currentTime < modData.banData.releaseTime) then return plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason) end
+		if(currentTime < modData.banData.releaseTime) then
+			local s, e = pcall(function()
+				Players:BanAsync({
+					UserIds = {plr.UserId},
+					Duration = math.floor((modData.banData.releaseTime - currentTime) / 1000),
+					DisplayReason = modData.banData.reason,
+					PrivateReason = modData.banData.reason,
+					ExcludeAltAccounts = false,
+					ApplyToUniverse = true
+				})
+			end)
+			plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason)
+			if(not e) then
+				Database:UnbanPlayer(plr.UserId, modData)
+			end
+			return
+		end
 		Database:UnbanPlayer(plr.UserId, modData)
 	else
-		if(modData.banData.isBanned) then return plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason) end
+		if(modData.banData.isBanned) then
+			local s, e = pcall(function()
+				Players:BanAsync({
+					UserIds = {plr.UserId},
+					Duration = -1,
+					DisplayReason = modData.banData.reason,
+					PrivateReason = modData.banData.reason,
+					ExcludeAltAccounts = false,
+					ApplyToUniverse = true
+				})
+			end)
+			plr:Kick("You are banned from this game. Reason: " .. modData.banData.reason)
+			if(not e) then
+				Database:UnbanPlayer(plr.UserId, modData)
+			end
+			return
+		end
 	end
 	if(modData.muteData.isMuted) then
 		local continueOn = true
