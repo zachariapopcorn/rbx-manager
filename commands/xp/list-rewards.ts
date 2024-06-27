@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox from 'noblox.js';
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import BotClient from '../../utils/classes/BotClient';
 
@@ -12,7 +12,7 @@ import config from '../../config';
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
-        let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+        let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
         let index = xpData.findIndex(v => v.discordID === interaction.user.id);
         let userData: UserEntry;
         if(index !== -1) {

@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import ms = require('ms');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -74,8 +74,8 @@ const command: CommandFile = {
         }
         if(config.groupIds.length !== 0) {
             let groupID = GroupHandler.getIDFromName(args["group"]);
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
-            let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let bannedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let suspendedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
             let bannedIndex = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === robloxID);
             let isGroupBanned = (bannedIndex !== -1);
             let suspendedIndex = suspendedUsers.findIndex(v => v.groupID === groupID && v.userId === robloxID);

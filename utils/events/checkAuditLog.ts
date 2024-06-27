@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import BotClient from '../classes/BotClient';
 import GroupHandler from '../classes/GroupHandler';
@@ -38,7 +38,7 @@ export default async function checkAudits(groupID: number, client: BotClient) {
                 }
             } else if(log.actionType === "Change Rank") {
                 let isUserSuspended = false;
-                let suspensions = (JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[]);
+                let suspensions = (JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[]);
                 let susIndex = suspensions.findIndex(v => v.userId === log.description["TargetId"] && v.groupID === groupID);
                 if(susIndex !== -1) isUserSuspended = true;
                 let isLockedRank = client.isLockedRole((await roblox.getRoles(groupID)).find(v => v.name === log.description["NewRoleSetName"]));

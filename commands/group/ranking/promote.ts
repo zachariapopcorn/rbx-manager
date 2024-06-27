@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -50,7 +50,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let suspensions = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
             let index = suspensions.findIndex(v => v.userId === victimRobloxID);
             if(index != -1) {
                 logs.push({

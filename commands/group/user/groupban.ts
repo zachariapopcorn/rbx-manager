@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -51,7 +51,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let bannedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
             let index = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === victimRobloxID);
             if(index !== -1) {
                 logs.push({
@@ -62,7 +62,7 @@ const command: CommandFile = {
                 continue;
             }
             bannedUsers.push({groupID: groupID, userID: victimRobloxID});
-            await fs.writeFile(`${process.cwd()}/database/groupbans.json`, JSON.stringify(bannedUsers));
+            await fs.promises.writeFile(`${process.cwd()}/database/groupbans.json`, JSON.stringify(bannedUsers));
             let rankID = await roblox.getRankInGroup(groupID, victimRobloxID);
             if(rankID !== 0) {
                 try {

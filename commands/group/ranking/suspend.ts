@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import ms = require('ms');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -41,7 +41,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "User Not In Group", description: "This user is currently not in the group", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+        let suspensions = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
         let index = suspensions.findIndex(v => v.userId === userID);
         if(index != -1) {
             suspensions[index].timeToRelease = Date.now() + (time as any);
@@ -61,7 +61,7 @@ const command: CommandFile = {
                 return await interaction.editReply({embeds: [embed]});
             }
         }
-        await fs.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
+        await fs.promises.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
         await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}** in **${GroupHandler.getNameFromID(groupID)}**`);
         let embed = client.embedMaker({title: "Success", description: `You've successfully suspended this user`, type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
