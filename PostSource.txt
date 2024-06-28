@@ -40,14 +40,18 @@ The value, ``ROBLOX_COOKIE``, is your bot's Roblox cookie. To get it, log in to 
 Once you found the ``.ROBLOSECURITY`` cookie, copy it and paste it after the equal sign in the .env file
 
 # Step 5.3
-The value, ``ROBLOX_API_KEY``, is your API key for the Open Cloud endpoints. To get it, go to [your API keys](https://create.roblox.com/credentials) and click "Create API Key". Once you do so, name it whatever you want and give it the Datastore and Messaging Service API systems and add your desired experience to it and for the scopes, give Datastore [these scopes](https://i.imgur.com/5w8Qw2I.png) and Messaging Service the Publish scope. Once done, go to section 3: Security, and input the IP address of the machine you want to host the bot on.
+The value, ``ROBLOX_API_KEY``, is your API key for the Open Cloud endpoints. To get it, go to [your API keys](https://create.roblox.com/credentials) and click "Create API Key". Once you do so, name it whatever you want and give it the Datastore, Messaging Service, and User Restriction API systems and add your desired experience to it.
 
-If you want to allow all requests regardless of IP address, type ``0.0.0.0`` and ``0.0.0.0/0`` (If hosting on Repl or a similar service with dynamic IPs, this is required)
+For the scopes, give Datastore [these scopes](https://i.imgur.com/5w8Qw2I.png), Messaging Service the Publish scope, and User Restriction the Read and Write scopes.
+
+Once done, go to section 3: Security, and input the IP address of the machine you want to host the bot on.
+
+If you want to allow all requests regardless of IP address, type ``0.0.0.0`` and ``0.0.0.0/0`` (If hosting on a service with dynamic IPs, this is required)
 
 After that, click "SAVE & GENERATE KEY", and then click "COPY KEY TO CLIPBOARD". Paste the API key after the equal sign in the .env file
 
 # Step 5.4
-The value, ``ROVER_API_KEY``, is your API key for Rover, the verification provider that this bot uses. To get it, go to [the Rover website](https://rover.link/) and login with your Discord account. Once you do that, click on "Manage Servers" and click on the server(s) that you bot is going to be in, and then click "Developer API". Once you're here, type a name for your API key and click "Create" and then click "Copy" on the prompt that came up. Paste what you copied after the equal sign in the .env file
+The value, ``VERIFICATION_PROVIDER_API_KEY``, is your API key for whichever verification provider you want to use. Look up how to get it for said provider and paste it after the equal sign
 
 # Step 6
 Now that you're done configuring the .env file, close it, and open the ``config.ts`` file with your favorite text editor.
@@ -87,37 +91,43 @@ The value, ``logging``, is an object with logging properties. To enable/disable 
 The value, ``embedColors``, is an object setting the colors of different types of embeds. You don't need to change these values, but if you want to, [here are the valid options](https://discord.js.org/#/docs/discord.js/main/typedef/ColorResolvable)
 
 # Step 6.8
-The value, ``defaultCooldown``, is the default command cooldown in milliseconds. The default is 5000 milliseconds (5 seconds)
+The value, ``ban``, is an object containing the ban settings used for banning people from games (excluding ban.banDiscordAccounts, this applies to both game and group bans). The configuration options are self-explainatory, so I don't believe I need to mention them here
 
 # Step 6.9
-The value, ``cooldownOverrides``, are exceptions to the default cooldown set in step 6.8. The takes properties of ``commandName: new_cooldown``. For example, if I wanted to set the cooldown of the exile command to 20 seconds (20000 milliseconds), the value would be `cooldownOverrides: {"exile": 20000}`
+The value, ``defaultCooldown``, is the default command cooldown in milliseconds. The default is 5000 milliseconds (5 seconds)
 
 # Step 6.10
-The value, ``suspensionRank``, is the rank ID of the suspended rank in your group. This is the rank that people get set to when suspended
+The value, ``cooldownOverrides``, are exceptions to the default cooldown set in step 6.8. The takes properties of ``commandName: new_cooldown``. For example, if I wanted to set the cooldown of the exile command to 20 seconds (20000 milliseconds), the value would be `cooldownOverrides: {"exile": 20000}`
 
 # Step 6.11
+The value, ``suspensionRank``, is the rank ID of the suspended rank in your group. This is the rank that people get set to when suspended
+
+# Step 6.12
 The value, ``universes``, is an array value representing the universes that you want to link. This is an array of universe IDs
 To get a universe ID, go to [your creations page](https://create.roblox.com/creations), click the "..." on the games you want to configure, and click "Copy Universe ID" and set it in the config
 
-# Step 6.12
+# Step 6.13
 The value, ``datastoreName``, is the name of the datastore to use. You don't need to configure this
 
 **If you change this value, you MUST change it's value in the Roblox files in step 9**
 
-# Step 6.13
+# Step 6.14
 The value, ``verificationChecks``, is the toggle for verification checks on the group commands. This by default is enabled, but if you want to disable it, set this to false
 
-# Step 6.14
+# Step 6.15
 The value, ``collectorTime``, is how long collectors wait before being terminated in milliseconds. The default is 2 minutes, but you can change this if you want
 
-# Step 6.15
+# Step 6.16
 The value, ``maximumNumberOfUsers``, indicates how many users you can execute a bulk action on. The default is 5, but you can change this if you want
 
-# Step 6.16
+# Step 6.17
 The value, ``lockedRanks``, "locks" the ranks inputted, meaning that you can't promote/demote/setrank to those ranks. This accepts rank names and ids
 
-# Step 6.17
+# Step 6.18
 The value, ``lockedCommands``, locks commands, meaning that no one can use them. Simply type a command name and it will lock it. Casing does not matter
+
+# Step 6.19
+The value, ``verificationProvider``, defines what verification provider the bot will use. Valid values are ``bloxlink``, ``rover``, and ``rowifi``
 
 # Step 7
 Now that you've configured your bot, go back to your bot's Discord develop page and copy it's client ID. After doing so, paste the following link into your browser: ``https://discord.com/oauth2/authorize?client_id=CLIENT_ID_HERE&permissions=8&scope=applications.commands%20bot`` and replace CLIENT_ID_HERE with your bot's client ID
@@ -132,7 +142,7 @@ Copy [the following code](https://raw.githubusercontent.com/sv-du/rbx-manager/ma
 
 You will see a configuration section. Before pasting this code into the console of the game you want to install this system to, configure it
 
-**Unless you configured the datastoreName value in Step 6.12, which would then need to be reflected in the DATASTORE_NAME value, no configuration is needed**
+**Unless you configured the datastoreName value in Step 6.13, which would then need to be reflected in the DATASTORE_NAME value, no configuration is needed**
 
 You are now done with setting up this system! Was that hard?
 
