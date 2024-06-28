@@ -110,7 +110,7 @@ const config: BotConfig = {
     maximumNumberOfUsers: 5,
     lockedRanks: [],
     lockedCommands: [],
-    verificationProvider: "bloxlink"
+    verificationProvider: "rover"
 }
 
 export default config;
