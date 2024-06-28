@@ -8,8 +8,8 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-async function deleteWallPost(client: BotClient, groupID: number, postID: number) {
-    let res = await client.request({
+async function deleteWallPost(groupID: number, postID: number) {
+    let res = await BotClient.request({
         url: `https://groups.roblox.com/v1/groups/${groupID}/wall/posts/${postID}`,
         method: "DELETE",
         headers: {},
@@ -22,7 +22,7 @@ async function deleteWallPost(client: BotClient, groupID: number, postID: number
     }
 }
 
-async function deletePosts(client: BotClient, groupID: number, amount: number, userID?: number): Promise<{success: number, failed: number, err?: string}> {
+async function deletePosts(groupID: number, amount: number, userID?: number): Promise<{success: number, failed: number, err?: string}> {
     let success = 0;
     let failed = 0;
     let page: roblox.WallPostPage;
@@ -45,7 +45,7 @@ async function deletePosts(client: BotClient, groupID: number, amount: number, u
             }
             if(shouldDelete) {
                 try {
-                    await deleteWallPost(client, groupID, post.id);
+                    await deleteWallPost(groupID, post.id);
                     success++;
                 } catch(e) {
                     console.log(e);
@@ -90,7 +90,7 @@ const command: CommandFile = {
         }
         let embed = client.embedMaker({title: "Deleting Posts", description: "Depending on how many posts there are, this can take up to a few milliseconds to a few minutes", type: "info", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
-        let deleteResult = await deletePosts(client, groupID, amount, userID);
+        let deleteResult = await deletePosts(groupID, amount, userID);
         let embedDescription = "";
         if(deleteResult.err) {
             embedDescription = `While deleting, there was an error while trying to fetch the posts: ${deleteResult.err}. I've successfully deleted **${deleteResult.success}** posts and failed to delete **${deleteResult.failed}** posts`;

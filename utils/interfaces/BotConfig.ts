@@ -3,12 +3,13 @@ import Discord from 'discord.js';
 import AntiAbuseAction from './AntiAbuseAction';
 import LoggingConfig from './LoggingConfig';
 import RewardEntry from './RewardEntry';
+import VerificationProvider from './VerificationProvider';
 
 export default interface BotConfig {
     DISCORD_TOKEN: string,
     ROBLOX_COOKIE: string,
     ROBLOX_API_KEY: string,
-    ROVER_API_KEY: string,
+    VERIFICATION_PROVIDER_API_KEY: string,
     groupIds: number[],
     permissions: {
         all: string[],
@@ -70,7 +71,12 @@ export default interface BotConfig {
         success: Discord.ColorResolvable,
         error: Discord.ColorResolvable
     },
-    debug?: boolean,
+    ban: {
+        banDiscordAccounts: boolean,
+        useSamePrivateReasonForDisplay: boolean,
+        displayReason: string,
+        excludeAlts: boolean
+    }
     defaultCooldown: number,
     cooldownOverrides: {[key: string]: number},
     suspensionRank: number,
@@ -81,4 +87,6 @@ export default interface BotConfig {
     maximumNumberOfUsers: number,
     lockedRanks: (string | number)[],
     lockedCommands: string[],
+    verificationProvider: VerificationProvider
+    debug?: boolean,
 }

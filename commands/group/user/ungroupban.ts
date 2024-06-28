@@ -1,13 +1,14 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
@@ -16,7 +17,7 @@ import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+        let authorRobloxID = await VerificationHelpers.getRobloxUser(interaction.guild.id, interaction.user.id);
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let reasonData = CommandHelpers.parseReasons(usernames, args["reason"]);
@@ -39,7 +40,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Exile", victimRobloxID);
+                let verificationStatus = await VerificationHelpers.preformVerificationChecks(groupID, authorRobloxID, "Exile", victimRobloxID);
                 if(!verificationStatus.success) {
                     logs.push({
                         username: username,
@@ -49,7 +50,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let bannedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
             let index = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === victimRobloxID);
             if(index === -1) {
                 logs.push({
@@ -60,7 +61,7 @@ const command: CommandFile = {
                 continue;
             }
             bannedUsers.splice(index, 1);
-            await fs.writeFile(`${process.cwd()}/database/groupbans.json`, JSON.stringify(bannedUsers));
+            await fs.promises.writeFile(`${process.cwd()}/database/groupbans.json`, JSON.stringify(bannedUsers));
             logs.push({
                 username: username,
                 status: "Success"

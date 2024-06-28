@@ -4,15 +4,12 @@ import roblox = require('noblox.js');
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import BanService from '../../../utils/classes/BanService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
-import ModerationData from '../../../utils/interfaces/ModerationData';
-
-const database = new RobloxDatastore(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -39,42 +36,7 @@ const command: CommandFile = {
                 continue;
             }
             username = await roblox.getUsernameFromId(robloxID);
-            try {
-                let oldData: ModerationData;
-                try {
-                    oldData = await database.getModerationData(universeID, robloxID);
-                } catch(e) {
-                    let err = e.toString() as string;
-                    if(!err.includes("NOT_FOUND")) {
-                        logs.push({
-                            username: username,
-                            status: "Error",
-                            message: e
-                        });
-                        continue;
-                    } else {
-                        oldData = {
-                            banData: { // Gets overridden in the setModerationData call
-                                isBanned: false,
-                                reason: ""
-                            },
-                            muteData: {
-                                isMuted: false,
-                                reason: ""
-                            },
-                            warns: []
-                        }
-                    }
-                }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: false, reason: ""}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason, releaseTime: oldData.muteData.releaseTime}, warns: (oldData.warns || [])});
-            } catch(e) {
-                logs.push({
-                    username: username,
-                    status: "Error",
-                    message: e
-                });
-                continue;
-            }
+            await BanService.unban(universeID, robloxID);
             logs.push({
                 username: username,
                 status: "Success"

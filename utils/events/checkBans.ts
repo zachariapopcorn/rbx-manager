@@ -1,6 +1,6 @@
 import roblox = require('noblox.js');
 
-import fs from 'fs/promises';
+import fs from 'fs';
 
 import BotClient from '../classes/BotClient';
 import GroupBanEntry from '../interfaces/GroupBanEntry';
@@ -16,7 +16,7 @@ async function isUserInGroup(userID: number, groupID: number): Promise<boolean> 
 export default async function checkBans(client: BotClient) {
     if(!client.isLoggedIn) return;
     try {
-        let bannedUsers = (JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[]);
+        let bannedUsers = (JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[]);
         for(let i = 0; i < bannedUsers.length; i++) {
             let groupID = bannedUsers[i].groupID;
             let userID = bannedUsers[i].userID;

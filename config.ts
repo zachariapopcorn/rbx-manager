@@ -2,7 +2,7 @@ import BotConfig from "./utils/interfaces/BotConfig";
 
 require('dotenv').config();
 
-export const envValues = ["DISCORD_TOKEN", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "ROVER_API_KEY"];
+export const envValues = ["DISCORD_TOKEN", "ROBLOX_COOKIE", "ROBLOX_API_KEY", "VERIFICATION_PROVIDER_API_KEY"];
 for(let i = 0; i < envValues.length; i++) {
     if(!process.env[envValues[i]]) {
         console.log(`${envValues[i]} not defined in .env file`);
@@ -14,7 +14,7 @@ const config: BotConfig = {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
     ROBLOX_COOKIE: process.env.ROBLOX_COOKIE,
     ROBLOX_API_KEY: process.env.ROBLOX_API_KEY,
-    ROVER_API_KEY: process.env.ROVER_API_KEY,
+    VERIFICATION_PROVIDER_API_KEY: process.env.VERIFICATION_PROVIDER_API_KEY,
     groupIds: [],
     permissions: {
         all: [""],
@@ -94,6 +94,12 @@ const config: BotConfig = {
         success: "Green",
         error: "Red"
     },
+    ban: {
+        banDiscordAccounts: true,
+        useSamePrivateReasonForDisplay: false,
+        displayReason: "You've been banned from this game",
+        excludeAlts: false,
+    },
     defaultCooldown: 5000,
     cooldownOverrides: {}, // Format: {"command name": cooldownInMilliSeconds} ; EX: {"exile": 20000}
     suspensionRank: 0,
@@ -104,6 +110,7 @@ const config: BotConfig = {
     maximumNumberOfUsers: 5,
     lockedRanks: [],
     lockedCommands: [],
+    verificationProvider: "bloxlink"
 }
 
 export default config;

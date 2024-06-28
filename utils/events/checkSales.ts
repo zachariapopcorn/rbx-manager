@@ -5,12 +5,14 @@ import GroupHandler from '../classes/GroupHandler';
 
 import SalesLog from '../interfaces/SaleLog';
 
+import config from '../../config';
+
 const oldDates: {id: number, date: Date}[] = [];
 
 async function getSales(client: BotClient, groupID: number): Promise<SalesLog[]> {
     let res = await fetch(`https://economy.roblox.com/v2/groups/${groupID}/transactions?cursor=&limit=100&transactionType=Sale`, {
         headers: {
-            "Cookie": `.ROBLOSECURITY=${client.config.ROBLOX_COOKIE}`
+            "Cookie": `.ROBLOSECURITY=${config.ROBLOX_COOKIE}`
         }
     });
     let json = await res.json();
@@ -25,7 +27,7 @@ async function getSales(client: BotClient, groupID: number): Promise<SalesLog[]>
 
 export default async function checkSales(groupID: number, client: BotClient) {
     if(!client.isLoggedIn) return;
-    if(client.config.logging.sales.enabled === false) return;
+    if(config.logging.sales.enabled === false) return;
     try {
         let sales = await getSales(client, groupID);
         if(!sales) throw("Skip check");
@@ -35,7 +37,7 @@ export default async function checkSales(groupID: number, client: BotClient) {
         if(saleIndex === 0 || saleIndex === -1) throw("Skip check");
         for(let i = saleIndex - 1; i >= 0; i--) {
             let log = sales[i];
-            let channel = await client.channels.fetch(client.config.logging.sales.loggingChannel) as Discord.TextChannel;
+            let channel = await client.channels.fetch(config.logging.sales.loggingChannel) as Discord.TextChannel;
             if(channel) {
                 let embed = client.embedMaker({title: "New Sale", description: `**${log.agent.name}** has bought **${log.details.name}** for **${log.currency.amount}** robux after tax from **${GroupHandler.getNameFromID(groupID)}**`, type: "info", author: client.user});
                 await channel.send({embeds: [embed]});

@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -13,7 +13,7 @@ import CommandFile from '../../../utils/interfaces/CommandFile';
 const fileName = "RevertRanksData.txt";
 
 async function logAction(msg: string) {
-    await fs.appendFile(`${process.cwd()}/${fileName}`, `${msg}\n`);
+    await fs.promises.appendFile(`${process.cwd()}/${fileName}`, `${msg}\n`);
 }
 
 function getRankNameFromID(roles: roblox.Role[], roleSetID: any) {
@@ -117,7 +117,7 @@ const command: CommandFile = {
         let newEmbed = client.embedMaker({title: "Reserving Complete", description: `I've finished the rank reversing process. The log has been attached below\n\nSuccess Percentage: ${sucRate}% (${logs.data.length - failedAmount}/${logs.data.length})\nFailure Percentage: ${100 - sucRate}% (${failedAmount}/${logs.data.length})`, type: "info", author: interaction.user});
         await interaction.editReply({content: `<@${interaction.user.id}>`, embeds: [newEmbed]});
         await interaction.channel.send({files: [`${process.cwd()}/${fileName}`]});
-        await fs.unlink(`${process.cwd()}/${fileName}`);
+        await fs.promises.unlink(`${process.cwd()}/${fileName}`);
         return logs.data.length; // This is the only command where the multiplier is calculated, so I return it to multiply it in the main file
     },
     slashData: new Discord.SlashCommandBuilder()

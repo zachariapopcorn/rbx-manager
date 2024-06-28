@@ -8,8 +8,6 @@ import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-const messaging = new MessagingService(config);
-
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let jobID = args["jobid"];
@@ -17,7 +15,7 @@ const command: CommandFile = {
         let universeName = args["universe"];
         let universeID = UniverseHandler.getIDFromName(universeName);
         try {
-            await messaging.sendMessage(universeID, "Lock", {
+            await MessagingService.sendMessage(universeID, "Lock", {
                 jobID: jobID,
                 reason: reason
             });

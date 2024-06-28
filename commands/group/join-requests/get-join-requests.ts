@@ -34,7 +34,7 @@ const command: CommandFile = {
         ]);
         let msg = await interaction.editReply({embeds: [embed]}) as Discord.Message;
         let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
-        let collector = msg.createMessageComponentCollector({filter: filter, time: client.config.collectorTime});
+        let collector = msg.createMessageComponentCollector({filter: filter, time: config.collectorTime});
         collector.on('collect', async(button: Discord.ButtonInteraction) => {
             if(button.customId === "previousPage") {
                 joinRequests = await roblox.getJoinRequests(groupID, "Desc", 10, previousPageCursor);

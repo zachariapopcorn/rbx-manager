@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import roblox from 'noblox.js';
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import BotClient from '../../utils/classes/BotClient';
 
@@ -17,7 +17,7 @@ const command: CommandFile = {
             return await interaction.editReply({embeds: [embed]});
         }
         username = await roblox.getUsernameFromId(robloxID);
-        let xpData = JSON.parse(await fs.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
+        let xpData = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/xpdata.json`, "utf-8")) as UserEntry[];
         let index = xpData.findIndex(v => v.discordID === interaction.user.id);
         let userData: UserEntry;
         if(index !== -1) {
@@ -36,7 +36,7 @@ const command: CommandFile = {
         } else {
             xpData.push(userData);
         }
-        await fs.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
+        await fs.promises.writeFile(`${process.cwd()}/database/xpdata.json`, JSON.stringify(xpData));
         let embed = client.embedMaker({title: "Set User", description: "You've successfully set your Roblox account", type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});
         await client.logXPAction("Set Roblox User", `<@${interaction.user.id}> has set their linked Roblox account to **${username}**`);

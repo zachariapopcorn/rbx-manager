@@ -5,10 +5,10 @@ import BotClient from '../classes/BotClient';
 export default async function checkLoginStatus(client: BotClient) {
     try {
         await roblox.getCurrentUser();
-        client.user.setActivity("Logged Into Roblox? ✅");
+        client.setStatusActivity();
         client.isLoggedIn = true;
     } catch(e) {
-        client.user.setActivity("Logged Into Roblox? ❌");
+        client.setStatusActivity();
         client.isLoggedIn = false;
     }
     setTimeout(async() => {

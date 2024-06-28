@@ -3,10 +3,12 @@ import roblox = require('noblox.js');
 
 import BotClient from '../classes/BotClient';
 
+import config from '../../config';
+
 const oldMemberCounts: {id: number, count: number}[] = [];
 
 export default async function checkMemberCount(groupID: number, client: BotClient) {
-    if(!client.config.counting.enabled) return;
+    if(!config.counting.enabled) return;
     try {
         let groupInfo = await roblox.getGroup(groupID);
         let index = oldMemberCounts.findIndex(v => v.id === groupID);
@@ -16,7 +18,7 @@ export default async function checkMemberCount(groupID: number, client: BotClien
         }
         if(groupInfo.memberCount === oldMemberCounts[index].count) throw("Skip check");
         let isAddition = groupInfo.memberCount > oldMemberCounts[index].count;
-        let isAtGoal = groupInfo.memberCount >= client.config.counting.goal;
+        let isAtGoal = groupInfo.memberCount >= config.counting.goal;
         let embedTitle: string;
         if(!isAtGoal) {
             embedTitle = (isAddition ? "Gained Members" : "Lost Members");
@@ -29,7 +31,7 @@ export default async function checkMemberCount(groupID: number, client: BotClien
         embedDescription += `**New MemberCount**: ${groupInfo.memberCount}`;
         embedDescription += `**Goal Reached?**: ${isAtGoal ? "Yes" : "No"}`;
         let embed = client.embedMaker({title: embedTitle, description: embedDescription, type: "info", author: client.user});
-        let channel = await client.channels.fetch(client.config.counting.loggingChannel) as Discord.TextChannel;
+        let channel = await client.channels.fetch(config.counting.loggingChannel) as Discord.TextChannel;
         if(channel) {
             await channel.send({embeds: [embed]});
         }

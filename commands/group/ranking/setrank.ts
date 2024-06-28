@@ -1,13 +1,14 @@
 import Discord from 'discord.js';
 import roblox = require('noblox.js');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
@@ -24,7 +25,7 @@ function parseRanks(ranks: string): any[] {
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+        let authorRobloxID = await VerificationHelpers.getRobloxUser(interaction.guild.id, interaction.user.id);
         let logs: CommandLog[] = [];
         let usernames = args["username"].replaceAll(" ", "").split(",");
         let ranks = parseRanks(args["rank"]);
@@ -58,7 +59,7 @@ const command: CommandFile = {
             }
             username = await roblox.getUsernameFromId(victimRobloxID);
             if(config.verificationChecks) {
-                let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", victimRobloxID);
+                let verificationStatus = await VerificationHelpers.preformVerificationChecks(groupID, authorRobloxID, "Ranking", victimRobloxID);
                 if(!verificationStatus.success) {
                     logs.push({
                         username: username,
@@ -68,7 +69,7 @@ const command: CommandFile = {
                     continue;
                 }
             }
-            let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let suspensions = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
             let index = suspensions.findIndex(v => v.userId === victimRobloxID);
             if(index != -1) {
                 logs.push({

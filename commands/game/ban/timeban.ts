@@ -5,17 +5,14 @@ import ms = require('ms');
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
-import MessagingService from '../../../utils/classes/MessagingService';
-import RobloxDatastore from '../../../utils/classes/RobloxDatastore';
+import BanService from '../../../utils/classes/BanService';
 import CommandHelpers from '../../../utils/classes/CommandHelpers';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
+import BetterConsole from '../../../utils/classes/BetterConsole';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import CommandLog from '../../../utils/interfaces/CommandLog';
-import ModerationData from '../../../utils/interfaces/ModerationData';
-
-const database = new RobloxDatastore(config);
-const messaging = new MessagingService(config);
 
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
@@ -37,7 +34,7 @@ const command: CommandFile = {
         let universeID = UniverseHandler.getIDFromName(universeName);
         for(let i = 0; i < usernames.length; i++) {
             let username = usernames[i];
-            let time = times[i];
+            let time = times[i]; // In milliseconds
             let reason = reasons[i];
             let robloxID = await roblox.getIdFromUsername(username) as number;
             if(!robloxID) {
@@ -49,54 +46,33 @@ const command: CommandFile = {
                 continue;
             }
             username = await roblox.getUsernameFromId(robloxID);
-            try {
-                let oldData: ModerationData;
-                try {
-                    oldData = await database.getModerationData(universeID, robloxID);
-                } catch(e) {
-                    let err = e.toString() as string;
-                    if(!err.includes("NOT_FOUND")) {
-                        logs.push({
-                            username: username,
-                            status: "Error",
-                            message: e
-                        });
-                        continue;
-                    } else {
-                        oldData = {
-                            banData: { // Gets overridden in the setModerationData call
-                                isBanned: false,
-                                reason: ""
-                            },
-                            muteData: {
-                                isMuted: false,
-                                reason: ""
-                            },
-                            warns: []
-                        }
-                    }
-                }
-                await database.setModerationData(universeID, robloxID, {banData: {isBanned: true, reason: reason, releaseTime: (Date.now() + time)}, muteData: {isMuted: oldData.muteData.isMuted, reason: oldData.muteData.reason}, warns: (oldData.warns || [])});
-            } catch(e) {
+            let res = await BanService.ban(universeID, robloxID, reason, time / 1000);
+            if(res.err) {
                 logs.push({
                     username: username,
                     status: "Error",
-                    message: e
+                    message: res.err
                 });
                 continue;
             }
-            let didKickError = false;
-            try {
-                await messaging.sendMessage(universeID, "Kick", {username: username, reason: reason});
-            } catch(e) {
-                didKickError = true;
-                logs.push({
-                    username: username,
-                    status: "Error",
-                    message: `Although this user is now banned, I couldn't kick them from the game because of the following error: ${e}`
-                });
+            let didDiscordBanError = false;
+            if(config.ban.banDiscordAccounts) {
+                let discordIDs = await VerificationHelpers.getDiscordUsers(interaction.guild.id, robloxID);
+                BetterConsole.log(`Fetected Discord IDs for Roblox ID ${robloxID}: ${discordIDs}`);
+                for(let i = 0; i < discordIDs.length; i++) {
+                    try {
+                        await interaction.guild.members.ban(discordIDs[i], {reason: reason});
+                    } catch(e) {
+                        didDiscordBanError = true;
+                        logs.push({
+                            username: `<@${discordIDs[i]}>`,
+                            status: "Error",
+                            message: `Although this user is now banned from the game, they are not banned from the Discord due to the following error: ${e}`
+                        });
+                    }
+                }
             }
-            if(!didKickError) {
+            if(!res.err && !didDiscordBanError) {
                 logs.push({
                     username: username,
                     status: "Success"

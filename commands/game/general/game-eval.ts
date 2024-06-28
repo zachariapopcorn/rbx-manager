@@ -8,8 +8,6 @@ import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-const messaging = new MessagingService(config);
-
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let typeOfOperation = args["subcommand"];
@@ -21,7 +19,7 @@ const command: CommandFile = {
             code = await (await fetch(code, {method: "GET"})).text();
         }
         try {
-            await messaging.sendMessage(universeID, "Eval", {
+            await MessagingService.sendMessage(universeID, "Eval", {
                 isGlobal: (typeOfOperation === "global"),
                 code: code,
                 jobID: jobID

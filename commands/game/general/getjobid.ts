@@ -9,8 +9,6 @@ import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 
-const messaging = new MessagingService(config);
-
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let username = args["username"];
@@ -25,7 +23,7 @@ const command: CommandFile = {
         let embed = client.embedMaker({title: "Awaiting...", description: "This function requires a message from the Roblox game, meaning that you'll have to wait for it to get your response", type: "info", author: interaction.user});
         let msg = await interaction.editReply({embeds: [embed]});
         try {
-            await messaging.sendMessage(universeID, "GetJobID", {
+            await MessagingService.sendMessage(universeID, "GetJobID", {
                 username: username
             });
             client.jobIdsRequested.push({

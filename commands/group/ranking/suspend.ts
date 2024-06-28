@@ -2,12 +2,13 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import ms = require('ms');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
 import BotClient from '../../../utils/classes/BotClient';
 import GroupHandler from '../../../utils/classes/GroupHandler';
+import VerificationHelpers from '../../../utils/classes/VerificationHelpers';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
@@ -15,7 +16,7 @@ import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
 const command: CommandFile = {
     run: async(interaction: Discord.CommandInteraction<Discord.CacheType>, client: BotClient, args: any): Promise<any> => {
         let groupID = GroupHandler.getIDFromName(args["group"]);
-        let authorRobloxID = await client.getRobloxUser(interaction.guild.id, interaction.user.id);
+        let authorRobloxID = await VerificationHelpers.getRobloxUser(interaction.guild.id, interaction.user.id);
         let username = args["username"];
         let userID = await roblox.getIdFromUsername(username) as number;
         if(!userID) {
@@ -24,7 +25,7 @@ const command: CommandFile = {
         }
         username = await roblox.getUsernameFromId(userID);
         if(config.verificationChecks) {
-            let verificationStatus = await client.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
+            let verificationStatus = await VerificationHelpers.preformVerificationChecks(groupID, authorRobloxID, "Ranking", userID);
             if(!verificationStatus.success) {
                 let embed = client.embedMaker({title: "Verification Checks Failed", description: `You've failed the verification checks, reason: ${verificationStatus.err}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
@@ -40,7 +41,7 @@ const command: CommandFile = {
             let embed = client.embedMaker({title: "User Not In Group", description: "This user is currently not in the group", type: "error", author: interaction.user});
             return await interaction.editReply({embeds: [embed]});
         }
-        let suspensions = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+        let suspensions = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
         let index = suspensions.findIndex(v => v.userId === userID);
         if(index != -1) {
             suspensions[index].timeToRelease = Date.now() + (time as any);
@@ -54,13 +55,13 @@ const command: CommandFile = {
                 timeToRelease: Date.now() + (time as any)
             });
             try {
-                await roblox.setRank(groupID, userID, client.config.suspensionRank);
+                await roblox.setRank(groupID, userID, config.suspensionRank);
             } catch(e) {
                 let embed = client.embedMaker({title: "Error", description: `There was an error while trying to change the rank of this user: ${e}`, type: "error", author: interaction.user});
                 return await interaction.editReply({embeds: [embed]});
             }
         }
-        await fs.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
+        await fs.promises.writeFile(`${process.cwd()}/database/suspensions.json`, JSON.stringify(suspensions));
         await client.logAction(`<@${interaction.user.id}> has suspended **${username}** for **${ms((time as any), {long: true})}** for the reason of **${args["reason"]}** in **${GroupHandler.getNameFromID(groupID)}**`);
         let embed = client.embedMaker({title: "Success", description: `You've successfully suspended this user`, type: "success", author: interaction.user});
         await interaction.editReply({embeds: [embed]});

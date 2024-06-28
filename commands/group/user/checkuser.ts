@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import roblox = require('noblox.js');
 import ms = require('ms');
 
-import fs from "fs/promises"
+import fs from "fs";
 
 import config from '../../../config';
 
@@ -12,11 +12,8 @@ import GroupHandler from '../../../utils/classes/GroupHandler';
 import UniverseHandler from '../../../utils/classes/UniverseHandler';
 
 import CommandFile from '../../../utils/interfaces/CommandFile';
-import ModerationData from '../../../utils/interfaces/ModerationData';
 import GroupBanEntry from '../../../utils/interfaces/GroupBanEntry';
 import SuspensionEntry from '../../../utils/interfaces/SuspensionEntry';
-
-const database = new RobloxDatastore(config);
 
 function formatWarnDate(date: Date): string {
     let hour = date.getHours();
@@ -49,42 +46,25 @@ const command: CommandFile = {
         username = await roblox.getUsernameFromId(robloxID);
         let groupDataValue;
         let gameDataValue;
-        if(client.config.universes.length !== 0) {
+        if(config.universes.length !== 0) {
             let universeName = args["universe"];
             let universeID = UniverseHandler.getIDFromName(universeName);
-            let moderationData: ModerationData | string = "";
-            try {
-                moderationData = await database.getModerationData(universeID, robloxID);
-            } catch(e) {
-                let err = e.toString() as string;
-                if(err.includes("NOT_FOUND")) {
-                    moderationData = {
-                        banData: {
-                            isBanned: false,
-                            reason: ""
-                        },
-                        muteData: {
-                            isMuted: false,
-                            reason: ""
-                        },
-                        warns: []
-                    }
-                } else {
-                    let embed = client.embedMaker({title: "Error", description: `There was an error while trying to pull this user's moderation status: ${e}`, type: "error", author: interaction.user});
-                    return await interaction.editReply({embeds: [embed]});
-                }
+            let res = await RobloxDatastore.getModerationData(universeID, robloxID);
+            if(res.err) {
+                let embed = client.embedMaker({title: "Error", description: `There was an error while trying to fetch the user's moderation data: ${res.err}`, type: "error", author: interaction.user});
+                return await interaction.editReply({embeds: [embed]});
             }
+            let moderationData = res.data;
             let warnsString = "There were len warnings found for this user\n\n";
-            if(typeof(moderationData) !== "string") {
-                if(moderationData.warns) {
-                    if(moderationData.warns.length === 0) {
-                        warnsString = "No warnings present";
-                    } else {
-                        for(let i = 0; i < moderationData.warns.length; i++) {
-                            warnsString += `Author: ${moderationData.warns[i].author} | Reason: ${moderationData.warns[i].reason} | Date Assigned: ${formatWarnDate(new Date(moderationData.warns[i].dateAssigned))}\n`;
-                        }
-                        warnsString = warnsString.replace("len", moderationData.warns.length.toString());
+            if(moderationData.warns) {
+                if(moderationData.warns.length === 0) {
+                    warnsString = "No warnings present";
+                } else {
+                    if(moderationData.warns.length === 1) warnsString = "There was 1 warning found for this user\n\n";
+                    for(let i = 0; i < moderationData.warns.length; i++) {
+                        warnsString += `Author: ${moderationData.warns[i].author} | Reason: ${moderationData.warns[i].reason} | Date Assigned: ${formatWarnDate(new Date(moderationData.warns[i].dateAssigned))}\n`;
                     }
+                    warnsString = warnsString.replace("len", moderationData.warns.length.toString());
                 }
             }
             gameDataValue = "```\nIs User Banned: <ban status>\nIs User Muted: <mute status>\nWarnings: <warnings>```"
@@ -92,10 +72,10 @@ const command: CommandFile = {
             .replace("<mute status>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.muteData.isMuted ? `Yes\nMute Reason: ${moderationData.muteData.reason}` : "No"))
             gameDataValue = gameDataValue.replace("<warnings>", (typeof(moderationData) === "string" ? "Unable to Load" : moderationData.warns ? moderationData.warns.length === 0 ? "No warnings present" : warnsString : "No warnings present"))
         }
-        if(client.config.groupIds.length !== 0) {
+        if(config.groupIds.length !== 0) {
             let groupID = GroupHandler.getIDFromName(args["group"]);
-            let bannedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
-            let suspendedUsers = JSON.parse(await fs.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
+            let bannedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/groupbans.json`, "utf-8")) as GroupBanEntry[];
+            let suspendedUsers = JSON.parse(await fs.promises.readFile(`${process.cwd()}/database/suspensions.json`, "utf-8")) as SuspensionEntry[];
             let bannedIndex = bannedUsers.findIndex(v => v.groupID === groupID && v.userID === robloxID);
             let isGroupBanned = (bannedIndex !== -1);
             let suspendedIndex = suspendedUsers.findIndex(v => v.groupID === groupID && v.userId === robloxID);

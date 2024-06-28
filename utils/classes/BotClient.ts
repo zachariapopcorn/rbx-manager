@@ -7,32 +7,31 @@ import BotConfig from '../interfaces/BotConfig';
 import RequestOptions from '../interfaces/RequestOptions';
 import EmbedMakerOptions from '../interfaces/EmbedMakerOptions';
 import CommandLog from '../interfaces/CommandLog';
-import NeededRobloxPermissions from '../interfaces/NeededRobloxPermissions';
 import CooldownEntry from '../interfaces/CooldownEntry';
 import GroupLog from '../interfaces/GroupLog';
-import VerificationResult from '../interfaces/VerificationResult';
+
+import config from '../../config';
 
 export default class BotClient extends Discord.Client {
-    public config: BotConfig;
     public originalLockedCommands: string[] = [];
     public isLoggedIn: boolean;
+    public onLatestVersion: boolean;
     public robloxInfo: roblox.LoggedInUserData;
     public commandCooldowns: CooldownEntry[] = [];
     public groupLogs: GroupLog[] = [];
-    public roverCache: {discordID: string, robloxID: number, timeAdded: number}[] = [];
+    public verificationCache: {discordID: string, robloxID: number, timeAdded: number}[] = [];
     public jobIdsRequested: {username: string, universeID: number, msgID: string, channelID: string, timeRequested: number}[] = [];
 
     constructor(config: BotConfig) {
         super({intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildMessages, Discord.IntentsBitField.Flags.GuildMessageReactions, Discord.IntentsBitField.Flags.MessageContent]});
-        this.config = config;
         this.originalLockedCommands = config.lockedCommands;
     }
 
-    public async request(requestOptions: RequestOptions) : Promise<Response> {
+    public static async request(requestOptions: RequestOptions) : Promise<Response> {
         if(requestOptions.robloxRequest) {
             requestOptions.headers = {
                 "X-CSRF-TOKEN": await roblox.getGeneralToken(),
-                "Cookie": `.ROBLOSECURITY=${this.config.ROBLOX_COOKIE}`,
+                "Cookie": `.ROBLOSECURITY=${config.ROBLOX_COOKIE}`,
                 ...requestOptions.headers
             }
         }
@@ -47,13 +46,25 @@ export default class BotClient extends Discord.Client {
     public embedMaker(embedOptions: EmbedMakerOptions): Discord.EmbedBuilder {
         let embed = new Discord.EmbedBuilder();
         embed.setAuthor({name: embedOptions.author.tag, iconURL: embedOptions.author.displayAvatarURL()});
-        embed.setColor(this.config.embedColors[embedOptions.type]);
+        embed.setColor(config.embedColors[embedOptions.type]);
         if(embedOptions.description.length > 0) {
             embed.setDescription(embedOptions.description);
         }
         embed.setFooter({text: "Created by sv_du - https://discord.gg/XGGpf3q"});
         embed.setTitle(embedOptions.title);
         return embed;
+    }
+
+    public setStatusActivity() {
+        let version = "On Latest Version? ❌";
+        let roblox = "Logged Into Roblox? ❌";
+        if(this.onLatestVersion) {
+            version = "On Latest Version? ✅";
+        }
+        if(this.isLoggedIn) {
+            roblox = "Logged Into Roblox? ✅";
+        }
+        this.user.setActivity(version + "\n" + roblox);
     }
 
     public createButtons(buttonData: {customID: string, label: string, style: Discord.ButtonStyle}[]): Discord.MessageReplyOptions {
@@ -76,78 +87,10 @@ export default class BotClient extends Discord.Client {
         return {components: components}
     }
 
-    public async getRobloxUser(guildID: string, discordID: string): Promise<number> {
-        let index = this.roverCache.findIndex(v => v.discordID === discordID);
-        if(index != -1) {
-            if(Date.now() - this.roverCache[index].timeAdded >= 300_000) { // Remove cache items if older than 5 minutes
-                this.roverCache.splice(index, 1);
-            } else {
-                return this.roverCache[index].robloxID;
-            }
-        }
-        let res = await this.request({
-            url: `https://registry.rover.link/api/guilds/${guildID}/discord-to-roblox/${discordID}`,
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json;charset=UTF-8",
-                "Authorization": `Bearer ${this.config.ROVER_API_KEY}`
-            },
-            body: undefined,
-            robloxRequest: false
-        });
-        if(res.status === 200) {
-            let rbxID = (await res.json()).robloxId;
-            this.roverCache.push({discordID: discordID, robloxID: rbxID, timeAdded: Date.now()});
-            return rbxID;
-        } else {
-            let headers = res.headers;
-            if(parseInt(headers.get("X-RateLimit-Remaining")) === 0) {
-                console.error("Rover API limit reached");
-                setTimeout(async() => {
-                    await this.getRobloxUser(guildID, discordID);
-                }, parseInt(headers.get("X-RateLimit-Reset-After")) * 1000);
-            } else if(res.status === 429) {
-                console.error("Rover API limit reached");
-                setTimeout(async() => {
-                    await this.getRobloxUser(guildID, discordID);
-                }, parseInt(headers.get("Retry-After")) * 1000);
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    private async getPermissions(groupID: number, rbxID: number) {
-        let rank = await roblox.getRankInGroup(groupID, rbxID);
-        let role = (await roblox.getRoles(groupID)).find(r => r.rank === rank);
-        let permissions = (await roblox.getRolePermissions(groupID, role.id)).permissions;
-        let permissionData = {
-            "JoinRequests": permissions.groupMembershipPermissions.inviteMembers,
-            "Ranking": permissions.groupMembershipPermissions.changeRank,
-            "Shouts": permissions.groupPostsPermissions.postToStatus,
-            "Exile": permissions.groupMembershipPermissions.removeMembers,
-            "Wall": permissions.groupPostsPermissions.deleteFromWall
-        }
-        return permissionData;
-    }
-
-    public async preformVerificationChecks(groupID: number, robloxID: number, permissionNeeded: NeededRobloxPermissions, victimUserID?: number): Promise<VerificationResult> {
-        if(!this.config.verificationChecks) return {success: true};
-        let authorGroupRole = await roblox.getRankInGroup(groupID, robloxID);
-        if(authorGroupRole === 0) return {success: false, err: "User is not in group"};
-        let permissions = await this.getPermissions(groupID, robloxID);
-        if(!permissions[permissionNeeded]) return {success: false, err: "User does not have required permission"};
-        if(victimUserID) {
-            let victimGroupRole = await roblox.getRankInGroup(groupID, victimUserID);
-            if(victimGroupRole >= authorGroupRole) return {success: false, err: "User does not have permission to manage other user"};
-        }
-        return {success: true};
-    }
-
     public async logAction(logString: string): Promise<void> {
-        if(!this.config.logging.command.enabled) return;
+        if(!config.logging.command.enabled) return;
         let embed = this.embedMaker({title: "Command Executed", description: logString, type: "info", author: this.user});
-        let channel = await this.channels.fetch(this.config.logging.command.loggingChannel) as Discord.TextChannel;
+        let channel = await this.channels.fetch(config.logging.command.loggingChannel) as Discord.TextChannel;
         if(channel) {
             try {
                 await channel.send({embeds: [embed]});
@@ -158,9 +101,9 @@ export default class BotClient extends Discord.Client {
     }
 
     public async logXPAction(title: string, logString: string): Promise<void> {
-        if(!this.config.logging.xp.enabled) return;
+        if(!config.logging.xp.enabled) return;
         let embed = this.embedMaker({title: title, description: logString, type: "info", author: this.user});
-        let channel = await this.channels.fetch(this.config.logging.xp.loggingChannel) as Discord.TextChannel;
+        let channel = await this.channels.fetch(config.logging.xp.loggingChannel) as Discord.TextChannel;
         if(channel) {
             try {
                 await channel.send({embeds: [embed]});
@@ -214,7 +157,7 @@ export default class BotClient extends Discord.Client {
             ]);
             let msg = await interaction.editReply({embeds: [embed], components: componentData.components}) as Discord.Message;
             let filter = (buttonInteraction: Discord.Interaction) => buttonInteraction.isButton() && buttonInteraction.user.id === interaction.user.id;
-            let collector = msg.createMessageComponentCollector({filter: filter, time: this.config.collectorTime});
+            let collector = msg.createMessageComponentCollector({filter: filter, time: config.collectorTime});
             collector.on("collect", async(button) => {
                 if(button.customId === "backButton") {
                     index -= 1;
@@ -241,8 +184,8 @@ export default class BotClient extends Discord.Client {
 
     public isLockedRole(role: roblox.Role): boolean {
         let isLocked = false;
-        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
-        if(this.config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
+        if(config.lockedRanks.findIndex(lockedRank => lockedRank === role.name) !== -1) isLocked = true;
+        if(config.lockedRanks.findIndex(lockedRank => lockedRank === role.rank) !== -1) isLocked = true;
         return isLocked;
     }
 
@@ -251,6 +194,6 @@ export default class BotClient extends Discord.Client {
     }
 
     public getCooldownForCommand(commandName: string): number {
-        return this.config.cooldownOverrides[commandName] || this.config.defaultCooldown;
+        return config.cooldownOverrides[commandName] || config.defaultCooldown;
     }
 }
